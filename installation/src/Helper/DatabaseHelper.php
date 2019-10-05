@@ -30,7 +30,7 @@ abstract class DatabaseHelper
 	 * @param   string   $database  The database to use.
 	 * @param   string   $prefix    The table prefix to use.
 	 * @param   boolean  $select    True if the database should be selected.
-	 * @param   array    $ssl       Databse TLS connection options.
+	 * @param   array    $ssl       Database TLS connection options.
 	 *
 	 * @return  DatabaseInterface
 	 *
@@ -90,13 +90,13 @@ abstract class DatabaseHelper
 	}
 
 	/**
-	 * Convert encryption option to array.
+	 * Convert encryption options to array.
 	 *
 	 * @param   \stdClass  $options  The session options
 	 *
-	 * @return  DatabaseInterface
+	 * @return  array  The encryption settings
 	 *
-	 * @since   1.6
+	 * @since   __DEPLOY_VERSION__
 	 */
 	public static function getEncryptionSettings($options)
 	{
