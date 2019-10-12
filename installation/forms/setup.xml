@@ -156,8 +156,9 @@
 			type="text"
 			label="INSTL_DATABASE_ENCRYPTION_KEY_LABEL"
 			desc="INSTL_DATABASE_ENCRYPTION_KEY_DESC"
+			hint="INSTL_DATABASE_ENCRYPTION_KEY_HINT"
 			filter="string"
-			size="100"
+			size="250"
 			showon="db_encryption:2"
 		/>
 
@@ -166,8 +167,9 @@
 			type="text"
 			label="INSTL_DATABASE_ENCRYPTION_CERT_LABEL"
 			desc="INSTL_DATABASE_ENCRYPTION_CERT_DESC"
+			hint="INSTL_DATABASE_ENCRYPTION_CERT_HINT"
 			filter="string"
-			size="100"
+			size="250"
 			showon="db_encryption:2"
 		/>
 
@@ -176,8 +178,9 @@
 			type="text"
 			label="INSTL_DATABASE_ENCRYPTION_CA_LABEL"
 			desc="INSTL_DATABASE_ENCRYPTION_CA_DESC"
+			hint="INSTL_DATABASE_ENCRYPTION_CA_HINT"
 			filter="string"
-			size="100"
+			size="250"
 			showon="db_encryption:2"
 		/>
 
@@ -186,8 +189,9 @@
 			type="text"
 			label="INSTL_DATABASE_ENCRYPTION_CAPATH_LABEL"
 			desc="INSTL_DATABASE_ENCRYPTION_CAPATH_DESC"
+			hint="INSTL_DATABASE_ENCRYPTION_CAPATH_HINT"
 			filter="string"
-			size="100"
+			size="250"
 			showon="db_encryption:2"
 		/>
 
@@ -196,8 +200,9 @@
 			type="text"
 			label="INSTL_DATABASE_ENCRYPTION_CIPHER_LABEL"
 			desc="INSTL_DATABASE_ENCRYPTION_CIPHER_DESC"
+			hint="INSTL_DATABASE_ENCRYPTION_CIPHER_HINT"
 			filter="string"
-			size="100"
+			size="300"
 			showon="db_encryption:2"
 		/>
 
