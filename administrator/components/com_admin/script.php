@@ -6766,10 +6766,13 @@ class JoomlaInstallerScript
 		$db->setQuery($query);
 		$contentTypes = $db->loadObjectList();
 
+		// On PostgreSQL we have to use escape syntax for the table value
+		$excapePrefix = $db->getServerType() === 'postgresql' ? 'E' : '';
+
 		// Prepare the update query.
 		$query = $db->getQuery(true)
 			->update($db->quoteName('#__content_types'))
-			->set($db->quoteName('table') . ' = :table')
+			->set($db->quoteName('table') . ' = ' . $excapePrefix . ':table')
 			->where($db->quoteName('type_alias') . ' = :typeAlias')
 			->bind(':table', $table)
 			->bind(':typeAlias', $typeAlias);
