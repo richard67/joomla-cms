@@ -40,16 +40,16 @@ $listDirn = $this->escape($this->state->get('list.direction'));
 								<th scope="col" style="width:15%" class="d-none d-md-table-cell">
 									<?php echo HTMLHelper::_('searchtools.sort', 'COM_MAILS_HEADING_COMPONENT', 'a.component', $listDirn, $listOrder); ?>
 								</th>
-								<th scope="col" style="width:10%" class="d-md-table-cell">
+								<th scope="col" class="w-10 d-md-table-cell">
 									<?php echo Text::_('COM_MAILS_HEADING_TEMPLATES_FOR_LANGUAGES'); ?>
 								</th>
-								<th scope="col" style="width:10%" class="d-md-table-cell">
+								<th scope="col" class="w-10 d-md-table-cell">
 									<?php echo Text::_('COM_MAILS_HEADING_NO_TEMPLATES_FOR_LANGUAGES'); ?>
 								</th>
 								<th scope="col" style="width:30%" class="d-none d-md-table-cell">
 									<?php echo Text::_('COM_MAILS_HEADING_DESCRIPTION'); ?>
 								</th>
-								<th scope="col" style="width:10%" class="d-none d-md-table-cell">
+								<th scope="col" class="w-10 d-none d-md-table-cell">
 									<?php echo HTMLHelper::_('searchtools.sort', 'JGRID_HEADING_ID', 'a.id', $listDirn, $listOrder); ?>
 								</th>
 							</tr>
@@ -68,9 +68,9 @@ $listDirn = $this->escape($this->state->get('list.direction'));
 											<?php foreach ($this->languages as $language) : ?>
 												<a class="dropdown-item" href="<?php echo Route::_('index.php?option=com_mails&task=template.edit&template_id=' . $item->template_id . '&language=' . $language->lang_code); ?>">
 													<?php if (in_array($language->lang_code, $item->languages)) : ?>
-														<?php echo JText::sprintf('COM_MAILS_LIST_EDIT_TEMPLATE', $language->title); ?>
+														<?php echo Text::sprintf('COM_MAILS_LIST_EDIT_TEMPLATE', $language->title); ?>
 													<?php else: ?>
-														<?php echo JText::sprintf('COM_MAILS_LIST_CREATE_TEMPLATE', $language->title); ?>
+														<?php echo Text::sprintf('COM_MAILS_LIST_CREATE_TEMPLATE', $language->title); ?>
 													<?php endif; ?>
 												</a>
 											<?php endforeach; ?>

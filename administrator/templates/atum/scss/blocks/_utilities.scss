@@ -18,7 +18,6 @@
 
 .hidden {
   display: none;
-  visibility: hidden;
 }
 
 .table-row {
@@ -77,4 +76,10 @@
   .column-count-lg-3 {
     column-count: 3;
   }
+}
+
+// Sizing
+
+.w-10 {
+  width: 10% !important;
 }
