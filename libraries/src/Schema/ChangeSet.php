@@ -85,12 +85,12 @@ class ChangeSet
 		{
 			$this->changeItems[] = ChangeItem::getInstance($db, $obj->file, $obj->updateQuery);
 
+			// Prepare the check of a previous change item for the same thing
 			$changeItem   = end($this->changeItems[]);
 			$changeIdx    = key($this->changeItems[]);
 			$itemXrefKey  = '';
 			$prevItemType = '';
 
-			// Prepare the check of a previous change item for the same thing
 			switch ($changeItem->queryType)
 			{
 				case 'ADD_COLUMN':
@@ -102,8 +102,30 @@ class ChangeSet
 					$prevItemType = 'ADD_COLUMN';
 					break;
 				case 'CHANGE_COLUMN_TYPE':
-					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . '.coltype';
+					$prevItemSubType = '.coltype';
+
+					if ($this->db->getServerType() === 'postgresql' && isset($changeItem->msgElements[2]))
+					{
+						switch ($changeItem->msgElements[2])
+						{
+							case 'NOT DEFAULT':
+								$prevItemSubType = '.coldefault';
+								break;
+							case 'NOT NULL':
+							case 'NULL':
+								$prevItemSubType = '.colnull';
+								break;
+							default:
+								if (substr($changeItem->msgElements[2], 7) === 'DEFAULT')
+								{
+									$prevItemSubType = '.coldefault';
+								}
+						}
+					}
+
+					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . $prevItemSubType;
 					$prevItemType = 'CHANGE_COLUMN_TYPE';
+
 					break;
 				case 'ADD_INDEX':
 					$itemXrefKey
@@ -130,6 +152,7 @@ class ChangeSet
 					$this->changeItems[$changeXrefs[$itemXrefKey]]->checkStatus = -2;
 				}
 
+				// Save current change item's index for the next check for the same thing
 				$changeXrefs[$itemXrefKey] = $changeIdx;
 			}
 		}
