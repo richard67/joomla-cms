@@ -192,6 +192,11 @@ abstract class ChangeItem
 	 */
 	public function check()
 	{
+		if ($this->checkStatus === -3)
+		{
+			return $this->checkStatus;
+		}
+
 		$this->checkStatus = -1;
 
 		if ($this->checkQuery)
