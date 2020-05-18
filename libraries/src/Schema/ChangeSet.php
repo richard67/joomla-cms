@@ -86,8 +86,8 @@ class ChangeSet
 			$this->changeItems[] = ChangeItem::getInstance($db, $obj->file, $obj->updateQuery);
 
 			// Prepare the check of a previous change item for the same thing
-			$changeItem   = end($this->changeItems[]);
-			$changeIdx    = key($this->changeItems[]);
+			$changeItem   = end($this->changeItems);
+			$changeIdx    = key($this->changeItems);
 			$itemXrefKey  = '';
 			$prevItemType = '';
 
