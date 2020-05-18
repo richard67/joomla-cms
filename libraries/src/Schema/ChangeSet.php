@@ -84,7 +84,7 @@ class ChangeSet
 		foreach ($updateQueries as $obj)
 		{
 			$changeItem = ChangeItem::getInstance($db, $obj->file, $obj->updateQuery);
-			$changeIdx  = count($this->changeItems);
+			$changeIdx  = \count($this->changeItems);
 			$this->changeItems[] = $changeItem;
 
 			// Check if the change item is a schema change which can overwrite previous changes
