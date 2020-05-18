@@ -70,9 +70,12 @@ class MysqlChangeItem extends ChangeItem
 
 			if ($alterCommand === 'ADD COLUMN')
 			{
-				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $this->fixQuote($wordArray[5]);
+				$table  = $this->fixQuote($wordArray[2]);
+				$column = $this->fixQuote($wordArray[5]);
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column;
 				$this->queryType = 'ADD_COLUMN';
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $this->fixQuote($wordArray[5]));
+				$this->msgElements = array($table, $column);
+				$this->xRefKey = $table . '.' . $column . '.column';
 			}
 			elseif ($alterCommand === 'ADD INDEX' || $alterCommand === 'ADD KEY')
 			{
@@ -85,9 +88,11 @@ class MysqlChangeItem extends ChangeItem
 					$index = $this->fixQuote($wordArray[5]);
 				}
 
+				$table  = $this->fixQuote($wordArray[2]);
 				$result = 'SHOW INDEXES IN ' . $wordArray[2] . ' WHERE Key_name = ' . $index;
 				$this->queryType = 'ADD_INDEX';
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
+				$this->msgElements = array($table, $index);
+				$this->xRefKey = $table . '.' . $index . '.idx';
 			}
 			elseif ($alterCommand === 'ADD UNIQUE')
 			{
@@ -112,25 +117,31 @@ class MysqlChangeItem extends ChangeItem
 					$index = $this->fixQuote($wordArray[$idxIndexName]);
 				}
 
+				$table  = $this->fixQuote($wordArray[2]);
 				$result = 'SHOW INDEXES IN ' . $wordArray[2] . ' WHERE Key_name = ' . $index;
 				$this->queryType = 'ADD_INDEX';
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
+				$this->msgElements = array($table, $index);
+				$this->xRefKey = $table . '.' . $index . '.idx';
 			}
 			elseif ($alterCommand === 'DROP INDEX' || $alterCommand === 'DROP KEY')
 			{
-				$index = $this->fixQuote($wordArray[5]);
+				$table  = $this->fixQuote($wordArray[2]);
+				$index  = $this->fixQuote($wordArray[5]);
 				$result = 'SHOW INDEXES IN ' . $wordArray[2] . ' WHERE Key_name = ' . $index;
 				$this->queryType = 'DROP_INDEX';
 				$this->checkQueryExpected = 0;
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
+				$this->msgElements = array($table, $index);
+				$this->xRefKey = $table . '.' . $index . '.idx';
 			}
 			elseif ($alterCommand === 'DROP COLUMN')
 			{
-				$index = $this->fixQuote($wordArray[5]);
-				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE Field = ' . $index;
+				$table  = $this->fixQuote($wordArray[2]);
+				$column = $this->fixQuote($wordArray[5]);
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE Field = ' . $column;
 				$this->queryType = 'DROP_COLUMN';
 				$this->checkQueryExpected = 0;
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
+				$this->msgElements = array($table, $column);
+				$this->xRefKey = $table . '.' . $column . '.column';
 			}
 			elseif (strtoupper($wordArray[3]) === 'MODIFY')
 			{
@@ -153,12 +164,15 @@ class MysqlChangeItem extends ChangeItem
 				 */
 				$typeCheck = $this->fixUtf8mb4TypeChecks($type);
 
-				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $this->fixQuote($wordArray[4])
+				$table  = $this->fixQuote($wordArray[2]);
+				$column = $this->fixQuote($wordArray[4]);
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column
 					. ' AND ' . $typeCheck
 					. ($defaultCheck ? ' AND ' . $defaultCheck : '')
 					. ($nullCheck ? ' AND ' . $nullCheck : '');
 				$this->queryType = 'CHANGE_COLUMN_TYPE';
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $this->fixQuote($wordArray[4]), $type);
+				$this->msgElements = array($table, $column, $type);
+				$this->xRefKey = $table . '.' . $column . '.coltype';
 			}
 			elseif (strtoupper($wordArray[3]) === 'CHANGE')
 			{
@@ -181,12 +195,15 @@ class MysqlChangeItem extends ChangeItem
 				 */
 				$typeCheck = $this->fixUtf8mb4TypeChecks($type);
 
-				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $this->fixQuote($wordArray[5])
+				$table  = $this->fixQuote($wordArray[2]);
+				$column = $this->fixQuote($wordArray[5]);
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column
 					. ' AND ' . $typeCheck
 					. ($defaultCheck ? ' AND ' . $defaultCheck : '')
 					. ($nullCheck ? ' AND ' . $nullCheck : '');
 				$this->queryType = 'CHANGE_COLUMN_TYPE';
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $this->fixQuote($wordArray[5]), $type);
+				$this->msgElements = array($table, $column, $type);
+				$this->xRefKey = $table . '.' . $column . '.coltype';
 			}
 		}
 

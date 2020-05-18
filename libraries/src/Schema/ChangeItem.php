@@ -113,6 +113,14 @@ abstract class ChangeItem
 	public $rerunStatus = 0;
 
 	/**
+	 * Cross reference key
+	 *
+	 * @var    string   They key for check if there is a previous change for the same object
+	 * @since  4.0.0
+	 */
+	public $xRefKey = '';
+
+	/**
 	 * Constructor: builds check query and message from $updateQuery
 	 *
 	 * @param   DatabaseDriver  $db     Database connector object
@@ -192,6 +200,11 @@ abstract class ChangeItem
 	 */
 	public function check()
 	{
+		if ($this->checkStatus === -3)
+		{
+			return $this->checkStatus;
+		}
+
 		$this->checkStatus = -1;
 
 		if ($this->checkQuery)

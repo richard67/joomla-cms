@@ -34,6 +34,14 @@ class ChangeSet
 	protected $changeItems = array();
 
 	/**
+	 * Array of cross references from database items to their last change items
+	 *
+	 * @var    changeXrefs[]
+	 * @since  4.0.0
+	 */
+	protected $changeXrefs = array();
+
+	/**
 	 * DatabaseDriver object
 	 *
 	 * @var    DatabaseDriver
@@ -76,6 +84,43 @@ class ChangeSet
 		foreach ($updateQueries as $obj)
 		{
 			$this->changeItems[] = ChangeItem::getInstance($db, $obj->file, $obj->updateQuery);
+
+			// Prepare the check of a previous change item for the same thing
+			$changeItem   = end($this->changeItems);
+			$changeIdx    = key($this->changeItems);
+			$skipItemType = '';
+
+			switch ($changeItem->queryType)
+			{
+				case 'ADD_COLUMN':
+					$skipItemType = 'DROP_COLUMN';
+					break;
+				case 'DROP_COLUMN':
+					$skipItemType = 'ADD_COLUMN';
+					break;
+				case 'CHANGE_COLUMN_TYPE':
+					$skipItemType = 'CHANGE_COLUMN_TYPE';
+					break;
+				case 'ADD_INDEX':
+					$skipItemType = 'DROP_INDEX';
+					break;
+				case 'DROP_INDEX':
+					$skipItemType = 'ADD_INDEX';
+					break;
+			}
+
+			if (!empty($changeItem->xRefKey))
+			{
+				// Check if there is a previous change item for the same thing to be skipped
+				if (isset($changeXrefs[$changeItem->xRefKey])
+				&& $this->changeItems[$changeXrefs[$changeItem->xRefKey]]->queryType === $skipItemType)
+				{
+					$this->changeItems[$changeXrefs[$changeItem->xRefKey]]->checkStatus = -3;
+				}
+
+				// Save current change item's index for the next check for the same thing
+				$changeXrefs[$changeItem->xRefKey] = $changeIdx;
+			}
 		}
 
 		// If on mysql, add a query at the end to check for utf8mb4 conversion status
@@ -199,7 +244,7 @@ class ChangeSet
 	 */
 	public function getStatus()
 	{
-		$result = array('unchecked' => array(), 'ok' => array(), 'error' => array(), 'skipped' => array());
+		$result = array('unchecked' => array(), 'ok' => array(), 'error' => array(), 'skipped' => array(), 'overwritten' => array());
 
 		foreach ($this->changeItems as $item)
 		{
@@ -216,6 +261,9 @@ class ChangeSet
 					break;
 				case -1:
 					$result['skipped'][] = $item;
+					break;
+				case -3:
+					$result['overwritten'][] = $item;
 					break;
 			}
 		}
