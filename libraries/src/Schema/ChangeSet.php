@@ -34,6 +34,14 @@ class ChangeSet
 	protected $changeItems = array();
 
 	/**
+	 * Array of cross references from database items to their last change items
+	 *
+	 * @var    changeXrefs[]
+	 * @since  4.0.0
+	 */
+	protected $changeXrefs = array();
+
+	/**
 	 * DatabaseDriver object
 	 *
 	 * @var    DatabaseDriver
@@ -76,6 +84,54 @@ class ChangeSet
 		foreach ($updateQueries as $obj)
 		{
 			$this->changeItems[] = ChangeItem::getInstance($db, $obj->file, $obj->updateQuery);
+
+			$changeItem   = end($this->changeItems[]);
+			$changeIdx    = key($this->changeItems[]);
+			$itemXrefKey  = '';
+			$prevItemType = '';
+
+			// Prepare the check of a previous change item for the same thing
+			switch ($changeItem->queryType)
+			{
+				case 'ADD_COLUMN':
+					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1];
+					$prevItemType = 'DROP_COLUMN';
+					break;
+				case 'DROP_COLUMN':
+					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1];
+					$prevItemType = 'ADD_COLUMN';
+					break;
+				case 'CHANGE_COLUMN_TYPE':
+					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . '.type';
+					$prevItemType = 'CHANGE_COLUMN_TYPE';
+					break;
+				case 'ADD_INDEX':
+					$itemXrefKey
+						= $this->db->getServerType() === 'postgresql'
+						? $changeItem->msgElements[0]
+						: $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1];
+					$prevItemType = 'DROP_INDEX';
+					break;
+				case 'DROP_INDEX':
+					$itemXrefKey
+						= $this->db->getServerType() === 'postgresql'
+						? $changeItem->msgElements[0]
+						: $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1];
+					$prevItemType = 'ADD_INDEX';
+					break;
+			}
+
+			if (!empty($itemXrefKey)
+			{
+				// Check if there is a previous change item for the same thing to be skiped
+				if (array_key_exists($itemXrefKey, $changeXrefs)
+				&& $this->changeItems[$changeXrefs[$itemXrefKey]]->queryType === $prevItemType)
+				{
+					$this->changeItems[$changeXrefs[$itemXrefKey]]->checkStatus = -1;
+				}
+
+				$changeXrefs[$itemXrefKey] = $changeIdx;
+			}
 		}
 
 		// If on mysql, add a query at the end to check for utf8mb4 conversion status
