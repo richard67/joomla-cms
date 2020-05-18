@@ -149,7 +149,7 @@ class ChangeSet
 				if (isset($changeXrefs[$itemXrefKey])
 				&& $this->changeItems[$changeXrefs[$itemXrefKey]]->queryType === $prevItemType)
 				{
-					$this->changeItems[$changeXrefs[$itemXrefKey]]->checkStatus = -2;
+					$this->changeItems[$changeXrefs[$itemXrefKey]]->checkStatus = -3;
 				}
 
 				// Save current change item's index for the next check for the same thing
@@ -296,7 +296,7 @@ class ChangeSet
 				case -1:
 					$result['skipped'][] = $item;
 					break;
-				case -2:
+				case -3:
 					$result['overwritten'][] = $item;
 					break;
 			}
