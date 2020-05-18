@@ -61,16 +61,45 @@ class PostgresqlChangeItem extends ChangeItem
 
 		$totalWords = \count($wordArray);
 
-		// First, make sure we have an array of at least 6 elements
+		// First, make sure we have an array of at least 3 elements
 		// if not, we can't make a check query for this one
-		if ($totalWords < 6)
+		if ($totalWords < 3)
 		{
 			// Done with method
 			return;
 		}
 
-		// We can only make check queries for alter table and create table queries
+		// We can only make check queries for alter table, create table and drop table queries
 		$command = strtoupper($wordArray[0] . ' ' . $wordArray[1]);
+
+		if ($command === 'DROP TABLE')
+		{
+			if ($totalWords > 4 && strtoupper($wordArray[2] . $wordArray[3]) === 'IFEXISTS')
+			{
+				$table = $this->fixQuote($wordArray[4]);
+			}
+			else
+			{
+				$table = $this->fixQuote($wordArray[2]);
+			}
+
+			$this->checkQuery = 'SELECT table_name FROM information_schema.tables WHERE table_name=' . $table;
+			$this->queryType = 'DROP_TABLE';
+			$this->checkQueryExpected = 0;
+			$this->msgElements = array($table);
+			$this->xRefKey = $table . '.table';
+			$this->checkStatus = 0;
+
+			// Done with method
+			return;
+		}
+
+		// Now make sure we have an array of at least 6 elements
+		if ($totalWords < 6)
+		{
+			// Done with method
+			return;
+		}
 
 		if ($command === 'ALTER TABLE')
 		{
@@ -282,6 +311,7 @@ class PostgresqlChangeItem extends ChangeItem
 			$this->queryType = 'CREATE_TABLE';
 			$this->checkQueryExpected = 1;
 			$this->msgElements = array($table);
+			$this->xRefKey = $table . '.table';
 		}
 
 		// Set fields based on results

@@ -97,6 +97,12 @@ class ChangeSet
 
 					switch ($changeItem->queryType)
 					{
+						case 'CREATE_TABLE':
+							$skipItemType = 'DROP_TABLE';
+							break;
+						case 'DROP_TABLE':
+							$skipItemType = 'CREATE_TABLE';
+							break;
 						case 'ADD_COLUMN':
 							$skipItemType = 'DROP_COLUMN';
 							break;
