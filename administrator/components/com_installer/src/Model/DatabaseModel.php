@@ -529,6 +529,7 @@ class DatabaseModel extends InstallerModel
 		$problemsMessage = array();
 		$problemsMessage[] = Text::sprintf('COM_INSTALLER_MSG_DATABASE_CHECKED_OK', count($status['ok']));
 		$problemsMessage[] = Text::sprintf('COM_INSTALLER_MSG_DATABASE_SKIPPED', count($status['skipped']));
+		$problemsMessage[] = Text::sprintf('COM_INSTALLER_MSG_DATABASE_OVERWRITTEN', count($status['overwritten']));
 
 		return $problemsMessage;
 	}

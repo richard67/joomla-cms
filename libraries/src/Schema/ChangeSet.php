@@ -94,29 +94,29 @@ class ChangeSet
 			switch ($changeItem->queryType)
 			{
 				case 'ADD_COLUMN':
-					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1];
+					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . '.column';
 					$prevItemType = 'DROP_COLUMN';
 					break;
 				case 'DROP_COLUMN':
-					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1];
+					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . '.column';
 					$prevItemType = 'ADD_COLUMN';
 					break;
 				case 'CHANGE_COLUMN_TYPE':
-					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . '.type';
+					$itemXrefKey  = $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . '.coltype';
 					$prevItemType = 'CHANGE_COLUMN_TYPE';
 					break;
 				case 'ADD_INDEX':
 					$itemXrefKey
 						= $this->db->getServerType() === 'postgresql'
-						? $changeItem->msgElements[0]
-						: $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1];
+						? $changeItem->msgElements[0] . '.idx'
+						: $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . '.idx';
 					$prevItemType = 'DROP_INDEX';
 					break;
 				case 'DROP_INDEX':
 					$itemXrefKey
 						= $this->db->getServerType() === 'postgresql'
-						? $changeItem->msgElements[0]
-						: $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1];
+						? $changeItem->msgElements[0] . '.idx'
+						: $changeItem->msgElements[0] . '.' . $changeItem->msgElements[1] . '.idx';
 					$prevItemType = 'ADD_INDEX';
 					break;
 			}
@@ -127,7 +127,7 @@ class ChangeSet
 				if (array_key_exists($itemXrefKey, $changeXrefs)
 				&& $this->changeItems[$changeXrefs[$itemXrefKey]]->queryType === $prevItemType)
 				{
-					$this->changeItems[$changeXrefs[$itemXrefKey]]->checkStatus = -1;
+					$this->changeItems[$changeXrefs[$itemXrefKey]]->checkStatus = -2;
 				}
 
 				$changeXrefs[$itemXrefKey] = $changeIdx;
@@ -255,7 +255,7 @@ class ChangeSet
 	 */
 	public function getStatus()
 	{
-		$result = array('unchecked' => array(), 'ok' => array(), 'error' => array(), 'skipped' => array());
+		$result = array('unchecked' => array(), 'ok' => array(), 'error' => array(), 'skipped' => array(), 'overwritten' => array());
 
 		foreach ($this->changeItems as $item)
 		{
@@ -272,6 +272,9 @@ class ChangeSet
 					break;
 				case -1:
 					$result['skipped'][] = $item;
+					break;
+				case -2:
+					$result['overwritten'][] = $item;
 					break;
 			}
 		}
