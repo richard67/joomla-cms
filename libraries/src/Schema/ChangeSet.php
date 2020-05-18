@@ -145,7 +145,7 @@ class ChangeSet
 
 			if (!empty($itemXrefKey))
 			{
-				// Check if there is a previous change item for the same thing to be skiped
+				// Check if there is a previous change item for the same thing to be skipped
 				if (isset($changeXrefs[$itemXrefKey])
 				&& $this->changeItems[$changeXrefs[$itemXrefKey]]->queryType === $prevItemType)
 				{
