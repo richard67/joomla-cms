@@ -83,42 +83,45 @@ class ChangeSet
 
 		foreach ($updateQueries as $obj)
 		{
-			$this->changeItems[] = ChangeItem::getInstance($db, $obj->file, $obj->updateQuery);
+			$changeItem = ChangeItem::getInstance($db, $obj->file, $obj->updateQuery);
+			$changeIdx  = count($this->changeItems);
+			$this->changeItems[] = $changeItem;
 
-			// Prepare the check of a previous change item for the same thing
-			$changeItem   = end($this->changeItems);
-			$changeIdx    = key($this->changeItems);
-			$skipItemType = '';
-
-			switch ($changeItem->queryType)
-			{
-				case 'ADD_COLUMN':
-					$skipItemType = 'DROP_COLUMN';
-					break;
-				case 'DROP_COLUMN':
-					$skipItemType = 'ADD_COLUMN';
-					break;
-				case 'CHANGE_COLUMN_TYPE':
-					$skipItemType = 'CHANGE_COLUMN_TYPE';
-					break;
-				case 'ADD_INDEX':
-					$skipItemType = 'DROP_INDEX';
-					break;
-				case 'DROP_INDEX':
-					$skipItemType = 'ADD_INDEX';
-					break;
-			}
-
+			// Check if the change item is a schema change which can overwrite previous changes
 			if (!empty($changeItem->xRefKey))
 			{
-				// Check if there is a previous change item for the same thing to be skipped
-				if (isset($changeXrefs[$changeItem->xRefKey])
-				&& $this->changeItems[$changeXrefs[$changeItem->xRefKey]]->queryType === $skipItemType)
+				// Check if there is a previous schema change for the same object
+				if (isset($changeXrefs[$changeItem->xRefKey]))
 				{
-					$this->changeItems[$changeXrefs[$changeItem->xRefKey]]->checkStatus = -3;
+					$skipItemType = '';
+
+					switch ($changeItem->queryType)
+					{
+						case 'ADD_COLUMN':
+							$skipItemType = 'DROP_COLUMN';
+							break;
+						case 'DROP_COLUMN':
+							$skipItemType = 'ADD_COLUMN';
+							break;
+						case 'CHANGE_COLUMN_TYPE':
+							$skipItemType = 'CHANGE_COLUMN_TYPE';
+							break;
+						case 'ADD_INDEX':
+							$skipItemType = 'DROP_INDEX';
+							break;
+						case 'DROP_INDEX':
+							$skipItemType = 'ADD_INDEX';
+							break;
+					}
+
+					// Check if the the previous change can be skipped
+					if ($this->changeItems[$changeXrefs[$changeItem->xRefKey]]->queryType === $skipItemType)
+					{
+						$this->changeItems[$changeXrefs[$changeItem->xRefKey]]->checkStatus = -3;
+					}
 				}
 
-				// Save current change item's index for the next check for the same thing
+				// Save current change item's index for the next check for the same object
 				$changeXrefs[$changeItem->xRefKey] = $changeIdx;
 			}
 		}
