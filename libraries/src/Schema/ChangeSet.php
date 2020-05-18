@@ -143,7 +143,7 @@ class ChangeSet
 					break;
 			}
 
-			if (!empty($itemXrefKey)
+			if (!empty($itemXrefKey))
 			{
 				// Check if there is a previous change item for the same thing to be skiped
 				if (array_key_exists($itemXrefKey, $changeXrefs)
