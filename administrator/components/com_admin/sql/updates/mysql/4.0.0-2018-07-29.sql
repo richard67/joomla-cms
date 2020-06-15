@@ -62,28 +62,30 @@ CREATE TABLE IF NOT EXISTS `#__finder_logging` (
 ALTER TABLE `#__finder_logging` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE `#__finder_logging` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-DROP TABLE `#__finder_taxonomy`;
-CREATE TABLE IF NOT EXISTS `#__finder_taxonomy` (
-	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`parent_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
-	`lft` INT(11) NOT NULL DEFAULT '0',
-	`rgt` INT(11) NOT NULL DEFAULT '0',
-	`level` INT(10) UNSIGNED NOT NULL DEFAULT '0',
-	`path` VARCHAR(400) NOT NULL DEFAULT '',
-	`title` VARCHAR(255) NOT NULL DEFAULT '',
-	`alias` VARCHAR(400) NOT NULL DEFAULT '',
-	`state` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1',
-	`access` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1',
-	`language` CHAR(7) NOT NULL DEFAULT '',
-	PRIMARY KEY (`id`),
-	INDEX `idx_state` (`state`),
-	INDEX `idx_access` (`access`),
-	INDEX `idx_path` (`path`(100)),
-	INDEX `idx_left_right` (`lft`, `rgt`),
-	INDEX `idx_alias` (`alias`(100)),
-	INDEX `idx_language` (`language`),
-	INDEX `idx_parent_published` (`parent_id`, `state`, `access`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
+TRUNCATE TABLE `#__finder_taxonomy`;
+ALTER TABLE `#__finder_taxonomy` DROP INDEX `parent_id`;
+ALTER TABLE `#__finder_taxonomy` DROP INDEX `state`;
+ALTER TABLE `#__finder_taxonomy` DROP INDEX `ordering`;
+ALTER TABLE `#__finder_taxonomy` DROP INDEX `access`;
+ALTER TABLE `#__finder_taxonomy` DROP COLUMN `ordering`;
+ALTER TABLE `#__finder_taxonomy` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `#__finder_taxonomy` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `#__finder_taxonomy` MODIFY `parent_id` INT(10) UNSIGNED NOT NULL DEFAULT '0';
+ALTER TABLE `#__finder_taxonomy` MODIFY `title` VARCHAR(255) NOT NULL DEFAULT '';
+ALTER TABLE `#__finder_taxonomy` MODIFY `state` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1';
+ALTER TABLE `#__finder_taxonomy` MODIFY `access` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1';
+ALTER TABLE `#__finder_taxonomy` ADD COLUMN `lft` INT(11) NOT NULL DEFAULT '0' AFTER `parent_id`;
+ALTER TABLE `#__finder_taxonomy` ADD COLUMN `rgt` INT(11) NOT NULL DEFAULT '0' AFTER `lft`;
+ALTER TABLE `#__finder_taxonomy` ADD COLUMN `level` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `rgt`;
+ALTER TABLE `#__finder_taxonomy` ADD COLUMN `path` VARCHAR(400) NOT NULL DEFAULT '' AFTER `level`;
+ALTER TABLE `#__finder_taxonomy` ADD COLUMN `alias` VARCHAR(400) NOT NULL DEFAULT '' AFTER `title`;
+ALTER TABLE `#__finder_taxonomy` ADD COLUMN `language` CHAR(7) NOT NULL DEFAULT '' AFTER `access`;
+ALTER TABLE `#__finder_taxonomy` ADD INDEX `idx_state` (`state`);
+ALTER TABLE `#__finder_taxonomy` ADD INDEX `idx_access` (`access`);
+ALTER TABLE `#__finder_taxonomy` ADD INDEX `idx_path` (`path`(100));
+ALTER TABLE `#__finder_taxonomy` ADD INDEX `idx_left_right` (`lft`, `rgt`);
+ALTER TABLE `#__finder_taxonomy` ADD INDEX `idx_alias` (`alias`(100));
+ALTER TABLE `#__finder_taxonomy` ADD INDEX `idx_language` (`language`);
 INSERT INTO `#__finder_taxonomy` (`id`, `parent_id`, `lft`, `rgt`, `level`, `path`, `title`, `alias`, `state`, `access`, `language`) VALUES
 (1, 0, 0, 1, 0, '', 'ROOT', 'root', 1, 1, '*');
 
@@ -92,25 +94,25 @@ ALTER TABLE `#__finder_taxonomy_map` CONVERT TO CHARACTER SET utf8mb4 COLLATE ut
 ALTER TABLE `#__finder_taxonomy_map` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 TRUNCATE TABLE `#__finder_terms`;
+ALTER TABLE `#__finder_terms` DROP INDEX `idx_term`;
 ALTER TABLE `#__finder_terms` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE `#__finder_terms` CHANGE `language` `language` CHAR(7) NOT NULL DEFAULT '' AFTER `links`;
 ALTER TABLE `#__finder_terms` MODIFY `term` varchar(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;
 ALTER TABLE `#__finder_terms` MODIFY `stem` varchar(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '';
 ALTER TABLE `#__finder_terms` MODIFY `soundex` varchar(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '';
-ALTER TABLE `#__finder_terms` DROP INDEX `idx_term`;
 ALTER TABLE `#__finder_terms` ADD INDEX `idx_stem` (`stem`);
 ALTER TABLE `#__finder_terms` ADD INDEX `idx_language` (`language`);
 ALTER TABLE `#__finder_terms` ADD UNIQUE INDEX `idx_term_language` (`term`, `language`);
 ALTER TABLE `#__finder_terms` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `#__finder_terms_common`;
-CREATE TABLE `#__finder_terms_common` (
-  `term` varchar(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
-  `language` char(7) NOT NULL DEFAULT '',
-  `custom` int(11) NOT NULL DEFAULT '0',
-  UNIQUE KEY `idx_term_language` (`term`,`language`),
-  KEY `idx_lang` (`language`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
+TRUNCATE TABLE `#__finder_terms_common`;
+ALTER TABLE `#__finder_terms_common` DROP INDEX `idx_word_lang`;
+ALTER TABLE `#__finder_terms_common` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `#__finder_terms_common` MODIFY `term` varchar(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '';
+ALTER TABLE `#__finder_terms_common` MODIFY `language` char(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '';
+ALTER TABLE `#__finder_terms_common` ADD COLUMN `custom` int(11) NOT NULL DEFAULT '0' AFTER `language`;
+ALTER TABLE `#__finder_terms_common` ADD UNIQUE INDEX `idx_term_language` (`term`, `language`);
+ALTER TABLE `#__finder_terms_common` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 INSERT INTO `#__finder_terms_common` (`term`, `language`, `custom`) VALUES
 	('i', 'en', 0),
 	('me', 'en', 0),
@@ -297,8 +299,8 @@ ALTER TABLE `#__finder_tokens` ADD INDEX `idx_language` (`language`);
 ALTER TABLE `#__finder_tokens` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 TRUNCATE TABLE `#__finder_tokens_aggregate`;
-ALTER TABLE `#__finder_tokens_aggregate` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE `#__finder_tokens_aggregate` DROP COLUMN `map_suffix`;
+ALTER TABLE `#__finder_tokens_aggregate` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE `#__finder_tokens_aggregate` CHANGE `language` `language` CHAR(7) NOT NULL DEFAULT '' AFTER `total_weight`;
 ALTER TABLE `#__finder_tokens_aggregate` MODIFY `term` varchar(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;
 ALTER TABLE `#__finder_tokens_aggregate` MODIFY `stem` varchar(75) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '';
