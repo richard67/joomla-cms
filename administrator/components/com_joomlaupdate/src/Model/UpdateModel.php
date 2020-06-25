@@ -1018,9 +1018,24 @@ ENDDATA;
 			throw new \RuntimeException(Text::_('COM_INSTALLER_MSG_INSTALL_WARNINSTALLUPLOADERROR'), 500);
 		}
 
-		// Build the appropriate paths.
-		$tmp_dest = tempnam(Factory::getApplication()->get('tmp_path'), 'ju');
+		// Build the source path.
 		$tmp_src  = $userfile['tmp_name'];
+
+		// Check mime type of the uploaded file.
+		$mime = $this->_getMimeType($tmp_src);
+
+		if (!$mime)
+		{
+			throw new \RuntimeException(Text::_('COM_JOOMLAUPDATE_MSG_WARNINGS_NOMIMETYPE'), 500);
+		}
+
+		if (!\in_array($mime, ['application/x-bzip2', 'application/x-gzip', 'application/x-zstd', 'application/zip']))
+		{
+			throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_MSG_WARNINGS_BADMIMETYPE', $mime), 500);
+		}
+
+		// Build the destination path.
+		$tmp_dest = tempnam(Factory::getApplication()->get('tmp_path'), 'ju');
 
 		// Move uploaded file.
 		if (version_compare(\JVERSION, '3.4.0', 'ge'))
@@ -1622,5 +1637,37 @@ ENDDATA;
 
 		// Translate the extension name if possible
 		$item->name = Text::_($item->name);
+	}
+
+	/**
+	 * Get the Mime type
+	 *
+	 * @param   string  $file  The full path to the file to be checked
+	 *
+	 * @return  mixed   The mime type detected false on error
+	 *
+	 * @since   4.0.0
+	 */
+	protected function _getMimeType($file)
+	{
+		try
+		{
+			if (\function_exists('mime_content_type'))
+			{
+				$mime = mime_content_type($file);
+			}
+			elseif (\function_exists('finfo_open'))
+			{
+				$finfo = finfo_open(FILEINFO_MIME_TYPE);
+				$mime  = finfo_file($finfo, $file);
+				finfo_close($finfo);
+			}
+		}
+		catch (\Exception $e)
+		{
+			$mime = false;
+		}
+
+		return $mime;
 	}
 }
