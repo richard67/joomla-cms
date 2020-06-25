@@ -18,7 +18,6 @@ use Joomla\CMS\Utility\Utility;
 HTMLHelper::_('behavior.core');
 Text::script('COM_INSTALLER_MSG_INSTALL_PLEASE_SELECT_A_PACKAGE', true);
 Text::script('COM_INSTALLER_MSG_WARNINGS_UPLOADFILETOOBIG', true);
-Text::script('COM_INSTALLER_MSG_WARNINGS_UPLOADFILETOOBIG', true);
 Text::script('COM_JOOMLAUPDATE_MSG_WARNINGS_UPLOADFILESUFFIX', true);
 Text::script('JGLOBAL_SELECTED_UPLOAD_FILE_SIZE', true);
 ?>
