@@ -1029,7 +1029,7 @@ ENDDATA;
 			throw new \RuntimeException(Text::_('COM_JOOMLAUPDATE_MSG_WARNINGS_NOMIMETYPE'), 500);
 		}
 
-		if (!\in_array($mime, ['application/x-bzip2', 'application/x-gzip', 'application/x-zstd', 'application/zip']))
+		if ($mime !== 'application/zip')
 		{
 			throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_MSG_WARNINGS_BADMIMETYPE', $mime), 500);
 		}
