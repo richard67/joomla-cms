@@ -1019,7 +1019,7 @@ ENDDATA;
 		}
 
 		// Build the source path.
-		$tmp_src  = $userfile['tmp_name'];
+		$tmp_src = $userfile['tmp_name'];
 
 		// Check mime type of the uploaded file.
 		$mime = $this->getMimeType($tmp_src);
