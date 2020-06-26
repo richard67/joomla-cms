@@ -982,10 +982,40 @@ ENDDATA;
 			throw new RuntimeException(JText::_('COM_INSTALLER_MSG_INSTALL_WARNINSTALLUPLOADERROR'), 500);
 		}
 
-		// Build the appropriate paths.
+		// Build the source path.
+		$tmp_src = $userfile['tmp_name'];
+
+		// Check mime type of the uploaded file.
+		$mime = $this->getMimeType($tmp_src);
+
+		// Delete the uploaded file if mime type detection failed or the type is not allowed
+		if ($mime !== 'application/zip')
+		{
+			try
+			{
+				JFile::delete($tmp_src);
+			}
+			catch (Exception $e)
+			{
+				// Do nothing
+			}
+		}
+
+		// Mime type detection failed
+		if (!$mime)
+		{
+			throw new RuntimeException(JText::_('COM_JOOMLAUPDATE_MSG_WARNINGS_NOMIMETYPE'), 500);
+		}
+
+		// Mime type not allowed
+		if ($mime !== 'application/zip')
+		{
+			throw new RuntimeException(JText::sprintf('COM_JOOMLAUPDATE_MSG_WARNINGS_BADMIMETYPE', $mime), 500);
+		}
+
+		// Build the destination path.
 		$config   = JFactory::getConfig();
 		$tmp_dest = tempnam($config->get('tmp_path'), 'ju');
-		$tmp_src  = $userfile['tmp_name'];
 
 		// Move uploaded file.
 		jimport('joomla.filesystem.file');
@@ -1093,5 +1123,57 @@ ENDDATA;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get the Mime type
+	 *
+	 * @param   string  $file  The full path to the file to be checked
+	 *
+	 * @return  mixed   The mime type detected false on error
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	protected function getMimeType($file)
+	{
+		$mime = false;
+
+		try
+		{
+			if (function_exists('mime_content_type'))
+			{
+				$mime = mime_content_type($file);
+			}
+		}
+		catch (Exception $e)
+		{
+			// Do nothing
+		}
+
+		if ($mime)
+		{
+			return $mime;
+		}
+
+		try
+		{
+			if (function_exists('finfo_open'))
+			{
+				$finfo = finfo_open(FILEINFO_MIME_TYPE);
+				$mime  = finfo_file($finfo, $file);
+				finfo_close($finfo);
+			}
+		}
+		catch (Exception $e)
+		{
+			// Do nothing, try below with next function
+		}
+
+		if (empty($mime))
+		{
+			return false;
+		}
+
+		return $mime;
 	}
 }
