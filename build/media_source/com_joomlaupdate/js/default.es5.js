@@ -25,7 +25,7 @@ Joomla = window.Joomla || {};
 		if (form.install_package.value == '') {
 			alert(Joomla.JText._('COM_INSTALLER_MSG_INSTALL_PLEASE_SELECT_A_PACKAGE'), true);
 		}
-		else if (!/\.tar\.bz2|\.tar\.gz|\.tar\.zst|\.zip$/i.test(form.install_package.value)) {
+		else if (!/\.zip$/i.test(form.install_package.value)) {
 			alert(Joomla.JText._('COM_JOOMLAUPDATE_MSG_WARNINGS_UPLOADFILESUFFIX'), true);
 		}
 		else if (form.install_package.files[0].size > form.max_upload_size.value) {
@@ -61,7 +61,7 @@ Joomla = window.Joomla || {};
 				}
 			}
 
-			if (/\.tar\.bz2|\.tar\.gz|\.tar\.zst|\.zip$/i.test(form.install_package.value)) {
+			if (/\.zip$/i.test(form.install_package.value)) {
 				fileSuffixWarning.classList.add('hidden');
 			} else {
 				fileSuffixWarning.classList.remove('hidden');
