@@ -142,7 +142,7 @@ JFactory::getDocument()->addStyleDeclaration($css);
 				</td>
 				<td>
 					<input class="input_box" id="install_package" name="install_package" type="file" size="57" onchange="Joomla.installpackageChange()" /><br>
-					<?php $maxSizeBytes = Utility::getMaxUploadSize(); ?>
+					<?php $maxSizeBytes = JUtility::getMaxUploadSize(); ?>
 					<?php $maxSize = JHtml::_('number.bytes', $maxSizeBytes); ?>
 					<input id="max_upload_size" name="max_upload_size" type="hidden" value="<?php echo $maxSizeBytes; ?>" />
 					<small class="form-text text-muted"><?php echo JText::sprintf('JGLOBAL_MAXIMUM_UPLOAD_SIZE_LIMIT', '&#x200E;' . $maxSize); ?></small>
