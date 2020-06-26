@@ -1024,11 +1024,26 @@ ENDDATA;
 		// Check mime type of the uploaded file.
 		$mime = $this->getMimeType($tmp_src);
 
+		// Delete the uploaded file if mime type detection failed or the type is not allowed
+		if ($mime !== 'application/zip')
+		{
+			try
+			{
+				File::delete($tmp_src);
+			}
+			catch (\Exception $e)
+			{
+				// Do nothing
+			}
+		}
+
+		// Mime type detection failed
 		if (!$mime)
 		{
 			throw new \RuntimeException(Text::_('COM_JOOMLAUPDATE_MSG_WARNINGS_NOMIMETYPE'), 500);
 		}
 
+		// Mime type not allowed
 		if ($mime !== 'application/zip')
 		{
 			throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_MSG_WARNINGS_BADMIMETYPE', $mime), 500);
@@ -1680,7 +1695,7 @@ ENDDATA;
 		}
 		catch (\Exception $e)
 		{
-			// Do nothing, try below with next function
+			// Do nothing
 		}
 
 		if (empty($mime))
