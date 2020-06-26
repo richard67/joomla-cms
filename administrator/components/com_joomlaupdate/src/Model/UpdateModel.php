@@ -1022,7 +1022,7 @@ ENDDATA;
 		$tmp_src  = $userfile['tmp_name'];
 
 		// Check mime type of the uploaded file.
-		$mime = $this->_getMimeType($tmp_src);
+		$mime = $this->getMimeType($tmp_src);
 
 		if (!$mime)
 		{
@@ -1648,7 +1648,7 @@ ENDDATA;
 	 *
 	 * @since   4.0.0
 	 */
-	protected function _getMimeType($file)
+	protected function getMimeType($file)
 	{
 		try
 		{
