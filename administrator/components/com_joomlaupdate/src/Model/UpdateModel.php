@@ -1650,13 +1650,28 @@ ENDDATA;
 	 */
 	protected function getMimeType($file)
 	{
+		$mime = false;
+
 		try
 		{
 			if (\function_exists('mime_content_type'))
 			{
 				$mime = mime_content_type($file);
 			}
-			elseif (\function_exists('finfo_open'))
+		}
+		catch (\Exception $e)
+		{
+			// Do nothing
+		}
+
+		if ($mime)
+		{
+			return $mime;
+		}
+
+		try
+		{
+			if (\function_exists('finfo_open'))
 			{
 				$finfo = finfo_open(FILEINFO_MIME_TYPE);
 				$mime  = finfo_file($finfo, $file);
@@ -1665,7 +1680,12 @@ ENDDATA;
 		}
 		catch (\Exception $e)
 		{
-			$mime = false;
+			// Do nothing, try below with next function
+		}
+
+		if (empty($mime))
+		{
+			return false;
 		}
 
 		return $mime;
