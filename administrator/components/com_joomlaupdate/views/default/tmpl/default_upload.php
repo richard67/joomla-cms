@@ -145,8 +145,8 @@ JFactory::getDocument()->addStyleDeclaration($css);
 					<?php $maxSizeBytes = JUtility::getMaxUploadSize(); ?>
 					<?php $maxSize = JHtml::_('number.bytes', $maxSizeBytes); ?>
 					<input id="max_upload_size" name="max_upload_size" type="hidden" value="<?php echo $maxSizeBytes; ?>" />
-					<p><?php echo JText::sprintf('JGLOBAL_MAXIMUM_UPLOAD_SIZE_LIMIT', '&#x200E;' . $maxSize); ?></p>
-					<p class="hidden" id="file_size" name="file_size"><?php echo JText::sprintf('JGLOBAL_SELECTED_UPLOAD_FILE_SIZE', '&#x200E;' . ''); ?></p>
+					<div class="small"><?php echo JText::sprintf('JGLOBAL_MAXIMUM_UPLOAD_SIZE_LIMIT', '&#x200E;' . $maxSize); ?></div>
+					<div class="small hidden" id="file_size" name="file_size"><?php echo JText::sprintf('JGLOBAL_SELECTED_UPLOAD_FILE_SIZE', '&#x200E;' . ''); ?></div>
 					<div class="alert alert-warning hidden" id="max_upload_size_warn">
 						<?php echo JText::_('COM_INSTALLER_MSG_WARNINGS_UPLOADFILETOOBIG'); ?>
 					</div>
