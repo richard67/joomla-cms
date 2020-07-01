@@ -48,10 +48,10 @@
 		/>
 
 		<field
-			name="mimetypecheck"
+			name="filetypecheck"
 			type="radio"
-			label="COM_JOOMLAUPDATE_CONFIG_MIMETYPECHECK_LABEL"
-			description="COM_JOOMLAUPDATE_CONFIG_MIMETYPECHECK_DESC"
+			label="COM_JOOMLAUPDATE_CONFIG_FILETYPECHECK_LABEL"
+			description="COM_JOOMLAUPDATE_CONFIG_FILETYPECHECK_DESC"
 			class="btn-group btn-group-yesno"
 			default="1"
 			>
