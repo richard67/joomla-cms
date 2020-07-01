@@ -985,19 +985,22 @@ ENDDATA;
 		// Build the source path.
 		$tmp_src = $userfile['tmp_name'];
 
-		// Get the MIME type of the uploaded file.
-		$mime = $this->getMimeType($tmp_src);
-
-		// MIME type detection failed
-		if (!$mime)
+		// Get the MIME type of the uploaded file if MIME type check is not switched off.
+		if (JComponentHelper::getParams('com_joomlaupdate')->get('mimetypecheck', 1))
 		{
-			throw new RuntimeException(JText::_('COM_JOOMLAUPDATE_MSG_WARNINGS_NOMIMETYPE'), 500);
-		}
+			$mime = $this->getMimeType($tmp_src);
 
-		// MIME type not allowed
-		if ($mime !== 'application/zip')
-		{
-			throw new RuntimeException(JText::sprintf('COM_JOOMLAUPDATE_MSG_WARNINGS_BADMIMETYPE', $mime), 500);
+			// MIME type detection failed
+			if (!$mime)
+			{
+				throw new RuntimeException(JText::_('COM_JOOMLAUPDATE_MSG_WARNINGS_NOMIMETYPE'), 500);
+			}
+
+			// MIME type not allowed
+			if ($mime !== 'application/zip')
+			{
+				throw new RuntimeException(JText::sprintf('COM_JOOMLAUPDATE_MSG_WARNINGS_BADMIMETYPE', $mime), 500);
+			}
 		}
 
 		// Build the destination path.

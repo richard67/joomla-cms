@@ -47,5 +47,16 @@
 			showon="updatesource:custom"
 		/>
 
+		<field
+			name="mimetypecheck"
+			type="radio"
+			label="COM_JOOMLAUPDATE_CONFIG_MIMETYPECHECK_LABEL"
+			description="COM_JOOMLAUPDATE_CONFIG_MIMETYPECHECK_DESC"
+			class="btn-group btn-group-yesno"
+			default="1"
+			>
+			<option value="1">JYES</option>
+			<option value="0">JNO</option>
+		</field>
 	</fieldset>
 </config>
