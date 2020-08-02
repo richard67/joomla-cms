@@ -72,6 +72,15 @@
     flex-grow: 0;
   }
 
+  .dropdown a {
+    display: inline-block !important;
+  }
+
+  .dropdown-toggle-split {
+    border: 1px solid lighten($cassiopeia-template-color, 10%);
+    margin-left: 6px;
+  }
+
   .mod-menu li {
     position: relative;
     display: inline-block;
@@ -113,6 +122,23 @@
       padding: .25rem 0 0;
       color: $white;
       text-decoration: none;
+    }
+  }
+
+  .mod-menu__sub li {
+    text-transform: none;
+
+    a {
+      color: $blue;
+    }
+
+    &.active {
+      background: darken($white-offset, 12%);
+    }
+
+    &:hover,
+    &:focus {
+      background: darken($white-offset, 24%);
     }
   }
 
