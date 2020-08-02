@@ -11,6 +11,10 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Helper\ModuleHelper;
 
+/** @var Joomla\CMS\WebAsset\WebAssetManager $wa */
+$wa = $app->getDocument()->getWebAssetManager();
+$wa->registerAndUseScript('mod_menu', 'mod_menu/menu.min.js', [], ['defer' => true]);
+
 $id = '';
 
 if ($tagId = $params->get('tag_id', ''))
@@ -18,7 +22,7 @@ if ($tagId = $params->get('tag_id', ''))
 	$id = ' id="' . $tagId . '"';
 }
 
-$isDropdown = false;
+$dropdownCounter = 0;
 
 // The menu class is deprecated. Use mod-menu instead
 ?>
@@ -27,19 +31,18 @@ $isDropdown = false;
 {
 	$itemParams = $item->getParams();
 
-	if ($isDropdown)
+	if ($item->level > 1)
 	{
 		$class = 'dropdown-item';
 	}
 	else
 	{
 		$class = 'nav-item';
+	}
 
-		if ($item->deeper)
-		{
-			$class .= ' dropdown';
-			$isDropdown = true;
-		}
+	if ($item->deeper)
+	{
+		$class .= ' dropdown';
 	}
 
 	if ($item->id == $default_id)
@@ -104,15 +107,17 @@ $isDropdown = false;
 	// The next item is deeper.
 	if ($item->deeper)
 	{
-		echo '<a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="sr-only">Toggle Dropdown</span></a>';
-		echo '<ul class="mod-menu__sub dropdown-menu" aria-labelledby="navbarDropdown">';
+		$dropdownSuffix = $dropdownCounter ?: '';
+		$dropdownClass  = $item->level > 1 ? 'dropdown-item' : 'nav-link';
+		$dropdownCounter++;
+		echo '<a id="navbarDropdown' . $dropdownSuffix . '" class="' . $dropdownClass . ' dropdown-toggle dropdown-toggle-split" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="sr-only">Toggle Dropdown</span></a>';
+		echo '<ul class="mod-menu__sub dropdown-menu" aria-labelledby="navbarDropdown' . $dropdownSuffix . '">';
 	}
 	// The next item is shallower.
 	elseif ($item->shallower)
 	{
 		echo '</li>';
 		echo str_repeat('</ul></li>', $item->level_diff);
-		$isDropdown = false;
 	}
 	// The next item is on the same level.
 	else

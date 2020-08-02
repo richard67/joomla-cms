@@ -11,6 +11,10 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Helper\ModuleHelper;
 
+/** @var Joomla\CMS\WebAsset\WebAssetManager $wa */
+$wa = $app->getDocument()->getWebAssetManager();
+$wa->registerAndUseScript('mod_menu', 'mod_menu/menu.min.js', [], ['defer' => true]);
+
 $id = '';
 
 if ($tagId = $params->get('tag_id', ''))
@@ -18,7 +22,8 @@ if ($tagId = $params->get('tag_id', ''))
 	$id = ' id="' . $tagId . '"';
 }
 
-$isDropdown = false;
+$dropdownCounter = 0;
+$isDropdown      = false;
 
 // The menu class is deprecated. Use mod-menu instead
 ?>
@@ -39,6 +44,7 @@ $isDropdown = false;
 		{
 			$class .= ' dropdown';
 			$isDropdown = true;
+			$dropdownCounter++;
 		}
 	}
 
@@ -104,8 +110,8 @@ $isDropdown = false;
 	// The next item is deeper.
 	if ($item->deeper)
 	{
-		echo '<a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="sr-only">Toggle Dropdown</span></a>';
-		echo '<ul class="mod-menu__sub dropdown-menu" aria-labelledby="navbarDropdown">';
+		echo '<a id="navbarDropdown' . $dropdownCounter . '" class="nav-link dropdown-toggle dropdown-toggle-split" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="sr-only">Toggle Dropdown</span></a>';
+		echo '<ul class="mod-menu__sub dropdown-menu" aria-labelledby="navbarDropdown' . $dropdownCounter . '">';
 	}
 	// The next item is shallower.
 	elseif ($item->shallower)
