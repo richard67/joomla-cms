@@ -109,10 +109,28 @@
 
     a {
       position: relative;
-      display: block;
+      display: inline-block;
       padding: .25rem 0 0;
       color: $white;
       text-decoration: none;
+    }
+  }
+
+
+  .mod-menu__sub li {
+    text-transform: none;
+
+    a {
+      color: $cassiopeia-template-color;
+    }
+
+    &.active {
+      background: darken($white-offset, 15%);
+    }
+
+    &:hover,
+    &:focus {
+      background: darken($white-offset, 30%);
     }
   }
 
