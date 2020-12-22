@@ -62,6 +62,15 @@ class JoomlaupdateViewDefault extends JViewLegacy
 	protected $phpSettings = null;
 
 	/**
+	 * Database checks.
+	 *
+	 * @var   array  Array of database checks
+	 *
+	 * @since 3.10.0
+	 */
+	protected $databaseChecks = null;
+
+	/**
 	 * Non Core Extensions.
 	 *
 	 * @var   array  Array of Non-Core-Extensions
@@ -100,6 +109,7 @@ class JoomlaupdateViewDefault extends JViewLegacy
 		// Get results of pre update check evaluations
 		$this->phpOptions             = $model->getPhpOptions();
 		$this->phpSettings            = $model->getPhpSettings();
+		$this->databaseChecks         = $model->getDatabaseChecks();
 		$this->nonCoreExtensions      = $model->getNonCoreExtensions();
 		$this->nonCoreCriticalPlugins = $model->getNonCorePlugins(array('system','user','authentication','actionlog','twofactorauth'));
 

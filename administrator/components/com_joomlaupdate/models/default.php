@@ -11,6 +11,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Extension\ExtensionHelper;
 use Joomla\CMS\Filter\InputFilter;
+use Joomla\Registry\Registry;
 
 jimport('joomla.filesystem.folder');
 jimport('joomla.filesystem.file');
@@ -1375,6 +1376,221 @@ ENDDATA;
 			// Attempt to detect their existence; even pure PHP implementations of them will trigger a positive response, though.
 			$result = function_exists('parse_ini_string');
 		}
+
+		return $result;
+	}
+
+
+	/**
+	 * Gets Database checks.
+	 *
+	 * @return array Array of database checks
+	 *
+	 * @since   3.10.0
+	 */
+	public function getDatabaseChecks()
+	{
+		$dbChecks = array();
+
+		// Check for database problems reported by com_installer.
+		$dbCheck         = new stdClass;
+		$dbCheck->label  = JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_DATABASE_CHECK_STRUCTURE_TITLE');
+		$dbCheck->state  = $this->getDatabaseSchemaCheck();
+		$dbCheck->action = JText::_($dbCheck->state ? 'JNONE' : 'COM_JOOMLAUPDATE_VIEW_DEFAULT_DATABASE_CHECK_STRUCTURE_ACTION');
+		$dbChecks[]      = $dbCheck;
+
+		// Check for required datetime/timestamp fields.
+		$dbCheck         = new stdClass;
+		$dbCheck->label  = JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_DATABASE_CHECK_REQUIRED_DATES_TITLE');
+		$dbCheck->state  = $this->checkRequiredDatetimeFields();
+		$dbCheck->action = JText::_($dbCheck->state ? 'JNONE' : 'COM_JOOMLAUPDATE_VIEW_DEFAULT_DATABASE_CHECK_REQUIRED_DATES_ACTION');
+		$dbChecks[]      = $dbCheck;
+
+		return $dbChecks;
+	}
+
+	/**
+	 * Check if database schema is ok
+	 *
+	 * @return  boolean  True if ok, false if not.
+	 *
+	 * @since   3.10.0
+	 */
+	private function getDatabaseSchemaCheck()
+	{
+		if (version_compare($this->getUpdateVersion(), JVERSION) != 0)
+		{
+			return false;
+		}
+
+		if (!$this->getConfigParams())
+		{
+			return false;
+		}
+
+		$folder = JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/';
+
+		try
+		{
+			$changeSet = JSchemaChangeset::getInstance($this->getDbo(), $folder);
+		}
+		catch (RuntimeException $e)
+		{
+			JFactory::getApplication()->enqueueMessage($e->getMessage(), 'warning');
+
+			return false;
+		}
+
+		if (!empty($changeSet->check()))
+		{
+			return false;
+		}
+
+		if ($this->getSchemaVersion() != $changeSet->getSchema())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns true, if J! version is < 4 or there haven't been found
+	 * any missing created dates in core content.
+	 *
+	 * @return boolean
+	 *
+	 * @since 3.10.0
+	 */
+	private function checkRequiredDatetimeFields()
+	{
+		if (version_compare($this->getUpdateInformation()['latest'], '4', '<'))
+		{
+			return true;
+		}
+
+		$db       = $this->getDbo();
+		$nullDate = $db->quote($db->getNullDate());
+
+		$query1 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__banners'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query2 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__categories'))
+			->where($db->quoteName('created_time') . ' = ' . $nullDate);
+
+		$query3 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__contact_details'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query4 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__content'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query5 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__fields'))
+			->where($db->quoteName('created_time') . ' = ' . $nullDate);
+
+		$query6 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__fields_groups'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query7 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__newsfeeds'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query8 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__redirect_links'))
+			->where($db->quoteName('created_date') . ' = ' . $nullDate);
+
+		$query9 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__tags'))
+			->where($db->quoteName('created_time') . ' = ' . $nullDate);
+
+		$query10 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__users'))
+			->where($db->quoteName('registerDate') . ' = ' . $nullDate);
+
+		$query11 = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__user_notes'))
+			->where($db->quoteName('created_time') . ' = ' . $nullDate);
+
+		$query1->unionAll(array($query2, $query3, $query4, $query5, $query6, $query7, $query8, $query9, $query10, $query11));
+
+		$db->setQuery($query1);
+		$db->execute();
+		$numRows = $db->getNumRows();
+
+		if (isset($numRows) && $numRows != 0)
+		{
+			// We have rows here so we have at minumum one row with an invalid created date
+			return false;
+		}
+
+		// All good, the query returned nothing.
+		return true;
+	}
+
+
+	/**
+	 * Get current version from #__extensions table.
+	 *
+	 * @return  mixed   version if successful, false if fail.
+	 *
+	 * @since   3.10.0
+	 */
+	private function getUpdateVersion()
+	{
+		$table = JTable::getInstance('Extension');
+		$table->load('700');
+		$cache = new Registry($table->manifest_cache);
+
+		return $cache->get('version');
+	}
+
+	/**
+	 * Check if com_config parameters are blank.
+	 *
+	 * @return  string  default text filters (if any).
+	 *
+	 * @since   3.10.0
+	 */
+	private function getConfigParams()
+	{
+		$table = JTable::getInstance('Extension');
+		$table->load($table->find(array('name' => 'com_config')));
+
+		return $table->params;
+	}
+
+	/**
+	 * Get version from #__schemas table.
+	 *
+	 * @return  mixed  the return value from the query, or null if the query fails.
+	 *
+	 * @since   3.10.0
+	 */
+	private function getSchemaVersion()
+	{
+		$db = $this->getDbo();
+		$query = $db->getQuery(true)
+			->select('version_id')
+			->from($db->quoteName('#__schemas'))
+			->where('extension_id = 700');
+		$db->setQuery($query);
+		$result = $db->loadResult();
 
 		return $result;
 	}

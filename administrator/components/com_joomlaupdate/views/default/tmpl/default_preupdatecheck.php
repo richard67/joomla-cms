@@ -53,7 +53,7 @@ $compatibilityTypes = array(
 	<?php echo JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXPLANATION_AND_LINK_TO_DOCS'); ?>
 </p>
 <div class="row-fluid">
-	<fieldset class="span6 ">
+	<fieldset class="span4 ">
 		<?php
 		$labelClass = 'success';
 		foreach ($this->phpOptions as $option) :
@@ -104,7 +104,7 @@ $compatibilityTypes = array(
 			</table>
 		</div>
 	</fieldset>
-	<fieldset class="span6 ">
+	<fieldset class="span4 ">
 		<?php
 		$labelClass = 'success';
 		foreach ($this->phpSettings as $setting) :
@@ -161,6 +161,43 @@ $compatibilityTypes = array(
 				</tbody>
 			</table>
 		</div>
+	</fieldset>
+	<fieldset class="span4 ">
+		<legend>
+			<?php echo JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_DATABASE_CHECKS'); ?>
+		</legend>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>
+						<?php echo JText::_('COM_JOOMLAUPDATE_PREUPDATE_HEADING_CHECK'); ?>
+					</th>
+					<th>
+						<?php echo JText::_('COM_JOOMLAUPDATE_PREUPDATE_HEADING_RESULT'); ?>
+					</th>
+					<th>
+						<?php echo JText::_('COM_JOOMLAUPDATE_PREUPDATE_HEADING_RECOMMENDED_ACTION'); ?>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($this->databaseChecks as $dbCheck) : ?>
+					<tr>
+						<td>
+							<?php echo $dbCheck->label; ?>
+						</td>
+						<td>
+							<span class="label label-<?php echo $dbCheck->state ? 'success' : 'important'; ?>">
+								<?php echo JText::_($dbCheck->state ? 'JYES' : 'JNO'); ?>
+							</span>
+						</td>
+						<td>
+							<?php echo $dbCheck->action; ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
 	</fieldset>
 </div>
 <?php if (!empty($this->nonCoreExtensions)) : ?>
