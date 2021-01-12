@@ -155,14 +155,9 @@ class JDatabaseDriverPdomysql extends JDatabaseDriverPdo
 		$this->connection->query("SET @@SESSION.sql_mode = '';");
 
 		// Disable query cache and turn profiling ON in debug mode.
-		if ($this->debug)
+		if ($this->debug && $this->hasProfiling())
 		{
-			$this->connection->query('SET query_cache_type = 0;');
-
-			if ($this->hasProfiling())
-			{
-				$this->connection->query('SET profiling_history_size = 100, profiling = 1;');
-			}
+			$this->connection->query('SET profiling_history_size = 100, profiling = 1;');
 		}
 	}
 

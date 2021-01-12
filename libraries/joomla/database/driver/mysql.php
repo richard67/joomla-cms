@@ -97,14 +97,9 @@ class JDatabaseDriverMysql extends JDatabaseDriverMysqli
 		$this->utf = $this->setUtf();
 
 		// Disable query cache and turn profiling ON in debug mode.
-		if ($this->debug)
+		if ($this->debug && $this->hasProfiling())
 		{
-			mysql_query('SET query_cache_type = 0;', $this->connection);
-
-			if ($this->hasProfiling())
-			{
-				mysql_query('SET profiling_history_size = 100, profiling = 1;', $this->connection);
-			}
+			mysql_query('SET profiling_history_size = 100, profiling = 1;', $this->connection);
 		}
 	}
 
