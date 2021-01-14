@@ -1491,9 +1491,9 @@ class PlgSystemDebug extends JPlugin
 			{
 				// Check if profiling is enabled.
 				$db->setQuery("SHOW VARIABLES LIKE 'have_profiling'");
-				$hasProfiling = $db->loadResult();
+				$row = $db->loadAssoc();
 
-				if ($hasProfiling)
+				if (isset($row['Value']) && $row['Value'] === 'YES')
 				{
 					// Run a SHOW PROFILE query.
 					$db->setQuery('SHOW PROFILES');
