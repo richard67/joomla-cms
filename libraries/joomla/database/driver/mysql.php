@@ -498,7 +498,7 @@ class JDatabaseDriverMysql extends JDatabaseDriverMysqli
 			$res = mysql_query("SHOW VARIABLES LIKE 'have_profiling'", $this->connection);
 			$row = mysql_fetch_assoc($res);
 
-			return isset($row);
+			return isset($row['Value']) && $row['Value'] === 'YES';
 		}
 		catch (Exception $e)
 		{

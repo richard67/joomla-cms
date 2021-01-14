@@ -586,6 +586,6 @@ class JDatabaseDriverPdomysql extends JDatabaseDriverPdo
 	{
 		$result = $this->setQuery("SHOW VARIABLES LIKE 'have_profiling'")->loadAssoc();
 
-		return isset($result);
+		return isset($result['Value']) && $result['Value'] === 'YES';
 	}
 }
