@@ -125,9 +125,6 @@ $compatibilityTypes = array(
 			</h3>
 		</legend>
 		<div class="settingsInfo hidden" >
-			<p>
-				<?php echo JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_RECOMMENDED_SETTINGS_DESC'); ?>
-			</p>
 			<table class="table">
 				<thead>
 				<tr>
@@ -160,6 +157,9 @@ $compatibilityTypes = array(
 					<?php endforeach; ?>
 				</tbody>
 			</table>
+			<p>
+				<?php echo JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_RECOMMENDED_SETTINGS_DESC'); ?>
+			</p>
 		</div>
 	</fieldset>
 </div>
