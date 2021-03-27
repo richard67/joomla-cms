@@ -53,7 +53,7 @@ $compatibilityTypes = array(
 	<?php echo JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXPLANATION_AND_LINK_TO_DOCS'); ?>
 </p>
 <div class="row-fluid">
-	<fieldset class="span6 ">
+	<fieldset class="span4 ">
 		<?php
 		$labelClass = 'success';
 		foreach ($this->phpOptions as $option) :
@@ -104,7 +104,7 @@ $compatibilityTypes = array(
 			</table>
 		</div>
 	</fieldset>
-	<fieldset class="span6 ">
+	<fieldset class="span4 ">
 		<?php
 		$labelClass = 'success';
 		foreach ($this->phpSettings as $setting) :
@@ -155,6 +155,61 @@ $compatibilityTypes = array(
 								<span class="label label-<?php echo ($setting->state === $setting->recommended) ? 'success' : 'warning'; ?>">
 									<?php echo JText::_($setting->state ? 'JON' : 'JOFF'); ?>
 								</span>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+	</fieldset>
+	<fieldset class="span4">
+		<?php
+		$labelClass = 'success';
+		foreach ($this->databaseChecks as $dbCheck) :
+			if (!$dbCheck->state)
+			{
+				$labelClass = 'important';
+				break;
+			}
+		endforeach;
+		?>
+
+		<legend class="label label-<?php echo $labelClass;?>">
+			<h3>
+				<?php
+				echo $labelClass === 'important' ? JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_DATABASE_CHECKS_WARNING') : JText::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_DATABASE_CHECKS_PASSED');
+				?>
+				<div class="settingstoggle" data-state="closed"><?php echo JText::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSIONS_SHOW_MORE_COMPATIBILITY_INFORMATION', '<span class="icon-chevron-right large-icon" style="font-size:0.85rem"></span>'); ?></div>
+			</h3>
+		</legend>
+		<div class="settingsInfo hidden" >
+			<table class="table">
+				<thead>
+					<tr>
+						<th>
+							<?php echo JText::_('COM_JOOMLAUPDATE_PREUPDATE_HEADING_CHECK'); ?>
+						</th>
+						<th>
+							<?php echo JText::_('COM_JOOMLAUPDATE_PREUPDATE_HEADING_RESULT'); ?>
+						</th>
+						<th>
+							<?php echo JText::_('COM_JOOMLAUPDATE_PREUPDATE_HEADING_RECOMMENDED_ACTION'); ?>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ($this->databaseChecks as $dbCheck) : ?>
+						<tr>
+							<td>
+								<?php echo $dbCheck->label; ?>
+							</td>
+							<td>
+								<span class="label label-<?php echo $dbCheck->state ? 'success' : 'important'; ?>">
+									<?php echo JText::_($dbCheck->state ? 'JYES' : 'JNO'); ?>
+								</span>
+							</td>
+							<td>
+								<?php echo $dbCheck->action; ?>
 							</td>
 						</tr>
 					<?php endforeach; ?>
