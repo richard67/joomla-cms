@@ -21,10 +21,14 @@ defined('_JEXEC') or die;
 	<?php else : ?>
 		<div id="j-main-container">
 	<?php endif; ?>
-		<?php if ($this->errorCount === 0) : ?>
-			<?php echo JHtml::_('bootstrap.startTabSet', 'myTab', array('active' => 'other')); ?>
-		<?php else : ?>
+		<?php if ($this->errorCount > 0) : ?>
 			<?php echo JHtml::_('bootstrap.startTabSet', 'myTab', array('active' => 'problems')); ?>
+		<?php elseif ($this->badCreatedCount > 0) : ?>
+			<?php echo JHtml::_('bootstrap.startTabSet', 'myTab', array('active' => 'badCreatedDates')); ?>
+		<?php else : ?>
+			<?php echo JHtml::_('bootstrap.startTabSet', 'myTab', array('active' => 'other')); ?>
+		<?php endif; ?>
+		<?php if ($this->errorCount > 0) : ?>
 			<?php echo JHtml::_('bootstrap.addTab', 'myTab', 'problems', JText::plural('COM_INSTALLER_MSG_N_DATABASE_ERROR_PANEL', $this->errorCount)); ?>
 				<fieldset class="panelform">
 					<ul>
@@ -51,6 +55,65 @@ defined('_JEXEC') or die;
 							<li><?php echo $message; ?></li>
 						<?php endforeach; ?>
 					</ul>
+				</fieldset>
+			<?php echo JHtml::_('bootstrap.endTab'); ?>
+		<?php endif; ?>
+		<?php if ($this->badCreatedCount > 0) : ?>
+			<?php $lang = JFactory::getLanguage();
+				$lang->load('com_banners.sys', JPATH_ADMINISTRATOR, null, false, true);
+				$lang->load('com_contact', JPATH_ADMINISTRATOR, null, false, true);
+				$lang->load('com_redirect', JPATH_ADMINISTRATOR, null, false, true);
+				$lang->load('com_users', JPATH_ADMINISTRATOR, null, false, true); ?>
+			<?php echo JHtml::_('bootstrap.addTab', 'myTab', 'badCreatedDates', JText::_('COM_INSTALLER_MSG_DATABASE_BAD_CREATED_DATES_PANEL')); ?>
+				<?php echo JText::_('COM_INSTALLER_MSG_DATABASE_BAD_CREATED_DATES_DETAILS'); ?>
+				<?php $tableNumberPrevious = null;
+					$db = JFactory::getDbo();
+					$dbPrefix = $db->getPrefix(); ?>
+				<?php foreach ($this->badCreatedDates as $line => $badDate) : ?>
+					<?php if ($badDate->table_number !== $tableNumberPrevious) : ?>
+						<?php if ($tableNumberPrevious !== null) : ?>
+					</tbody>
+				</table>
+						<?php endif; ?>
+						<?php $tableNumberPrevious = $badDate->table_number;
+							$tableAndColumnsDb = explode('/', $badDate->table_columns_db);
+							$table = isset($tableAndColumnsDb[0]) ? str_replace('#__', $dbPrefix, $tableAndColumnsDb[0]) : '?';
+							$colCreated = isset($tableAndColumnsDb[1]) ? $tableAndColumnsDb[1] : '?';
+							$colId = isset($tableAndColumnsDb[2]) ? $tableAndColumnsDb[2] : '?';
+							$colName = isset($tableAndColumnsDb[3]) ? $tableAndColumnsDb[3] : '?';
+							$tableAndColumnsTxt = explode('/', $badDate->table_columns_txt);
+							$contentType = isset($tableAndColumnsTxt[0]) ? JText::_($tableAndColumnsTxt[0]) : '?';
+							$fieldCreated = isset($tableAndColumnsTxt[1]) ? JText::_($tableAndColumnsTxt[1]) : '?';
+							$fieldId = isset($tableAndColumnsTxt[2]) ? JText::_($tableAndColumnsTxt[2]) : '?';
+							$fieldName = isset($tableAndColumnsTxt[3]) ? JText::_($tableAndColumnsTxt[3]) : '?'; ?>
+				<fieldset class="panelform">
+					<legend class="label">
+						<h4><?php echo $contentType . ' - ' . $fieldCreated . ' (' . $db->quoteName($table) . '.' . $db->quoteName($colCreated) . ')'; ?></h4>
+					</legend>
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th scope="col" class="nowrap" width="1%">
+									<?php echo $fieldId . ' (' .  $colId. ')'; ?>
+								</th>
+								<th scope="col">
+									<?php echo $fieldName . ' (' .  $colName. ')'; ?>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+					<?php endif; ?>
+							<tr>
+								<td>
+									<?php echo $badDate->id; ?>
+								</td>
+								<td>
+									<?php echo $badDate->name; ?>
+								</td>
+							</tr>
+				<?php endforeach; ?>
+						</tbody>
+					</table>
 				</fieldset>
 			<?php echo JHtml::_('bootstrap.endTab'); ?>
 		<?php endif; ?>

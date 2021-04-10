@@ -33,17 +33,19 @@ class InstallerViewDatabase extends InstallerViewDefault
 		$app = JFactory::getApplication();
 
 		// Get data from the model.
-		$this->state = $this->get('State');
-		$this->changeSet = $this->get('Items');
-		$this->errors = $this->changeSet->check();
-		$this->results = $this->changeSet->getStatus();
-		$this->schemaVersion = $this->get('SchemaVersion');
-		$this->updateVersion = $this->get('UpdateVersion');
-		$this->filterParams  = $this->get('DefaultTextFilters');
-		$this->schemaVersion = $this->schemaVersion ?: JText::_('JNONE');
-		$this->updateVersion = $this->updateVersion ?: JText::_('JNONE');
-		$this->pagination = $this->get('Pagination');
-		$this->errorCount = count($this->errors);
+		$this->state           = $this->get('State');
+		$this->changeSet       = $this->get('Items');
+		$this->errors          = $this->changeSet->check();
+		$this->results         = $this->changeSet->getStatus();
+		$this->schemaVersion   = $this->get('SchemaVersion');
+		$this->updateVersion   = $this->get('UpdateVersion');
+		$this->filterParams    = $this->get('DefaultTextFilters');
+		$this->schemaVersion   = $this->schemaVersion ?: JText::_('JNONE');
+		$this->updateVersion   = $this->updateVersion ?: JText::_('JNONE');
+		$this->pagination      = $this->get('Pagination');
+		$this->badCreatedDates = $this->get('BadCreatedDates');
+		$this->errorCount      = count($this->errors);
+		$this->badCreatedCount = count($this->badCreatedDates);
 
 		if ($this->schemaVersion != $this->changeSet->getSchema())
 		{
@@ -67,6 +69,18 @@ class InstallerViewDatabase extends InstallerViewDefault
 		else
 		{
 			$app->enqueueMessage(JText::_('COM_INSTALLER_MSG_DATABASE_ERRORS'), 'warning');
+		}
+
+		if ($this->badCreatedCount > 0)
+		{
+			$app->enqueueMessage(
+				JText::sprintf(
+					'COM_INSTALLER_MSG_DATABASE_BAD_CREATED_DATES_FOUND',
+					JText::_('COM_INSTALLER_TOOLBAR_DATABASE_FIX'),
+					JText::_('COM_INSTALLER_MSG_DATABASE_BAD_CREATED_DATES_PANEL')
+				),
+				'warning'
+			);
 		}
 
 		parent::display($tpl);

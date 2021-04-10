@@ -324,4 +324,148 @@ class InstallerModelDatabase extends InstallerModel
 			)->execute();
 		}
 	}
+
+	/**
+	 * Returns records with missing created dates in core database tables
+	 *
+	 * @return array
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function getBadCreatedDates()
+	{
+		$db = JFactory::getDbo();
+
+		$nullDate = $db->quote($db->getNullDate());
+
+		$query1 = $db->getQuery(true)
+			->select(array(
+				'1 AS ' . $db->quoteName('table_number'),
+				$db->quote('COM_BANNERS/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/JFIELD_NAME_LABEL') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__banners/created/id/name') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('name'),
+			))
+			->from($db->quoteName('#__banners'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query2 = $db->getQuery(true)
+			->select(array(
+				'2 AS ' . $db->quoteName('table_number'),
+				$db->quote('JCATEGORIES/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/JGLOBAL_TITLE') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__categories/created_time/id/title') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('title') . ' AS ' . $db->quoteName('name'),
+			))
+			->from($db->quoteName('#__categories'))
+			->where($db->quoteName('created_time') . ' = ' . $nullDate);
+
+		$query3 = $db->getQuery(true)
+			->select(array(
+				'3 AS ' . $db->quoteName('table_number'),
+				$db->quote('COM_CONTACT/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/JFIELD_NAME_LABEL') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__contact_details/created/id/name') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('name'),
+			))
+			->from($db->quoteName('#__contact_details'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query4 = $db->getQuery(true)
+			->select(array(
+				'4 AS ' . $db->quoteName('table_number'),
+				$db->quote('JGLOBAL_ARTICLES/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/JGLOBAL_TITLE') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__content/created/id/title') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('title') . ' AS ' . $db->quoteName('name'),
+			))
+			->from($db->quoteName('#__content'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query5 = $db->getQuery(true)
+			->select(array(
+				'5 AS ' . $db->quoteName('table_number'),
+				$db->quote('COM_FIELDS/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/JGLOBAL_TITLE') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__fields/created_time/id/title') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('title') . ' AS ' . $db->quoteName('name'),
+			))
+			->from($db->quoteName('#__fields'))
+			->where($db->quoteName('created_time') . ' = ' . $nullDate);
+
+		$query6 = $db->getQuery(true)
+			->select(array(
+				'6 AS ' . $db->quoteName('table_number'),
+				$db->quote('JGLOBAL_FIELD_GROUPS/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/JGLOBAL_TITLE') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__fields_groups/created/id/title') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('title') . ' AS ' . $db->quoteName('name'),
+			))
+			->from($db->quoteName('#__fields_groups'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query7 = $db->getQuery(true)
+			->select(array(
+				'7 AS ' . $db->quoteName('table_number'),
+				$db->quote('JGLOBAL_FEED_TITLE/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/JGLOBAL_TITLE') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__newsfeeds/created/id/name') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('name'),
+			))
+			->from($db->quoteName('#__newsfeeds'))
+			->where($db->quoteName('created') . ' = ' . $nullDate);
+
+		$query8 = $db->getQuery(true)
+			->select(array(
+				'8 AS ' . $db->quoteName('table_number'),
+				$db->quote('COM_REDIRECT/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/COM_REDIRECT_FIELD_OLD_URL_LABEL') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__redirect_links/created_date/id/old_url') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('old_url') . ' AS ' . $db->quoteName('name'),
+			))
+			->from($db->quoteName('#__redirect_links'))
+			->where($db->quoteName('created_date') . ' = ' . $nullDate);
+
+		$query9 = $db->getQuery(true)
+			->select(array(
+				'9 AS ' . $db->quoteName('table_number'),
+				$db->quote('JTAG/JGLOBAL_FIELD_CREATED_LABEL/JGLOBAL_FIELD_ID_LABEL/JGLOBAL_TITLE') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__tags/created_time/id/title') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('title') . ' AS ' . $db->quoteName('name'),
+			))
+			->from($db->quoteName('#__tags'))
+			->where($db->quoteName('created_time') . ' = ' . $nullDate);
+
+		$query10 = $db->getQuery(true)
+			->select(array(
+				'10 AS ' . $db->quoteName('table_number'),
+				$db->quote('COM_USERS/COM_USERS_USER_FIELD_REGISTERDATE_LABEL/JGLOBAL_FIELD_ID_LABEL/JFIELD_NAME_LABEL') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__users/registerDate/id/name') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('name'),
+			))
+			->from($db->quoteName('#__users'))
+			->where($db->quoteName('registerDate') . ' = ' . $nullDate);
+
+		$query11 = $db->getQuery(true)
+			->select(array(
+				'11 AS ' . $db->quoteName('table_number'),
+				$db->quote('COM_USERS_VIEW_NOTES_TITLE/JGLOBAL_NONAPPLICABLE/JGLOBAL_FIELD_ID_LABEL/COM_USERS_FIELD_SUBJECT_LABEL') . ' AS ' . $db->quoteName('table_columns_txt'),
+				$db->quote('#__user_notes/created_time/id/subject') . ' AS ' . $db->quoteName('table_columns_db'),
+				$db->quoteName('id'),
+				$db->quoteName('subject') . ' AS ' . $db->quoteName('name'),
+			))
+			->from($db->quoteName('#__user_notes'))
+			->where($db->quoteName('created_time') . ' = ' . $nullDate);
+
+		$query1->unionAll(array($query2, $query3, $query4, $query5, $query6, $query7, $query8, $query9, $query10, $query11));
+		$query1->order(array($db->quoteName('table_number'), $db->quoteName('id')));
+
+		$db->setQuery($query1);
+
+		$results = $db->loadObjectList();
+
+		return $results;
+	}
 }
