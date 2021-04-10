@@ -64,7 +64,7 @@ defined('_JEXEC') or die;
 				$lang->load('com_contact', JPATH_ADMINISTRATOR, null, false, true);
 				$lang->load('com_redirect', JPATH_ADMINISTRATOR, null, false, true);
 				$lang->load('com_users', JPATH_ADMINISTRATOR, null, false, true); ?>
-			<?php echo JHtml::_('bootstrap.addTab', 'myTab', 'badCreatedDates', JText::_('COM_INSTALLER_MSG_DATABASE_BAD_CREATED_DATES_PANEL')); ?>
+			<?php echo JHtml::_('bootstrap.addTab', 'myTab', 'badCreatedDates', JText::plural('COM_INSTALLER_MSG_N_DATABASE_BAD_CREATED_DATES_PANEL', $this->badCreatedCount)); ?>
 				<?php echo JText::_('COM_INSTALLER_MSG_DATABASE_BAD_CREATED_DATES_DETAILS'); ?>
 				<?php $tableNumberPrevious = null;
 					$db = JFactory::getDbo();
