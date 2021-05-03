@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS `#__contentitem_tag_map` (
   `core_content_id` int unsigned NOT NULL COMMENT 'PK from the core content table',
   `content_item_id` int NOT NULL COMMENT 'PK from the content type table',
   `tag_id` int unsigned NOT NULL COMMENT 'PK from the tag table',
-  `tag_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Date of most recent save for this tag-item',
+  `tag_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() COMMENT 'Date of most recent save for this tag-item',
   `type_id` mediumint NOT NULL COMMENT 'PK from the content_type table',
   UNIQUE KEY `uc_ItemnameTagid` (`type_id`,`content_item_id`,`tag_id`),
   KEY `idx_tag_type` (`tag_id`,`type_id`),

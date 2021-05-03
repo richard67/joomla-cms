@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS "#__contentitem_tag_map" (
   "core_content_id" integer NOT NULL,
   "content_item_id" integer NOT NULL,
   "tag_id" integer NOT NULL,
-  "tag_date" timestamp without time zone DEFAULT '1970-01-01 00:00:00' NOT NULL,
+  "tag_date" timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
   "type_id" integer NOT NULL,
  PRIMARY KEY ("type_id", "content_item_id", "tag_id")
 );
