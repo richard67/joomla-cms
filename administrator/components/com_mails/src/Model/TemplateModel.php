@@ -114,15 +114,21 @@ class TemplateModel extends AdminModel
 			$form->removeField('copyto', 'params');
 		}
 
-		try
-		{
-			$attachmentPath = Path::check(JPATH_ROOT . '/' . $params->get('attachment_folder'));
-		}
-		catch (\Exception $e)
-		{
-			$attachmentPath = '';
-		}
+		$attachmentFolder = trim($params->get('attachment_folder'));
+		$attachmentPath   = '';
 
+		if ($attachmentFolder)
+		{
+			try
+			{
+				$attachmentPath = Path::check(JPATH_ROOT . '/' . $attachmentFolder);
+			}
+			catch (\Exception $e)
+			{
+				$attachmentPath = '';
+			}
+		}
+		
 		if (!$attachmentPath || !is_dir($attachmentPath))
 		{
 			$form->removeField('attachments');
