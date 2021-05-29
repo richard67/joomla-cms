@@ -500,6 +500,6 @@ class MailTemplate
 			return '';
 		}
 
-		return File::makeSafe($name);
+		return $name;
 	}
 }
