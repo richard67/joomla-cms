@@ -581,8 +581,8 @@ class JoomlaInstallerScript
 			'files_checked'   => [],
 		];
 
-		$status['files_checked'] = $deletedFiles;
-		$status['folders_checked'] = $deletedFolders;
+		$status['files_checked'] = $adminScriptDeletedFiles;
+		$status['folders_checked'] = $adminScriptDeletedFolders;
 
 		foreach ($adminScriptDeletedFiles as $file)
 		{
