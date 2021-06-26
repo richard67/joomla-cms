@@ -1355,7 +1355,7 @@ class JoomlaInstallerScript
 	 */
 	protected function fixFilenameCasing()
 	{
-		// Get adminScriptRenamedFiles from include file
+		// Get $adminScriptRenamedFiles from include file
 		require_once __DIR__ . '/includes/renamed_files.php';
 
 		foreach ($adminScriptRenamedFiles as $old => $expected)
