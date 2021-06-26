@@ -9,7 +9,7 @@
 
 defined('_JEXEC') or die;
 
-$renamedFiles = [
+$adminScriptRenamedFiles = [
 	// 3.10 changes
 	'/libraries/src/Filesystem/Support/Stringcontroller.php' => '/libraries/src/Filesystem/Support/StringController.php',
 	'/libraries/src/Form/Rule/SubFormRule.php' => '/libraries/src/Form/Rule/SubformRule.php',

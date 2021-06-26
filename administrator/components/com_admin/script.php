@@ -566,6 +566,7 @@ class JoomlaInstallerScript
 	 */
 	public function deleteUnexistingFiles($dryRun = false, $suppressOutput = false)
 	{
+		// Get $adminScriptDeletedFiles and $adminScriptDeletedFolders from include files
 		require_once __DIR__ . '/includes/deleted_files.php';
 		require_once __DIR__ . '/includes/deleted_folders.php';
 
@@ -583,7 +584,7 @@ class JoomlaInstallerScript
 		$status['files_checked'] = $deletedFiles;
 		$status['folders_checked'] = $deletedFolders;
 
-		foreach ($deletedFiles as $file)
+		foreach ($adminScriptDeletedFiles as $file)
 		{
 			if ($fileExists = File::exists(JPATH_ROOT . $file))
 			{
@@ -603,7 +604,7 @@ class JoomlaInstallerScript
 			}
 		}
 
-		foreach ($deletedFolders as $folder)
+		foreach ($adminScriptDeletedFolders as $folder)
 		{
 			if ($folderExists = Folder::exists(JPATH_ROOT . $folder))
 			{
@@ -1354,9 +1355,10 @@ class JoomlaInstallerScript
 	 */
 	protected function fixFilenameCasing()
 	{
+		// Get adminScriptRenamedFiles from include file
 		require_once __DIR__ . '/includes/renamed_files.php';
 
-		foreach ($renamedFiles as $old => $expected)
+		foreach ($adminScriptRenamedFiles as $old => $expected)
 		{
 			$oldRealpath = realpath(JPATH_ROOT . $old);
 

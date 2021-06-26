@@ -9,7 +9,7 @@
 
 defined('_JEXEC') or die;
 
-$deletedFiles = [
+$adminScriptDeletedFiles = [
 	// From 3.10 to 4.0
 	'/administrator/components/com_actionlogs/actionlogs.php',
 	'/administrator/components/com_actionlogs/controller.php',

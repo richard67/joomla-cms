@@ -9,7 +9,7 @@
 
 defined('_JEXEC') or die;
 
-$deletedFolders = [
+$adminScriptDeletedFolders = [
 	// From 3.10 to 4.0
 	'/templates/system/images',
 	'/templates/system/html',
