@@ -29,6 +29,9 @@ function usage($command)
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
 	echo PHP_TAB . '--from <ref>:' . PHP_TAB . 'Starting commit reference (branch/tag)' . PHP_EOL;
 	echo PHP_TAB . '--to <ref>:' . PHP_TAB . 'Ending commit reference (branch/tag) [optional]' . PHP_EOL;
+	echo PHP_TAB . '--prevDelFiles <ref>:' . PHP_TAB . 'Text file with deleted files from previous release to `--to <ref>` [optional]' . PHP_EOL;
+	echo PHP_TAB . '--prevDelFolders <ref>:' . PHP_TAB . 'Text file with deleted folders from previous release to `--to <ref>` [optional]' . PHP_EOL;
+	echo PHP_TAB . '--prevRenFiles <ref>:' . PHP_TAB . 'Text file with renamed files from previous release to `--to <ref>` [optional]' . PHP_EOL;
 	echo PHP_EOL;
 }
 
@@ -36,7 +39,7 @@ function usage($command)
  * This is where the magic happens
  */
 
-$options = getopt('', array('from:', 'to::'));
+$options = getopt('', array('from:', 'to::', 'prevDelFiles::', 'prevDelFolders::', 'prevRenFiles::'));
 
 // We need the from reference, otherwise we're doomed to fail
 if (empty($options['from']))
@@ -59,6 +62,11 @@ if (empty($options['to']))
 
 	exit(1);
 }
+
+// Check if results from comparison with previous release are given
+$PreviousDeletedFiles = empty($options['prevDelFiles']) ? [] : explode("\n", file_get_contents($options['prevDelFiles']));
+$PreviousDeletedFolders = empty($options['prevDelFolders']) ? [] : explode("\n", file_get_contents($options['prevDelFolders']));
+$PreviousRenamedFiles = empty($options['prevRenFiles']) ? [] : explode("\n", file_get_contents($options['prevRenFiles']));
 
 // Directories to skip for the check (needs to include anything from J3 we want to keep)
 $previousReleaseExclude = [
@@ -196,6 +204,9 @@ foreach ($foldersToKeep as $folder)
 	}
 }
 
+// Remove folders from the results which are already present in the result file from the previous release
+$foldersDifference = array_diff($foldersDifference, $PreviousDeletedFolders);
+
 asort($filesDifference);
 rsort($foldersDifference);
 
@@ -231,6 +242,10 @@ foreach ($filesDifference as $file)
 	// File has been really deleted and not just renamed
 	$deletedFiles[] = $file;
 }
+
+// Remove files from the results which are already present in the result files from the previous major release
+$deletedFiles = array_diff($deletedFiles, $PreviousDeletedFiles);
+$renamedFiles = array_diff($renamedFiles, $PreviousRenamedFiles);
 
 // Write the lists to files for later reference
 file_put_contents(__DIR__ . '/deleted_files.txt', implode("\n", $deletedFiles));
