@@ -10,6 +10,6 @@
 /com_joomlaupdate-pkg
 
 # Ignore the deleted file script output
-/deleted_files.txt
-/deleted_folders.txt
-/renamed_files.txt
+/deleted_files*.txt
+/deleted_folders*.txt
+/renamed_files*.txt
