@@ -18,11 +18,11 @@ SELECT 'search', 'package', 'pkg_search', '', 0, 1, 1, 0, '', '', '', 0, NULL, 0
 -- package extension if that exists
 --
 UPDATE `#__extensions` a
- CROSS JOIN (SELECT `extension_id` FROM `#__extensions` WHERE `type`='package' AND `element`='pkg_search') AS b
+ CROSS JOIN (SELECT `extension_id` FROM `#__extensions` WHERE `type` = 'package' AND `element` = 'pkg_search') AS b
    SET a.`package_id` = b.`extension_id`
- WHERE (`type` = 'component' AND `element` = 'com_search')
-    OR (`type` = 'module' AND `element` = 'mod_search' AND `client_id` = 0)
-    OR (`type` = 'plugin' AND `element` IN ('categories', 'contacts', 'content', 'newsfeeds', 'tags') AND `folder` = 'search');
+ WHERE (a.`type` = 'component' AND a.`element` = 'com_search')
+    OR (a.`type` = 'module' AND a.`element` = 'mod_search' AND a.`client_id` = 0)
+    OR (a.`type` = 'plugin' AND a.`element` IN ('categories', 'contacts', 'content', 'newsfeeds', 'tags') AND a.`folder` = 'search');
 
 --
 -- Create an update site for the com_search package if that package exists and
