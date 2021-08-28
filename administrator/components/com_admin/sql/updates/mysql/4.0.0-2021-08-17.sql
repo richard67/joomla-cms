@@ -32,7 +32,7 @@ INSERT INTO `#__update_sites` (`name`, `type`, `location`, `enabled`)
 SELECT 'Search Update Site', 'extension', 'https://raw.githubusercontent.com/joomla-extensions/search/main/manifest.xml', 1
   FROM `#__extensions` e
  WHERE e.`type` = 'package' AND e.`element` = 'pkg_search'
-   AND (SELECT COUNT(u.`location`) FROM `#__update_sites` u WHERE u.`name` = 'Search Update Site') = 0;
+   AND (SELECT COUNT(u.`name`) FROM `#__update_sites` u WHERE u.`name` = 'Search Update Site') = 0;
 
 --
 -- Insert a cross reference for update site and package extension if both exist
