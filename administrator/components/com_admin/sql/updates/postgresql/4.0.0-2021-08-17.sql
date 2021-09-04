@@ -32,10 +32,10 @@ INSERT INTO "#__update_sites" ("name", "type", "location", "enabled")
 SELECT 'Search Update Site', 'extension', 'https://raw.githubusercontent.com/joomla-extensions/search/main/manifest.xml', 1
   FROM "#__extensions" e
  WHERE e."type" = 'package' AND e."element" = 'pkg_search'
-   AND (SELECT COUNT(u."name") FROM "#__update_sites" u WHERE u."name" = 'Search Update Site') = 0;
+   AND (SELECT COUNT(u."name") FROM "#__update_sites" u WHERE u."location" = 'https://raw.githubusercontent.com/joomla-extensions/search/main/manifest.xml') = 0;
 
 --
 -- Insert a cross reference for update site and package extension if both exist
 --
 INSERT INTO "#__update_sites_extensions" ("update_site_id", "extension_id") VALUES
-((SELECT "update_site_id" FROM "#__update_sites" WHERE "name" = 'Search Update Site'), (SELECT "extension_id" FROM "#__extensions" WHERE "element" = 'pkg_search' AND "type" = 'package'));
+((SELECT "update_site_id" FROM "#__update_sites" WHERE "location" = 'https://raw.githubusercontent.com/joomla-extensions/search/main/manifest.xml'), (SELECT "extension_id" FROM "#__extensions" WHERE "element" = 'pkg_search' AND "type" = 'package'));
