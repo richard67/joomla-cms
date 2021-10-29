@@ -78,6 +78,7 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 							<tbody>
 							<?php
 							foreach ($this->items as $i => $item): ?>
+								<?php $itemVersionHtml = HTMLHelper::_('language.inlineBidirectional', $item->version, 'ltr'); ?>
 								<tr class="row<?php echo $i % 2; ?>">
 									<td class="text-center">
 										<?php if($item->isMissingDownloadKey): ?>
@@ -110,10 +111,10 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 										<?php echo $item->type_translated; ?>
 									</td>
 									<td>
-										<span class="badge bg-warning text-dark"><?php echo $item->current_version; ?></span>
+										<span class="badge bg-warning text-dark"><?php echo HTMLHelper::_('language.inlineBidirectional', $item->current_version, 'ltr'); ?></span>
 									</td>
 									<td>
-										<span class="badge bg-success"><?php echo $item->version; ?></span>
+										<span class="badge bg-success"><?php echo $itemVersionHtml; ?></span>
 									</td>
 									<td class="d-none d-md-table-cell text-center">
 										<?php if (!empty($item->changelogurl)) : ?>
@@ -125,7 +126,7 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 											'bootstrap.renderModal',
 											'changelogModal' . $item->extension_id,
 											array(
-												'title' => Text::sprintf('COM_INSTALLER_CHANGELOG_TITLE', $item->name, $item->version),
+												'title' => Text::sprintf('COM_INSTALLER_CHANGELOG_TITLE', $item->name, $itemVersionHtml),
 											),
 											''
 										);

@@ -83,7 +83,7 @@ $updatePossible = true;
 <div id="joomlaupdate-wrapper" class="main-card p-3 mt-3" data-joomla-target-version="<?php echo $latestJoomlaVersion; ?>" data-joomla-current-version="<?php echo $currentJoomlaVersion; ?>">
 
 	<h2 class="my-3">
-		<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_PREUPDATE_CHECK', '&#x200E;' . $this->updateInfo['latest']); ?>
+		<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_PREUPDATE_CHECK', HTMLHelper::_('language.inlineBidirectional', $this->updateInfo['latest'], 'ltr')); ?>
 	</h2>
 	<p>
 		<?php echo Text::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXPLANATION_AND_LINK_TO_DOCS'); ?>
@@ -268,10 +268,10 @@ $updatePossible = true;
 											<?php echo Text::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_INSTALLED_VERSION'); ?>
 										</th>
 										<th class="currcomp hidden" scope="col">
-											<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_COMPATIBLE_WITH_JOOMLA_VERSION', isset($this->updateInfo['current']) ? $this->escape($this->updateInfo['current']) : JVERSION); ?>
+											<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_COMPATIBLE_WITH_JOOMLA_VERSION', HTMLHelper::_('language.inlineBidirectional', isset($this->updateInfo['current']) ? $this->escape($this->updateInfo['current']) : JVERSION, 'ltr')); ?>
 										</th>
 										<th class="upcomp hidden" scope="col">
-											<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_COMPATIBLE_WITH_JOOMLA_VERSION', $this->escape($this->updateInfo['latest'])); ?>
+											<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_COMPATIBLE_WITH_JOOMLA_VERSION', HTMLHelper::_('language.inlineBidirectional', $this->escape($this->updateInfo['latest']), 'ltr')); ?>
 										</td>
 									</tr>
 								</thead>
@@ -287,7 +287,7 @@ $updatePossible = true;
 												<?php echo Text::_('COM_INSTALLER_TYPE_' . strtoupper($extension->type)); ?>
 											</td>
 											<td class="instver hidden">
-												<?php echo $extension->version; ?>
+												<?php echo HTMLHelper::_('language.inlineBidirectional', $extension->version, 'ltr'); ?>
 											</td>
 											<td id="available-version-<?php echo $extension->extension_id; ?>" class="currcomp hidden" />
 											<td

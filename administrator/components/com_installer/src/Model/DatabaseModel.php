@@ -12,6 +12,7 @@ namespace Joomla\Component\Installer\Administrator\Model;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\Schema\ChangeSet;
@@ -225,7 +226,11 @@ class DatabaseModel extends InstallerModel
 
 			if ($result->version_id !== $schema)
 			{
-				$errorMessages[] = Text::sprintf('COM_INSTALLER_MSG_DATABASE_SCHEMA_ERROR', $result->version_id, $schema);
+				$errorMessages[] = Text::sprintf(
+					'COM_INSTALLER_MSG_DATABASE_SCHEMA_ERROR',
+					HTMLHelper::_('language.inlineBidirectional', $result->version_id, 'ltr'),
+					HTMLHelper::_('language.inlineBidirectional', $schema, 'ltr')
+				);
 				$errorCount++;
 			}
 
@@ -572,7 +577,12 @@ class DatabaseModel extends InstallerModel
 
 		if (version_compare($extensionVersion, $updateVersion) != 0)
 		{
-			return Text::sprintf('COM_INSTALLER_MSG_DATABASE_UPDATEVERSION_ERROR', $updateVersion, $extension->name, $extensionVersion);
+			return Text::sprintf(
+				'COM_INSTALLER_MSG_DATABASE_UPDATEVERSION_ERROR',
+				HTMLHelper::_('language.inlineBidirectional', $updateVersion, 'ltr'),
+				$extension->name,
+				HTMLHelper::_('language.inlineBidirectional', $extensionVersion, 'ltr')
+			);
 		}
 
 		return null;
