@@ -521,6 +521,7 @@ JLoader::registerAlias('JHtmlGrid',                         '\\Joomla\\CMS\\HTML
 JLoader::registerAlias('JHtmlIcons',                        '\\Joomla\\CMS\\HTML\\Helpers\\Icons', '5.0');
 JLoader::registerAlias('JHtmlJGrid',                        '\\Joomla\\CMS\\HTML\\Helpers\\JGrid', '5.0');
 JLoader::registerAlias('JHtmlJquery',                       '\\Joomla\\CMS\\HTML\\Helpers\\Jquery', '5.0');
+JLoader::registerAlias('JHtmlLanguage',                     '\\Joomla\\CMS\\HTML\\Helpers\\Language', '5.0');
 JLoader::registerAlias('JHtmlLinks',                        '\\Joomla\\CMS\\HTML\\Helpers\\Links', '5.0');
 JLoader::registerAlias('JHtmlList',                         '\\Joomla\\CMS\\HTML\\Helpers\\ListHelper', '5.0');
 JLoader::registerAlias('JHtmlMenu',                         '\\Joomla\\CMS\\HTML\\Helpers\\Menu', '5.0');
