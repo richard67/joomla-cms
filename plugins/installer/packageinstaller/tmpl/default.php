@@ -81,7 +81,7 @@ $maxSize = HTMLHelper::_('number.bytes', $maxSizeBytes);
 					</button>
 				</p>
 				<p>
-					<?php echo Text::sprintf('JGLOBAL_MAXIMUM_UPLOAD_SIZE_LIMIT', '&#x200E;' . $maxSize); ?>
+					<?php echo Text::sprintf('JGLOBAL_MAXIMUM_UPLOAD_SIZE_LIMIT', HTMLHelper::_('language.inlineBidirectional', $maxSize, 'ltr')); ?>
 				</p>
 			</div>
 		</div>

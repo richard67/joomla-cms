@@ -81,7 +81,7 @@ $wa->useScript('keepalive')
 									<?php echo $item->count; ?>
 								</td>
 								<td class="text-end">
-									<?php echo '&#x200E;' . HTMLHelper::_('number.bytes', $item->size); ?>
+									<?php echo HTMLHelper::_('language.inlineBidirectional', HTMLHelper::_('number.bytes', $item->size), 'ltr'); ?>
 								</td>
 							</tr>
 						<?php $i++; endforeach; ?>
