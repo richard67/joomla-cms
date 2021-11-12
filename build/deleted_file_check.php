@@ -266,4 +266,4 @@ if (!empty($renamedFiles))
 }
 
 echo PHP_EOL;
-echo 'There are ' . count($deletedFiles) . ' deleted files, ' . count($foldersDifference) .  ' deleted folders and ' . count($renamedFiles) .  ' renamed files in comparison to "' . $options['from'] . '"' . PHP_EOL;
+echo 'There are ' . count($deletedFiles) . ' deleted files, ' . count($foldersDifference) .  ' deleted folders and ' . count($renamedFiles) .  ' renamed files in comparison from "' . $options['from'] . '" to "' . $options['to'] . '"' . PHP_EOL;
