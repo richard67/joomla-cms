@@ -60,6 +60,16 @@ if (empty($options['to']))
 	exit(1);
 }
 
+// Define the result files
+$deletedFilesFile   = __DIR__ . '/deleted_files.txt';
+$deletedFoldersFile = __DIR__ . '/deleted_folders.txt';
+$renamedFilesFile   = __DIR__ . '/renamed_files.txt';
+
+// Get previous results if some
+$previousDeletedFiles   = file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : [];
+$previousDeletedFolders = file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : [];
+$previousRenamedFiles   = file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : [];
+
 // Directories to skip for the check (needs to include anything from J3 we want to keep)
 $previousReleaseExclude = [
 	$options['from'] . '/administrator/components/com_search',
@@ -196,6 +206,9 @@ foreach ($foldersToKeep as $folder)
 	}
 }
 
+// Remove folders from the results which are already present in the result file from the previous release
+$foldersDifference = array_diff($foldersDifference, $previousDeletedFolders);
+
 asort($filesDifference);
 rsort($foldersDifference);
 
@@ -232,10 +245,14 @@ foreach ($filesDifference as $file)
 	$deletedFiles[] = $file;
 }
 
+// Remove files from the results which are already present in the result files from the previous major release
+$deletedFiles = array_diff($deletedFiles, $previousDeletedFiles);
+$renamedFiles = array_diff($renamedFiles, $previousRenamedFiles);
+
 // Write the lists to files for later reference
-file_put_contents(__DIR__ . '/deleted_files.txt', implode("\n", $deletedFiles));
-file_put_contents(__DIR__ . '/deleted_folders.txt', implode("\n", $foldersDifference));
-file_put_contents(__DIR__ . '/renamed_files.txt', implode("\n", $renamedFiles));
+file_put_contents($deletedFilesFile, implode("\n", $deletedFiles), FILE_APPEND);
+file_put_contents($deletedFoldersFile, implode("\n", $foldersDifference), FILE_APPEND);
+file_put_contents($renamedFilesFile, implode("\n", $renamedFiles), FILE_APPEND);
 
 echo PHP_EOL;
 echo 'There are ' . count($deletedFiles) . ' deleted files, ' . count($foldersDifference) .  ' deleted folders and ' . count($renamedFiles) .  ' renamed files in comparison to "' . $options['from'] . '"' . PHP_EOL;
