@@ -250,9 +250,20 @@ $deletedFiles = array_diff($deletedFiles, $previousDeletedFiles);
 $renamedFiles = array_diff($renamedFiles, $previousRenamedFiles);
 
 // Write the lists to files for later reference
-file_put_contents($deletedFilesFile, implode("\n", $deletedFiles), FILE_APPEND);
-file_put_contents($deletedFoldersFile, implode("\n", $foldersDifference), FILE_APPEND);
-file_put_contents($renamedFilesFile, implode("\n", $renamedFiles), FILE_APPEND);
+if (!empty($deletedFiles))
+{
+	file_put_contents($deletedFilesFile, implode("\n", $deletedFiles) . "\n", FILE_APPEND);
+}
+
+if (!empty($foldersDifference))
+{
+	file_put_contents($deletedFoldersFile, implode("\n", $foldersDifference) . "\n", FILE_APPEND);
+}
+
+if (!empty($renamedFiles))
+{
+	file_put_contents($renamedFilesFile, implode("\n", $renamedFiles) . "\n", FILE_APPEND);
+}
 
 echo PHP_EOL;
 echo 'There are ' . count($deletedFiles) . ' deleted files, ' . count($foldersDifference) .  ' deleted folders and ' . count($renamedFiles) .  ' renamed files in comparison to "' . $options['from'] . '"' . PHP_EOL;
