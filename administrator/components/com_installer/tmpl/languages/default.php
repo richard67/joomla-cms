@@ -19,6 +19,7 @@ HTMLHelper::_('behavior.multiselect');
 
 $listOrder = $this->escape($this->state->get('list.ordering'));
 $listDirn  = $this->escape($this->state->get('list.direction'));
+$isRtl     = Factory::getLanguage()->isRtl();
 ?>
 <div id="installer-languages" class="clearfix">
 	<form action="<?php echo Route::_('index.php?option=com_installer&view=languages'); ?>" method="post" name="adminForm" id="adminForm">
@@ -84,15 +85,16 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 								</td>
 								<td class="text-end d-none d-md-table-cell">
 										<?php $minorVersion = $version::MAJOR_VERSION . '.' . $version::MINOR_VERSION; ?>
+										<?php $languageVersion = $isRtl ? '<span dir="ltr">' . $language->version . '</span>' : $language->version; ?>
 										<?php // Display a Note if language pack version is not equal to Joomla version ?>
 										<?php if (strpos($language->version, $minorVersion) !== 0 || strpos($language->version, $currentShortVersion) !== 0) : ?>
-											<span class="badge bg-warning text-dark"><?php echo $language->version; ?></span>
+											<span class="badge bg-warning text-dark"><?php echo $languageVersion; ?></span>
 											<span class="icon-info-circle" aria-hidden="true" tabindex="0"></span>
 											<div role="tooltip" class="text-start" id="tip<?php echo $language->code; ?>">
 											<?php echo Text::_('JGLOBAL_LANGUAGE_VERSION_NOT_PLATFORM'); ?>
 											</div>
 										<?php else : ?>
-											<span class="badge bg-success"><?php echo $language->version; ?></span>
+											<span class="badge bg-success"><?php echo $languageVersion; ?></span>
 										<?php endif; ?>
 								</td>
 								<td class="small d-none d-md-table-cell">

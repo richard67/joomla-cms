@@ -22,6 +22,7 @@ $wa->useScript('com_installer.changelog');
 
 $listOrder = $this->escape($this->state->get('list.ordering'));
 $listDirn  = $this->escape($this->state->get('list.direction'));
+$isRtl     = Factory::getLanguage()->isRtl();
 ?>
 <div id="installer-update" class="clearfix">
 	<form action="<?php echo Route::_('index.php?option=com_installer&view=update'); ?>" method="post" name="adminForm" id="adminForm">
@@ -78,6 +79,8 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 							<tbody>
 							<?php
 							foreach ($this->items as $i => $item): ?>
+								<?php $itemVersionHtml = $isRtl ? '<span dir="ltr">' . $item->version . '</span>' : $item->version; ?>
+								<?php $currentVersionHtml = $isRtl ? '<span dir="ltr">' . $item->current_version . '</span>' : $item->current_version; ?>
 								<tr class="row<?php echo $i % 2; ?>">
 									<td class="text-center">
 										<?php if($item->isMissingDownloadKey): ?>
@@ -110,10 +113,10 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 										<?php echo $item->type_translated; ?>
 									</td>
 									<td>
-										<span class="badge bg-warning text-dark"><?php echo $item->current_version; ?></span>
+										<span class="badge bg-warning text-dark"><?php echo $currentVersionHtml; ?></span>
 									</td>
 									<td>
-										<span class="badge bg-success"><?php echo $item->version; ?></span>
+										<span class="badge bg-success"><?php echo $itemVersionHtml; ?></span>
 									</td>
 									<td class="d-none d-md-table-cell text-center">
 										<?php if (!empty($item->changelogurl)) : ?>
@@ -125,7 +128,7 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 											'bootstrap.renderModal',
 											'changelogModal' . $item->extension_id,
 											array(
-												'title' => Text::sprintf('COM_INSTALLER_CHANGELOG_TITLE', $item->name, $item->version),
+												'title' => Text::sprintf('COM_INSTALLER_CHANGELOG_TITLE', $item->name, $itemVersionHtml),
 											),
 											''
 										);
