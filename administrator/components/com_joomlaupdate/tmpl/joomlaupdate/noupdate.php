@@ -46,4 +46,4 @@ endif;
 $content = LayoutHelper::render('joomla.content.emptystate', $displayData);
 
 // Inject Joomla! version
-echo str_replace('%1$s', '&#x200E;' . $this->updateInfo['latest'], $content);
+echo str_replace('%1$s', Factory::getLanguage()->isRtl() ? '<span dir="ltr">' . $this->updateInfo['latest'] . '</span>' : $this->updateInfo['latest'], $content);
