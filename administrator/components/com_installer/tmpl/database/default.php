@@ -18,6 +18,7 @@ HTMLHelper::_('behavior.multiselect');
 
 $listOrder     = $this->escape($this->state->get('list.ordering'));
 $listDirection = $this->escape($this->state->get('list.direction'));
+$isRtl         = Factory::getLanguage()->isRtl();
 
 ?>
 <div id="installer-database" class="clearfix">
@@ -100,10 +101,10 @@ $listDirection = $this->escape($this->state->get('list.direction'));
 											</div>
 										</td>
 										<td class="d-none d-lg-table-cell text-end">
-											<?php echo $extension->version_id; ?>
+											<?php echo $isRtl ? '<span dir="ltr">' . $extension->version_id . '</span>' : $extension->version_id; ?>
 										</td>
 										<td class="d-none d-lg-table-cell">
-											<?php echo '&#x200E;' . $extension->version; ?>
+											<?php echo $isRtl ? '<span dir="ltr">' . $extension->version . '</span>' : $extension->version; ?>
 										</td>
 										<td class="d-none d-lg-table-cell">
 											<?php echo $extension->folder_translated; ?>
