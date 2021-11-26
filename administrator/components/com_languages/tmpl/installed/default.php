@@ -20,6 +20,7 @@ use Joomla\CMS\Version;
 $user      = Factory::getUser();
 $listOrder = $this->escape($this->state->get('list.ordering'));
 $listDirn  = $this->escape($this->state->get('list.direction'));
+$isRtl     = Factory::getLanguage()->isRtl();
 ?>
 <form action="<?php echo Route::_('index.php?option=com_languages&view=installed'); ?>" method="post" id="adminForm" name="adminForm">
 	<div class="row">
@@ -103,9 +104,9 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 							<?php $minorVersion = $version::MAJOR_VERSION . '.' . $version::MINOR_VERSION; ?>
 							<?php // Display a Note if language pack version is not equal to Joomla version ?>
 							<?php if (strpos($row->version, $minorVersion) !== 0 || strpos($row->version, $currentShortVersion) !== 0) : ?>
-								<span class="badge bg-warning text-dark" title="<?php echo Text::_('JGLOBAL_LANGUAGE_VERSION_NOT_PLATFORM'); ?>"><?php echo $row->version; ?></span>
+								<span class="badge bg-warning text-dark" title="<?php echo Text::_('JGLOBAL_LANGUAGE_VERSION_NOT_PLATFORM'); ?>"><?php echo $isRtl ? '<span dir="ltr">' . $row->version . '</span>' : $row->version; ?></span>
 							<?php else : ?>
-								<span class="badge bg-success"><?php echo $row->version; ?></span>
+								<span class="badge bg-success"><?php echo $isRtl ? '<span dir="ltr">' . $row->version . '</span>' : $row->version; ?></span>
 							<?php endif; ?>
 							</td>
 							<td class="d-none d-md-table-cell text-center">

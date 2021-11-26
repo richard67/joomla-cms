@@ -26,7 +26,10 @@ $uploadLink = 'index.php?option=com_joomlaupdate&view=upload';
 
 $displayData = [
 	'textPrefix' => 'COM_JOOMLAUPDATE_UPDATE',
-	'title'      => Text::sprintf('COM_JOOMLAUPDATE_UPDATE_EMPTYSTATE_TITLE', $this->escape($this->updateInfo['latest'])),
+	'title'      => Text::sprintf(
+		'COM_JOOMLAUPDATE_UPDATE_EMPTYSTATE_TITLE',
+		Factory::getLanguage()->isRtl() ? '<span dir="ltr">' . $this->escape($this->updateInfo['latest']) . '</span>' : $this->escape($this->updateInfo['latest'])
+	),
 	'content'    => Text::sprintf($this->langKey, $this->updateSourceKey),
 	'formURL'    => 'index.php?option=com_joomlaupdate&view=joomlaupdate',
 	'helpURL'    => 'https://docs.joomla.org/Special:MyLanguage/Updating_from_an_existing_version',

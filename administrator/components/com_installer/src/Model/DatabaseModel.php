@@ -225,7 +225,13 @@ class DatabaseModel extends InstallerModel
 
 			if ($result->version_id !== $schema)
 			{
-				$errorMessages[] = Text::sprintf('COM_INSTALLER_MSG_DATABASE_SCHEMA_ERROR', $result->version_id, $schema);
+				$isRtl = Factory::getLanguage()->isRtl();
+
+				$errorMessages[] = Text::sprintf(
+					'COM_INSTALLER_MSG_DATABASE_SCHEMA_ERROR',
+					$isRtl ? '<span dir="ltr">' . $result->version_id . '</span>' : $result->version_id,
+					$isRtl ? '<span dir="ltr">' . $schema . '</span>' : $schema
+				);
 				$errorCount++;
 			}
 
@@ -572,7 +578,14 @@ class DatabaseModel extends InstallerModel
 
 		if (version_compare($extensionVersion, $updateVersion) != 0)
 		{
-			return Text::sprintf('COM_INSTALLER_MSG_DATABASE_UPDATEVERSION_ERROR', $updateVersion, $extension->name, $extensionVersion);
+			$isRtl = Factory::getLanguage()->isRtl();
+
+			return Text::sprintf(
+				'COM_INSTALLER_MSG_DATABASE_UPDATEVERSION_ERROR',
+				$isRtl ? '<span dir="ltr">' . $updateVersion . '</span>' : $updateVersion,
+				$extension->name,
+				$isRtl ? '<span dir="ltr">' . $extensionVersion . '</span>' : $extensionVersion
+			);
 		}
 
 		return null;

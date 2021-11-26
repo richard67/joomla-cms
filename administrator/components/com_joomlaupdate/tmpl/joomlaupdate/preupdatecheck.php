@@ -78,12 +78,16 @@ $currentJoomlaVersion = isset($this->updateInfo['current']) ? $this->updateInfo[
 
 $updatePossible = true;
 
+$isRtl = Factory::getLanguage()->isRtl();
+
+$latestJoomlaVersionHtml = $isRtl ? '<span dir="ltr">' . $this->escape($latestJoomlaVersion) . '</span>' : $this->escape($latestJoomlaVersion);
+$currentJoomlaVersionHtml = $isRtl ? '<span dir="ltr">' . $this->escape($currentJoomlaVersion) . '</span>' : $this->escape($currentJoomlaVersion);
 ?>
 
 <div id="joomlaupdate-wrapper" class="main-card p-3 mt-3" data-joomla-target-version="<?php echo $latestJoomlaVersion; ?>" data-joomla-current-version="<?php echo $currentJoomlaVersion; ?>">
 
 	<h2 class="my-3">
-		<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_PREUPDATE_CHECK', '&#x200E;' . $this->updateInfo['latest']); ?>
+		<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_PREUPDATE_CHECK', $latestJoomlaVersionHtml); ?>
 	</h2>
 	<p>
 		<?php echo Text::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXPLANATION_AND_LINK_TO_DOCS'); ?>
@@ -268,10 +272,10 @@ $updatePossible = true;
 											<?php echo Text::_('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_INSTALLED_VERSION'); ?>
 										</th>
 										<th class="currcomp hidden" scope="col">
-											<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_COMPATIBLE_WITH_JOOMLA_VERSION', isset($this->updateInfo['current']) ? $this->escape($this->updateInfo['current']) : JVERSION); ?>
+											<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_COMPATIBLE_WITH_JOOMLA_VERSION', $currentJoomlaVersionHtml); ?>
 										</th>
 										<th class="upcomp hidden" scope="col">
-											<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_COMPATIBLE_WITH_JOOMLA_VERSION', $this->escape($this->updateInfo['latest'])); ?>
+											<?php echo Text::sprintf('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_COMPATIBLE_WITH_JOOMLA_VERSION', $latestJoomlaVersionHtml); ?>
 										</td>
 									</tr>
 								</thead>
@@ -287,7 +291,7 @@ $updatePossible = true;
 												<?php echo Text::_('COM_INSTALLER_TYPE_' . strtoupper($extension->type)); ?>
 											</td>
 											<td class="instver hidden">
-												<?php echo $extension->version; ?>
+												<?php echo $isRtl ? '<span dir="ltr">' . $extension->version . '</span>' : $extension->version; ?>
 											</td>
 											<td id="available-version-<?php echo $extension->extension_id; ?>" class="currcomp hidden" />
 											<td

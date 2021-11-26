@@ -18,6 +18,7 @@ HTMLHelper::_('behavior.multiselect');
 
 $listOrder = $this->escape($this->state->get('list.ordering'));
 $listDirn  = $this->escape($this->state->get('list.direction'));
+$isRtl     = Factory::getLanguage()->isRtl();
 ?>
 <div id="installer-discover" class="clearfix">
 	<form action="<?php echo Route::_('index.php?option=com_installer&view=discover'); ?>" method="post" name="adminForm" id="adminForm">
@@ -92,7 +93,7 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 									<?php echo $item->type_translated; ?>
 								</td>
 								<td class="d-none d-md-table-cell">
-									<?php echo !empty($item->version) ? $item->version : '&#160;'; ?>
+									<?php echo !empty($item->version) ? ($isRtl ? '<span dir="ltr">' . $item->version . '</span>' : $item->version) : '&#160;'; ?>
 								</td>
 								<td class="d-none d-md-table-cell">
 									<?php echo !empty($item->creationDate) ? $item->creationDate : '&#160;'; ?>

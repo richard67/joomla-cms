@@ -22,6 +22,7 @@ $wa->useScript('com_installer.changelog');
 
 $listOrder = $this->escape($this->state->get('list.ordering'));
 $listDirn  = $this->escape($this->state->get('list.direction'));
+$isRtl     = Factory::getLanguage()->isRtl();
 ?>
 <div id="installer-manage" class="clearfix">
 	<form action="<?php echo Route::_('index.php?option=com_installer&view=manage'); ?>" method="post" name="adminForm" id="adminForm">
@@ -111,22 +112,23 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 								</td>
 								<td class="d-none d-md-table-cell">
 									<?php if (!empty($item->version)) : ?>
+										<?php $itemVersionHtml = $isRtl ? '<span dir="ltr">' . $item->version . '</span>' : $item->version; ?>
 										<?php if (!empty($item->changelogurl)) : ?>
 											<a href="#changelogModal<?php echo $item->extension_id; ?>" class="changelogModal" data-js-extensionid="<?php echo $item->extension_id; ?>" data-js-view="manage" data-bs-toggle="modal">
-												<?php echo $item->version?>
+												<?php echo $itemVersionHtml; ?>
 											</a>
 											<?php
 											echo HTMLHelper::_(
 												'bootstrap.renderModal',
 												'changelogModal' . $item->extension_id,
 												array(
-													'title' => Text::sprintf('COM_INSTALLER_CHANGELOG_TITLE', $item->name, $item->version),
+													'title' => Text::sprintf('COM_INSTALLER_CHANGELOG_TITLE', $item->name, $itemVersionHtml),
 												),
 												''
 											);
 											?>
 										<?php else : ?>
-											<?php echo $item->version; ?>
+											<?php echo $itemVersionHtml; ?>
 										<?php endif; ?>
 									<?php else :
 										echo '&#160;';
