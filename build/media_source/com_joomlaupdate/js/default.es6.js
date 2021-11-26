@@ -285,19 +285,18 @@ Joomla = window.Joomla || {};
       // Switch the compatibility state
       switch (extensionData.compatibilityData.upgradeCompatibilityStatus.state) {
         case PreUpdateChecker.STATE.COMPATIBLE:
-          const compatibleVersionHtml = (extensionData.compatibilityData.upgradeCompatibilityStatus.compatibleVersion === false)
-            ? Joomla.Text._('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_NO_COMPATIBILITY_INFORMATION')
-            : (direction === 'rtl')
-              ? '<span dir="ltr">' + Joomla.sanitizeHtml(extensionData.compatibilityData.upgradeCompatibilityStatus.compatibleVersion) + '</span>'
-              : Joomla.sanitizeHtml(extensionData.compatibilityData.upgradeCompatibilityStatus.compatibleVersion);
           if (extensionData.compatibilityData.upgradeWarning) {
-            html = `<span class="label label-warning">${compatibleVersionHtml}</span>`;
+            const compatibleVersion = Joomla.sanitizeHtml(extensionData.compatibilityData.upgradeCompatibilityStatus.compatibleVersion);
+            html = (direction === 'rtl') ? `<span class="label label-warning"><span dir="ltr">${compatibleVersion}</span></span>` : `<span class="label label-warning">${compatibleVersion}</span>`;
             // @TODO activate when language strings are correct
             /* if (compatibilitytypes.querySelector('#updateorangewarning')) {
               compatibilitytypes.querySelector('#updateorangewarning').classList.remove('hidden');
             } */
+          } else if (extensionData.compatibilityData.currentCompatibilityStatus.compatibleVersion === false) {
+            html = Joomla.Text._('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_NO_COMPATIBILITY_INFORMATION');
           } else {
-            html = compatibleVersionHtml;
+            const compatibleVersion = Joomla.sanitizeHtml(extensionData.compatibilityData.upgradeCompatibilityStatus.compatibleVersion);
+            html = (direction === 'rtl') ? `<span class="label label-warning"><span dir="ltr">${compatibleVersion}</span></span>` : `<span class="label label-warning">${compatibleVersion}</span>`;
           }
           break;
         case PreUpdateChecker.STATE.INCOMPATIBLE:
@@ -334,11 +333,12 @@ Joomla = window.Joomla || {};
       // Switch the compatibility state
       switch (extensionData.compatibilityData.currentCompatibilityStatus.state) {
         case PreUpdateChecker.STATE.COMPATIBLE:
-          html = (extensionData.compatibilityData.currentCompatibilityStatus.compatibleVersion === false)
-            ? Joomla.Text._('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_NO_COMPATIBILITY_INFORMATION')
-            : (direction === 'rtl')
-              ? '<span dir="ltr">' + Joomla.sanitizeHtml(extensionData.compatibilityData.currentCompatibilityStatus.compatibleVersion) + '</span>'
-              : Joomla.sanitizeHtml(extensionData.compatibilityData.currentCompatibilityStatus.compatibleVersion);
+          if (extensionData.compatibilityData.currentCompatibilityStatus.compatibleVersion === false) {
+            html = Joomla.Text._('COM_JOOMLAUPDATE_VIEW_DEFAULT_EXTENSION_NO_COMPATIBILITY_INFORMATION');
+          } else {
+            const compatibleVersion = Joomla.sanitizeHtml(extensionData.compatibilityData.currentCompatibilityStatus.compatibleVersion);
+            html = (direction === 'rtl') ? `<span dir="ltr">${compatibleVersion}</span>` : compatibleVersion;
+          }
           break;
         case PreUpdateChecker.STATE.INCOMPATIBLE:
           // No compatible version found -> display error label
