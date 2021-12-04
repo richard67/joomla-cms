@@ -245,7 +245,7 @@ foreach ($filesDifference as $file)
 	$deletedFiles[] = $file;
 }
 
-// Remove files from the results which are already present in the result files from the previous major release
+// Remove files from the results which are already present in the result files
 $deletedFiles = array_diff($deletedFiles, $previousDeletedFiles);
 $renamedFiles = array_diff($renamedFiles, $previousRenamedFiles);
 
