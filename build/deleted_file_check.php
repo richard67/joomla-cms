@@ -177,9 +177,43 @@ foreach ($newReleaseIterator as $info)
 	$newReleaseFiles[] = "'" . str_replace($options['to'], '', $info->getPathname()) . "',";
 }
 
-$filesDifference = array_diff($previousReleaseFiles, $newReleaseFiles);
-
+$filesDifference   = array_diff($previousReleaseFiles, $newReleaseFiles);
 $foldersDifference = array_diff($previousReleaseFolders, $newReleaseFolders);
+
+$filesAdded   = array_diff($newReleaseFiles, $previousReleaseFiles);
+$foldersAdded = array_diff($newReleaseFolders, $previousReleaseFolders);
+
+// Remove files from previous results which are added back by the "to" version
+if (!empty($filesAdded))
+{
+	if (!empty($previousDeletedFiles))
+	{
+		$previousDeletedFiles = array_diff($previousDeletedFiles, $filesAdded);
+	}
+
+	if (!empty($previousRenamedFiles))
+	{
+		foreach ($filesAdded as $fileAdded)
+		{
+			// Check for files which might have been renamed only
+			$matches = preg_grep('/^' . preg_quote($fileAdded, '/') . ' => /', $previousRenamedFiles);
+
+			if ($matches !== false)
+			{
+				foreach ($matches as $key => $val)
+				{
+					unset($previousRenamedFiles[$key]);
+				}
+			}
+		}
+	}
+}
+
+// Remove folders from previous results which are added back by the "to" version
+if (!empty($previousDeletedFolders) && !empty($foldersAdded))
+{
+	$previousDeletedFolders = array_diff($previousDeletedFolders, $foldersAdded);
+}
 
 // Specific files (e.g. language files) that we want to keep on upgrade
 $filesToKeep = [
@@ -268,6 +302,21 @@ $deletedFiles = array_diff($deletedFiles, $previousDeletedFiles);
 $renamedFiles = array_diff($renamedFiles, $previousRenamedFiles);
 
 // Write the lists to files for later reference
+if (!empty($previousDeletedFiles))
+{
+	file_put_contents($deletedFilesFile, implode("\n", $previousDeletedFiles));
+}
+
+if (!empty($previousDeletedFolders))
+{
+	file_put_contents($deletedFoldersFile, implode("\n", $previousDeletedFolders));
+}
+
+if (!empty($previousRenamedFiles))
+{
+	file_put_contents($renamedFilesFile, implode("\n", $previousRenamedFiles));
+}
+
 if (!empty($deletedFiles))
 {
 	file_put_contents($deletedFilesFile, $versionComment, FILE_APPEND);
