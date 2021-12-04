@@ -60,6 +60,24 @@ if (empty($options['to']))
 	exit(1);
 }
 
+function getVersionFromManifest($xmlfile)
+{
+	$xml = simplexml_load_file($xmlfile);
+
+	if (!($xml instanceof \SimpleXMLElement) || !isset($xml->version))
+	{
+		return '<unknown version>';
+	}
+
+	$version = (string) $xml->version;
+
+	return $version ?: '<unknown version>';
+}
+
+// Build comment with versions from XML manifest files
+$versionComment = '// From ' . getVersionFromManifest($options['from'] . '/administrator/manifests/files/joomla.xml')
+	. ' to ' . getVersionFromManifest($options['to'] . '/administrator/manifests/files/joomla.xml') . "\n";
+
 // Define the result files
 $deletedFilesFile   = __DIR__ . '/deleted_files.txt';
 $deletedFoldersFile = __DIR__ . '/deleted_folders.txt';
@@ -252,16 +270,19 @@ $renamedFiles = array_diff($renamedFiles, $previousRenamedFiles);
 // Write the lists to files for later reference
 if (!empty($deletedFiles))
 {
+	file_put_contents($deletedFilesFile, $versionComment, FILE_APPEND);
 	file_put_contents($deletedFilesFile, implode("\n", $deletedFiles) . "\n", FILE_APPEND);
 }
 
 if (!empty($foldersDifference))
 {
+	file_put_contents($deletedFoldersFile, $versionComment, FILE_APPEND);
 	file_put_contents($deletedFoldersFile, implode("\n", $foldersDifference) . "\n", FILE_APPEND);
 }
 
 if (!empty($renamedFiles))
 {
+	file_put_contents($renamedFilesFile, $versionComment, FILE_APPEND);
 	file_put_contents($renamedFilesFile, implode("\n", $renamedFiles) . "\n", FILE_APPEND);
 }
 
