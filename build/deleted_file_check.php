@@ -27,8 +27,8 @@ function usage($command)
 {
 	echo PHP_EOL;
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
-	echo PHP_TAB . '--from <ref>:' . PHP_TAB . 'Starting commit reference (branch/tag)' . PHP_EOL;
-	echo PHP_TAB . '--to <ref>:' . PHP_TAB . 'Ending commit reference (branch/tag) [optional]' . PHP_EOL;
+	echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to directory with unpacked full package for starting version' . PHP_EOL;
+	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to directory with unpacked full package for ending version' . PHP_EOL;
 	echo PHP_EOL;
 }
 
@@ -36,9 +36,9 @@ function usage($command)
  * This is where the magic happens
  */
 
-$options = getopt('', array('from:', 'to::'));
+$options = getopt('', array('from:', 'to:'));
 
-// We need the from reference, otherwise we're doomed to fail
+// We need the from path, otherwise we're doomed to fail
 if (empty($options['from']))
 {
 	echo PHP_EOL;
@@ -49,7 +49,7 @@ if (empty($options['from']))
 	exit(1);
 }
 
-// Missing the to reference?  No problem, grab the current HEAD
+// We need the to path, otherwise we're doomed to fail
 if (empty($options['to']))
 {
 	echo PHP_EOL;
