@@ -60,6 +60,39 @@ if (empty($options['to']))
 	exit(1);
 }
 
+// Check from and to if folder or zip file and set base paths for exclude filter
+if (is_dir($options['from']))
+{
+	$fromFolderPath = $options['from'] . '/';
+}
+elseif (is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip')
+{
+	$fromFolderPath = '';
+}
+else
+{
+	echo PHP_EOL;
+	echo 'The "from" parameter is neither a directory nor a zip file' . PHP_EOL;
+
+	exit(1);
+}
+
+if (is_dir($options['to']))
+{
+	$toFolderPath = $options['to'] . '/';
+}
+elseif (is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip')
+{
+	$toFolderPath = '';
+}
+else
+{
+	echo PHP_EOL;
+	echo 'The "to" parameter is neither a directory nor a zip file' . PHP_EOL;
+
+	exit(1);
+}
+
 function readFolder($folderPath, $excludeFolders): stdClass
 {
 	$return = new stdClass;
@@ -143,40 +176,9 @@ function readZipFile($filePath, $excludeFolders): stdClass
 		}
 	}
 
+	$zipArchive->close();
+
 	return $return;
-}
-
-// Check from and to if folder or zip file
-if (is_dir($options['from']))
-{
-	$fromFolderPath = $options['from'] . '/';
-}
-elseif (is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip')
-{
-	$fromFolderPath = '';
-}
-else
-{
-	echo PHP_EOL;
-	echo 'The "from" parameter is neither a directory nor a zip file' . PHP_EOL;
-
-	exit(1);
-}
-
-if (is_dir($options['to']))
-{
-	$toFolderPath = $options['to'] . '/';
-}
-elseif (is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip')
-{
-	$toFolderPath = '';
-}
-else
-{
-	echo PHP_EOL;
-	echo 'The "to" parameter is neither a directory nor a zip file' . PHP_EOL;
-
-	exit(1);
 }
 
 // Directories to skip for the check (needs to include anything from J3 we want to keep)
