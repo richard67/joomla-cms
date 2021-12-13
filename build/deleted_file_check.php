@@ -40,9 +40,9 @@ function usage($command)
  * This is where the magic happens
  */
 
-$options = getopt('', array('from:', 'to::'));
+$options = getopt('', array('from:', 'to:'));
 
-// We need the from reference, otherwise we're doomed to fail
+// We need the from parameter, otherwise we're doomed to fail
 if (empty($options['from']))
 {
 	echo PHP_EOL;
@@ -53,7 +53,7 @@ if (empty($options['from']))
 	exit(1);
 }
 
-// Missing the to reference?  No problem, grab the current HEAD
+// We need the to parameter, otherwise we're doomed to fail
 if (empty($options['to']))
 {
 	echo PHP_EOL;
