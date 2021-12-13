@@ -32,7 +32,7 @@ function usage($command)
 	echo PHP_EOL;
 	echo '<path> can be either of the following:' . PHP_EOL;
 	echo PHP_TAB . '- Path to a full package Zip file' . PHP_EOL;
-	echo PHP_TAB . '- Path to a directory where that Zip file has been extracted to' . PHP_EOL;
+	echo PHP_TAB . '- Path to a directory where a full package Zip file has been extracted to' . PHP_EOL;
 	echo PHP_EOL;
 }
 
