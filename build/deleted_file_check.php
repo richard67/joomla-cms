@@ -28,11 +28,14 @@ function usage($command)
 	echo PHP_EOL;
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
 	echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to starting version' . PHP_EOL;
-	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version' . PHP_EOL;
+	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version [optional]' . PHP_EOL;
 	echo PHP_EOL;
 	echo '<path> can be either of the following:' . PHP_EOL;
-	echo PHP_TAB . '- Path to a full package Zip file' . PHP_EOL;
-	echo PHP_TAB . '- Path to a directory where a full package Zip file has been extracted to' . PHP_EOL;
+	echo PHP_TAB . '- Path to a full package Zip file.' . PHP_EOL;
+	echo PHP_TAB . '- Path to a directory where a full package Zip file has been extracted to.' . PHP_EOL;
+	echo PHP_EOL;
+	echo 'If the "to" parameter is not specified, file "build/tmp/packages/*Full_Package.zip"' . PHP_EOL;
+	echo 'is used if it exists from a previous run of the build script.' . PHP_EOL;
 	echo PHP_EOL;
 }
 
@@ -40,28 +43,37 @@ function usage($command)
  * This is where the magic happens
  */
 
-$options = getopt('', array('from:', 'to:'));
+$options = getopt('', array('from:', 'to::'));
 
 // We need the from parameter, otherwise we're doomed to fail
 if (empty($options['from']))
 {
 	echo PHP_EOL;
-	echo 'Missing starting directory or zip file' . PHP_EOL;
+	echo 'Missing "from" parameter' . PHP_EOL;
 
 	usage($argv[0]);
 
 	exit(1);
 }
 
-// We need the to parameter, otherwise we're doomed to fail
+// If the "to" parameter is not specified, use the default
 if (empty($options['to']))
 {
-	echo PHP_EOL;
-	echo 'Missing ending directory or zip file' . PHP_EOL;
+	$files = glob(__DIR__ . '/tmp/packages/*Full_Package.zip');
 
-	usage($argv[0]);
+	if ($files !== false && !empty($files))
+	{
+		$options['to'] = $files[0];
+	}
+	else
+	{
+		echo PHP_EOL;
+		echo 'Missing "to" parameter and no zip file "' . __DIR__ . '/tmp/packages/*Full_Package.zip" found.' . PHP_EOL;
 
-	exit(1);
+		usage($argv[0]);
+
+		exit(1);
+	}
 }
 
 // Check from and to if folder or zip file and set base paths for exclude filter
@@ -312,4 +324,4 @@ file_put_contents(__DIR__ . '/deleted_folders.txt', implode("\n", $foldersDiffer
 file_put_contents(__DIR__ . '/renamed_files.txt', implode("\n", $renamedFiles));
 
 echo PHP_EOL;
-echo 'There are ' . count($deletedFiles) . ' deleted files, ' . count($foldersDifference) .  ' deleted folders and ' . count($renamedFiles) .  ' renamed files in comparison to "' . $options['from'] . '"' . PHP_EOL;
+echo 'There are ' . count($deletedFiles) . ' deleted files, ' . count($foldersDifference) .  ' deleted folders and ' . count($renamedFiles) .  ' renamed files in comparison from "' . $options['from'] . '" to "' . $options['to'] . '"' . PHP_EOL;
