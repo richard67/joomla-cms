@@ -42,7 +42,7 @@ $options = getopt('', array('from:', 'to::'));
 if (empty($options['from']))
 {
 	echo PHP_EOL;
-	echo 'Missing starting directory' . PHP_EOL;
+	echo 'Missing starting directory or zip file' . PHP_EOL;
 
 	usage($argv[0]);
 
@@ -53,105 +53,173 @@ if (empty($options['from']))
 if (empty($options['to']))
 {
 	echo PHP_EOL;
-	echo 'Missing ending directory' . PHP_EOL;
+	echo 'Missing ending directory or zip file' . PHP_EOL;
 
 	usage($argv[0]);
 
 	exit(1);
 }
 
+function readFolder($folderPath, $excludeFolders): stdClass
+{
+	$return = new stdClass;
+
+	$return->files   = [];
+	$return->folders = [];
+
+	$releaseFilter = function ($file, $key, $iterator) use ($excludeFolders) {
+		if ($iterator->hasChildren() && !in_array($file->getPathname(), $excludeFolders))
+		{
+			return true;
+		}
+
+		return $file->isFile();
+	};
+
+	$releaseDirIterator = new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS);
+	$releaseIterator = new RecursiveIteratorIterator(
+		new RecursiveCallbackFilterIterator($releaseDirIterator, $releaseFilter),
+		RecursiveIteratorIterator::SELF_FIRST
+	);
+
+	foreach ($releaseIterator as $info)
+	{
+		if ($info->isDir())
+		{
+			$return->folders[] = "'" . str_replace($folderPath, '', $info->getPathname()) . "',";
+			continue;
+		}
+
+		$return->files[] = "'" . str_replace($folderPath, '', $info->getPathname()) . "',";
+	}
+
+	return $return;
+}
+
+function readZipFile($filePath, $excludeFolders): stdClass
+{
+	$return = new stdClass;
+
+	$return->files   = [];
+	$return->folders = [];
+
+	$zipArchive = new ZipArchive();
+
+	if ($zipArchive->open($filePath) !== true)
+	{
+		echo PHP_EOL;
+		echo 'Could not open zip archive "' . $filePath . '".' . PHP_EOL;
+
+		exit(1);
+	}
+
+	$excludeRegexp = '/^(';
+
+	foreach ($excludeFolders as $excludeFolder)
+	{
+		$excludeRegexp .= preg_quote($excludeFolder, '/') . '|';
+	}
+
+	$excludeRegexp = rtrim($excludeRegexp, '|') . ')\/.*/';
+
+	for ($i = 0; $i < $zipArchive->numFiles; $i++)
+	{
+		$stat = $zipArchive->statIndex($i);
+
+		$name = $stat['name'];
+
+		if (preg_match($excludeRegexp, $name) === 1)
+		{
+			continue;
+		}
+
+		if (substr($name, -1) === '/')
+		{
+			$return->folders[] = "'/" . rtrim($name, '/') . "',";
+		}
+		else
+		{
+			$return->files[] = "'/" . $name . "',";
+		}
+	}
+
+	return $return;
+}
+
+// Check from and to if folder or zip file
+if (is_dir($options['from']))
+{
+	$fromFolderPath = $options['from'] . '/';
+}
+elseif (is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip')
+{
+	$fromFolderPath = '';
+}
+else
+{
+	echo PHP_EOL;
+	echo 'The "from" parameter is neither a directory nor a zip file' . PHP_EOL;
+
+	exit(1);
+}
+
+if (is_dir($options['to']))
+{
+	$toFolderPath = $options['to'] . '/';
+}
+elseif (is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip')
+{
+	$toFolderPath = '';
+}
+else
+{
+	echo PHP_EOL;
+	echo 'The "to" parameter is neither a directory nor a zip file' . PHP_EOL;
+
+	exit(1);
+}
+
 // Directories to skip for the check (needs to include anything from J3 we want to keep)
 $previousReleaseExclude = [
-	$options['from'] . '/administrator/components/com_search',
-	$options['from'] . '/components/com_search',
-	$options['from'] . '/images/sampledata',
-	$options['from'] . '/installation',
-	$options['from'] . '/media/plg_quickicon_eos310',
-	$options['from'] . '/media/system/images',
-	$options['from'] . '/modules/mod_search',
-	$options['from'] . '/plugins/fields/repeatable',
-	$options['from'] . '/plugins/quickicon/eos310',
-	$options['from'] . '/plugins/search',
+	$fromFolderPath . 'administrator/components/com_search',
+	$fromFolderPath . 'components/com_search',
+	$fromFolderPath . 'images/sampledata',
+	$fromFolderPath . 'installation',
+	$fromFolderPath . 'media/plg_quickicon_eos310',
+	$fromFolderPath . 'media/system/images',
+	$fromFolderPath . 'modules/mod_search',
+	$fromFolderPath . 'plugins/fields/repeatable',
+	$fromFolderPath . 'plugins/quickicon/eos310',
+	$fromFolderPath . 'plugins/search',
 ];
 
-/**
- * @param   SplFileInfo                      $file      The file being checked
- * @param   mixed                            $key       ?
- * @param   RecursiveCallbackFilterIterator  $iterator  The iterator being processed
- *
- * @return bool True if you need to recurse or if the item is acceptable
- */
-$previousReleaseFilter = function ($file, $key, $iterator) use ($previousReleaseExclude) {
-	if ($iterator->hasChildren() && !in_array($file->getPathname(), $previousReleaseExclude))
-	{
-		return true;
-	}
-
-	return $file->isFile();
-};
-
-// Directories to skip for the check
+// Directories of the ending version to skip for the check
 $newReleaseExclude = [
-	$options['to'] . '/installation'
+	$toFolderPath . 'installation'
 ];
 
-/**
- * @param   SplFileInfo                      $file      The file being checked
- * @param   mixed                            $key       ?
- * @param   RecursiveCallbackFilterIterator  $iterator  The iterator being processed
- *
- * @return bool True if you need to recurse or if the item is acceptable
- */
-$newReleaseFilter = function ($file, $key, $iterator) use ($newReleaseExclude) {
-	if ($iterator->hasChildren() && !in_array($file->getPathname(), $newReleaseExclude))
-	{
-		return true;
-	}
-
-	return $file->isFile();
-};
-
-$previousReleaseDirIterator = new RecursiveDirectoryIterator($options['from'], RecursiveDirectoryIterator::SKIP_DOTS);
-$previousReleaseIterator = new RecursiveIteratorIterator(
-	new RecursiveCallbackFilterIterator($previousReleaseDirIterator, $previousReleaseFilter),
-	RecursiveIteratorIterator::SELF_FIRST
-);
-$previousReleaseFiles = [];
-$previousReleaseFolders = [];
-
-foreach ($previousReleaseIterator as $info)
+// Read files and folders lists folders or zip files
+if (is_dir($options['from']))
 {
-	if ($info->isDir())
-	{
-		$previousReleaseFolders[] = "'" . str_replace($options['from'], '', $info->getPathname()) . "',";
-		continue;
-	}
-
-	$previousReleaseFiles[] = "'" . str_replace($options['from'], '', $info->getPathname()) . "',";
+	$previousReleaseFilesFolders = readFolder($options['from'], $previousReleaseExclude);
+}
+else
+{
+	$previousReleaseFilesFolders = readZipFile($options['from'], $previousReleaseExclude);
 }
 
-$newReleaseDirIterator = new RecursiveDirectoryIterator($options['to'], RecursiveDirectoryIterator::SKIP_DOTS);
-$newReleaseIterator = new RecursiveIteratorIterator(
-	new RecursiveCallbackFilterIterator($newReleaseDirIterator, $newReleaseFilter),
-	RecursiveIteratorIterator::SELF_FIRST
-);
-$newReleaseFiles = [];
-$newReleaseFolders = [];
-
-foreach ($newReleaseIterator as $info)
+if (is_dir($options['to']))
 {
-	if ($info->isDir())
-	{
-		$newReleaseFolders[] = "'" . str_replace($options['to'], '', $info->getPathname()) . "',";
-		continue;
-	}
-
-	$newReleaseFiles[] = "'" . str_replace($options['to'], '', $info->getPathname()) . "',";
+	$newReleaseFilesFolders = readFolder($options['to'], $newReleaseExclude);
+}
+else
+{
+	$newReleaseFilesFolders = readZipFile($options['to'], $newReleaseExclude);
 }
 
-$filesDifference = array_diff($previousReleaseFiles, $newReleaseFiles);
+$filesDifference = array_diff($previousReleaseFilesFolders->files, $newReleaseFilesFolders->files);
 
-$foldersDifference = array_diff($previousReleaseFolders, $newReleaseFolders);
+$foldersDifference = array_diff($previousReleaseFilesFolders->folders, $newReleaseFilesFolders->folders);
 
 // Specific files (e.g. language files) that we want to keep on upgrade
 $filesToKeep = [
@@ -211,7 +279,7 @@ foreach ($filesDifference as $file)
 	}
 
 	// Check for files which might have been renamed only
-	$matches = preg_grep('/^' . preg_quote($file, '/') . '$/i', $newReleaseFiles);
+	$matches = preg_grep('/^' . preg_quote($file, '/') . '$/i', $newReleaseFilesFolders->files);
 
 	if ($matches !== false)
 	{
