@@ -27,9 +27,13 @@ function usage($command)
 {
 	echo PHP_EOL;
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
-	echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to full package zip file or directory for starting version' . PHP_EOL;
-	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to full package zip file or directory for ending version' . PHP_EOL;
+	echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to starting version' . PHP_EOL;
+	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version' . PHP_EOL;
 	echo PHP_TAB . '--comment <string>:' . PHP_TAB . 'Comment to be added at the top of the result files [optional]' . PHP_EOL;
+	echo PHP_EOL;
+	echo '<path> can be either of the following:' . PHP_EOL;
+	echo PHP_TAB . '- Path to a full package Zip file' . PHP_EOL;
+	echo PHP_TAB . '- Path to a directory where a full package Zip file has been extracted to' . PHP_EOL;
 	echo PHP_EOL;
 }
 
@@ -39,37 +43,60 @@ function usage($command)
 
 $options = getopt('', array('from:', 'to:', 'comment::'));
 
-// We need the from path, otherwise we're doomed to fail
+// We need the from parameter, otherwise we're doomed to fail
 if (empty($options['from']))
 {
 	echo PHP_EOL;
-	echo 'Missing starting directory' . PHP_EOL;
+	echo 'Missing starting directory or zip file' . PHP_EOL;
 
 	usage($argv[0]);
 
 	exit(1);
 }
 
-// We need the to path, otherwise we're doomed to fail
+// We need the to parameter, otherwise we're doomed to fail
 if (empty($options['to']))
 {
 	echo PHP_EOL;
-	echo 'Missing ending directory' . PHP_EOL;
+	echo 'Missing ending directory or zip file' . PHP_EOL;
 
 	usage($argv[0]);
 
 	exit(1);
 }
 
-// Define the result files
-$deletedFilesFile   = __DIR__ . '/deleted_files.txt';
-$deletedFoldersFile = __DIR__ . '/deleted_folders.txt';
-$renamedFilesFile   = __DIR__ . '/renamed_files.txt';
+// Check from and to if folder or zip file and set base paths for exclude filter
+if (is_dir($options['from']))
+{
+	$fromFolderPath = $options['from'] . '/';
+}
+elseif (is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip')
+{
+	$fromFolderPath = '';
+}
+else
+{
+	echo PHP_EOL;
+	echo 'The "from" parameter is neither a directory nor a zip file' . PHP_EOL;
 
-// Get previous results if some
-$previousDeletedFiles   = file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : [];
-$previousDeletedFolders = file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : [];
-$previousRenamedFiles   = file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : [];
+	exit(1);
+}
+
+if (is_dir($options['to']))
+{
+	$toFolderPath = $options['to'] . '/';
+}
+elseif (is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip')
+{
+	$toFolderPath = '';
+}
+else
+{
+	echo PHP_EOL;
+	echo 'The "to" parameter is neither a directory nor a zip file' . PHP_EOL;
+
+	exit(1);
+}
 
 function readFolder($folderPath, $excludeFolders): stdClass
 {
@@ -116,7 +143,13 @@ function readZipFile($filePath, $excludeFolders): stdClass
 
 	$zipArchive = new ZipArchive();
 
-	$zipArchive->open($filePath);
+	if ($zipArchive->open($filePath) !== true)
+	{
+		echo PHP_EOL;
+		echo 'Could not open zip archive "' . $filePath . '".' . PHP_EOL;
+
+		exit(1);
+	}
 
 	$excludeRegexp = '/^(';
 
@@ -148,40 +181,9 @@ function readZipFile($filePath, $excludeFolders): stdClass
 		}
 	}
 
+	$zipArchive->close();
+
 	return $return;
-}
-
-// Check from and to if folder or zip file
-if (is_dir($options['from']))
-{
-	$fromFolderPath = $options['from'] . '/';
-}
-elseif (is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip')
-{
-	$fromFolderPath = '';
-}
-else
-{
-	echo PHP_EOL;
-	echo 'The "from" parameter is neither a directory nor a zip file' . PHP_EOL;
-
-	exit(1);
-}
-
-if (is_dir($options['to']))
-{
-	$toFolderPath = $options['to'] . '/';
-}
-elseif (is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip')
-{
-	$toFolderPath = '';
-}
-else
-{
-	echo PHP_EOL;
-	echo 'The "to" parameter is neither a directory nor a zip file' . PHP_EOL;
-
-	exit(1);
 }
 
 // Directories to skip for the check (needs to include anything from J3 we want to keep)
@@ -227,6 +229,16 @@ $foldersDifference = array_diff($previousReleaseFilesFolders->folders, $newRelea
 
 $filesAdded   = array_diff($newReleaseFilesFolders->files, $previousReleaseFilesFolders->files);
 $foldersAdded = array_diff($newReleaseFilesFolders->folders, $previousReleaseFilesFolders->folders);
+
+// Define the result files
+$deletedFilesFile   = __DIR__ . '/deleted_files.txt';
+$deletedFoldersFile = __DIR__ . '/deleted_folders.txt';
+$renamedFilesFile   = __DIR__ . '/renamed_files.txt';
+
+// Get previous results if some
+$previousDeletedFiles   = file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : [];
+$previousDeletedFolders = file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : [];
+$previousRenamedFiles   = file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : [];
 
 // Remove files from previous results which are added back by the "to" version
 if (!empty($filesAdded))
