@@ -18,6 +18,8 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+use Joomla\CMS\Version;
+
 /*
  * Constants
  */
@@ -59,16 +61,22 @@ if (empty($options['from']))
 // If the "to" parameter is not specified, use the default
 if (empty($options['to']))
 {
-	$files = glob(__DIR__ . '/tmp/packages/*Full_Package.zip');
+	// Import the version class to set the version information
+	define('JPATH_PLATFORM', 1);
+	require_once dirname(__DIR__) . '/libraries/src/Version.php';
 
-	if ($files !== false && !empty($files))
+	$fullVersion      = (new Version)->getShortVersion();
+	$packageStability = str_replace(' ', '_', Version::DEV_STATUS);
+	$packageFile      = __DIR__ . '/tmp/packages/Joomla_' . $fullVersion . '-' . $packageStability . '-Full_Package.zip';
+
+	if (is_file($packageFile))
 	{
-		$options['to'] = $files[0];
+		$options['to'] = $packageFile;
 	}
 	else
 	{
 		echo PHP_EOL;
-		echo 'Missing "to" parameter and no zip file "' . __DIR__ . '/tmp/packages/*Full_Package.zip" found.' . PHP_EOL;
+		echo 'Missing "to" parameter and no zip file "' . $packageFile . '" found.' . PHP_EOL;
 
 		usage($argv[0]);
 
