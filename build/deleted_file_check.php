@@ -27,8 +27,12 @@ function usage($command)
 {
 	echo PHP_EOL;
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
-	echo PHP_TAB . '--from <ref>:' . PHP_TAB . 'Starting commit reference (branch/tag)' . PHP_EOL;
-	echo PHP_TAB . '--to <ref>:' . PHP_TAB . 'Ending commit reference (branch/tag) [optional]' . PHP_EOL;
+	echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to starting version' . PHP_EOL;
+	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version' . PHP_EOL;
+	echo PHP_EOL;
+	echo '<path> can be either of the following:' . PHP_EOL;
+	echo PHP_TAB . '- Path to a full package Zip file' . PHP_EOL;
+	echo PHP_TAB . '- Path to a directory where that Zip file has been extracted to' . PHP_EOL;
 	echo PHP_EOL;
 }
 
