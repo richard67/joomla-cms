@@ -47,7 +47,7 @@ function usage($command)
 
 $options = getopt('', array('from:', 'to::'));
 
-// We need the from parameter, otherwise we're doomed to fail
+// We need the "from" parameter, otherwise we're doomed to fail
 if (empty($options['from']))
 {
 	echo PHP_EOL;
