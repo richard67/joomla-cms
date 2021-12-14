@@ -18,6 +18,8 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+use Joomla\CMS\Version;
+
 /*
  * Constants
  */
@@ -28,7 +30,7 @@ function usage($command)
 	echo PHP_EOL;
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
 	echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to starting version' . PHP_EOL;
-	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version' . PHP_EOL;
+	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version [optional]' . PHP_EOL;
 	echo PHP_TAB . '--comment <string>:' . PHP_TAB . 'Comment to be added at the top of the result files [optional]' . PHP_EOL;
 	echo PHP_EOL;
 	echo '<path> can be either of the following:' . PHP_EOL;
@@ -41,28 +43,43 @@ function usage($command)
  * This is where the magic happens
  */
 
-$options = getopt('', array('from:', 'to:', 'comment::'));
+$options = getopt('', array('from:', 'to::', 'comment::'));
 
 // We need the from parameter, otherwise we're doomed to fail
 if (empty($options['from']))
 {
 	echo PHP_EOL;
-	echo 'Missing starting directory or zip file' . PHP_EOL;
+	echo 'Missing "from" parameter' . PHP_EOL;
 
 	usage($argv[0]);
 
 	exit(1);
 }
 
-// We need the to parameter, otherwise we're doomed to fail
+// If the "to" parameter is not specified, use the default
 if (empty($options['to']))
 {
-	echo PHP_EOL;
-	echo 'Missing ending directory or zip file' . PHP_EOL;
+	// Import the version class to set the version information
+	define('JPATH_PLATFORM', 1);
+	require_once dirname(__DIR__) . '/libraries/src/Version.php';
 
-	usage($argv[0]);
+	$fullVersion      = (new Version)->getShortVersion();
+	$packageStability = str_replace(' ', '_', Version::DEV_STATUS);
+	$packageFile      = __DIR__ . '/tmp/packages/Joomla_' . $fullVersion . '-' . $packageStability . '-Full_Package.zip';
 
-	exit(1);
+	if (is_file($packageFile))
+	{
+		$options['to'] = $packageFile;
+	}
+	else
+	{
+		echo PHP_EOL;
+		echo 'Missing "to" parameter and no zip file "' . $packageFile . '" found.' . PHP_EOL;
+
+		usage($argv[0]);
+
+		exit(1);
+	}
 }
 
 // Check from and to if folder or zip file and set base paths for exclude filter
