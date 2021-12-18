@@ -1,16 +1,20 @@
 <?php
 /**
- * This file is used to build the list of deleted files between two reference points.
+ * This file is used to build the lists of deleted files, deleted folders and
+ * renamed files between two Joomla versions.
  *
  * This script requires one parameter:
  *
- * --from - The git commit reference to use as the starting point for the comparison.
+ * --from - Full package zip file or folder with unpacked full package of the
+ *          starting point for the comparison, i.e. the older version.
  *
  * This script has one additional optional parameter:
  *
- * --to - The git commit reference to use as the ending point for the comparison.
+ * --to - Full package zip file or folder with unpacked full package of the
+ *        ending point for the comparison, i.e. the newer version.
  *
- * The reference parameters may be any valid identifier (i.e. a branch, tag, or commit SHA)
+ * If the "to" parameter is not given, the full package zip from a previous
+ * run of the build script is used, if present.
  *
  * @package    Joomla.Build
  *
@@ -117,6 +121,12 @@ else
 	exit(1);
 }
 
+/**
+ * @param   string  $folderPath      Path to the folder with the extracted full package
+ * @param   array   $excludeFolders  Excluded folders
+ *
+ * @return  stdClass  An object with arrays "files" and "folders"
+ */
 function readFolder($folderPath, $excludeFolders): stdClass
 {
 	$return = new stdClass;
@@ -124,6 +134,13 @@ function readFolder($folderPath, $excludeFolders): stdClass
 	$return->files   = [];
 	$return->folders = [];
 
+	/**
+	 * @param   SplFileInfo                      $file      The file being checked
+	 * @param   mixed                            $key       ?
+	 * @param   RecursiveCallbackFilterIterator  $iterator  The iterator being processed
+	 *
+	 * @return  bool  True if you need to recurse or if the item is acceptable
+	 */
 	$releaseFilter = function ($file, $key, $iterator) use ($excludeFolders) {
 		if ($iterator->hasChildren() && !in_array($file->getPathname(), $excludeFolders))
 		{
@@ -153,6 +170,12 @@ function readFolder($folderPath, $excludeFolders): stdClass
 	return $return;
 }
 
+/**
+ * @param   string  $filePath        Path to the full package zip file
+ * @param   array   $excludeFolders  Excluded folders
+ *
+ * @return  stdClass  An object with arrays "files" and "folders"
+ */
 function readZipFile($filePath, $excludeFolders): stdClass
 {
 	$return = new stdClass;
