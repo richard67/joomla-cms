@@ -1,16 +1,20 @@
 <?php
 /**
- * This file is used to build the list of deleted files between two reference points.
+ * This file is used to build the lists of deleted files, deleted folders and
+ * renamed files between two Joomla versions.
  *
  * This script requires one parameter:
  *
- * --from - The git commit reference to use as the starting point for the comparison.
+ * --from - Full package zip file or folder with unpacked full package of the
+ *          starting point for the comparison, i.e. the older version.
  *
  * This script has one additional optional parameter:
  *
- * --to - The git commit reference to use as the ending point for the comparison.
+ * --to - Full package zip file or folder with unpacked full package of the
+ *        ending point for the comparison, i.e. the newer version.
  *
- * The reference parameters may be any valid identifier (i.e. a branch, tag, or commit SHA)
+ * If the "to" parameter is not given, the full packagge zip from a previous
+ * run of the build script is used, if present.
  *
  * @package    Joomla.Build
  *
