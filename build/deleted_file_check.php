@@ -1,16 +1,16 @@
 <?php
 /**
- * This file is used to build the list of deleted files between two reference points.
+ * This file is used to build the lists of deleted files, deleted folders and
+ * renamed files between two Joomla versions.
  *
- * This script requires one parameter:
+ * This script requires two parameters:
  *
- * --from - The git commit reference to use as the starting point for the comparison.
+ * --from - Folder with unpacked full package of the starting point for the
+ *          comparison, i.e. the older version.
  *
- * This script has one additional optional parameter:
+ * --to - Folder with unpacked full package of the ending point for the
+ *        comparison, i.e. the newer version.
  *
- * --to - The git commit reference to use as the ending point for the comparison.
- *
- * The reference parameters may be any valid identifier (i.e. a branch, tag, or commit SHA)
  *
  * @package    Joomla.Build
  *
@@ -38,7 +38,7 @@ function usage($command)
 
 $options = getopt('', array('from:', 'to:'));
 
-// We need the from path, otherwise we're doomed to fail
+// We need the "from" path, otherwise we're doomed to fail
 if (empty($options['from']))
 {
 	echo PHP_EOL;
@@ -49,7 +49,7 @@ if (empty($options['from']))
 	exit(1);
 }
 
-// We need the to path, otherwise we're doomed to fail
+// We need the "to" path, otherwise we're doomed to fail
 if (empty($options['to']))
 {
 	echo PHP_EOL;
