@@ -35,7 +35,6 @@ function usage($command)
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
 	echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to starting version' . PHP_EOL;
 	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version [optional]' . PHP_EOL;
-	echo PHP_TAB . '--comment <string>:' . PHP_TAB . 'Comment to be added at the top of the result files [optional]' . PHP_EOL;
 	echo PHP_EOL;
 	echo '<path> can be either of the following:' . PHP_EOL;
 	echo PHP_TAB . '- Path to a full package Zip file' . PHP_EOL;
@@ -47,7 +46,7 @@ function usage($command)
  * This is where the magic happens
  */
 
-$options = getopt('', array('from:', 'to::', 'comment::'));
+$options = getopt('', array('from:', 'to::'));
 
 // We need the "from" parameter, otherwise we're doomed to fail
 if (empty($options['from']))
@@ -125,6 +124,7 @@ function readFolder($folderPath, $excludeFolders): stdClass
 
 	$return->files   = [];
 	$return->folders = [];
+	$return->version = '<unknown version>';
 
 	$releaseFilter = function ($file, $key, $iterator) use ($excludeFolders) {
 		if ($iterator->hasChildren() && !in_array($file->getPathname(), $excludeFolders))
@@ -152,6 +152,13 @@ function readFolder($folderPath, $excludeFolders): stdClass
 		$return->files[] = "'" . str_replace($folderPath, '', $info->getPathname()) . "',";
 	}
 
+	$xml = simplexml_load_file($folderPath . '/administrator/manifests/files/joomla.xml');
+
+	if ($xml instanceof \SimpleXMLElement && isset($xml->version))
+	{
+		$return->version = (string) $xml->version;
+	}
+
 	return $return;
 }
 
@@ -161,6 +168,7 @@ function readZipFile($filePath, $excludeFolders): stdClass
 
 	$return->files   = [];
 	$return->folders = [];
+	$return->version = '<unknown version>';
 
 	$zipArchive = new ZipArchive();
 
@@ -199,6 +207,16 @@ function readZipFile($filePath, $excludeFolders): stdClass
 		else
 		{
 			$return->files[] = "'/" . $name . "',";
+		}
+	}
+
+	if (($xmlFileContent = $zipArchive->getFromName('administrator/manifests/files/joomla.xml')) !== false)
+	{
+		$xml = simplexml_load_string($xmlFileContent);
+
+		if ($xml instanceof \SimpleXMLElement && isset($xml->version))
+		{
+			$return->version = (string) $xml->version;
 		}
 	}
 
@@ -250,6 +268,9 @@ $foldersDifference = array_diff($previousReleaseFilesFolders->folders, $newRelea
 
 $filesAdded   = array_diff($newReleaseFilesFolders->files, $previousReleaseFilesFolders->files);
 $foldersAdded = array_diff($newReleaseFilesFolders->folders, $previousReleaseFilesFolders->folders);
+
+// Build comment with versions from XML manifest files
+$versionComment = '// From ' . $previousReleaseFilesFolders->version . ' to ' . $newReleaseFilesFolders->version . "\n";
 
 // Define the result files
 $deletedFilesFile   = __DIR__ . '/deleted_files.txt';
@@ -397,28 +418,19 @@ if (!empty($previousRenamedFiles))
 
 if (!empty($deletedFiles))
 {
-	if (!empty($options['comment']))
-	{
-		file_put_contents($deletedFilesFile, '// ' . $options['comment'] . "\n", FILE_APPEND);
-	}
+	file_put_contents($deletedFilesFile, $versionComment, FILE_APPEND);
 	file_put_contents($deletedFilesFile, implode("\n", $deletedFiles) . "\n", FILE_APPEND);
 }
 
 if (!empty($foldersDifference))
 {
-	if (!empty($options['comment']))
-	{
-		file_put_contents($deletedFoldersFile, '// ' . $options['comment'] . "\n", FILE_APPEND);
-	}
+	file_put_contents($deletedFoldersFile, $versionComment, FILE_APPEND);
 	file_put_contents($deletedFoldersFile, implode("\n", $foldersDifference) . "\n", FILE_APPEND);
 }
 
 if (!empty($renamedFiles))
 {
-	if (!empty($options['comment']))
-	{
-		file_put_contents($renamedFilesFile, '// ' . $options['comment'] . "\n", FILE_APPEND);
-	}
+	file_put_contents($renamedFilesFile, $versionComment, FILE_APPEND);
 	file_put_contents($renamedFilesFile, implode("\n", $renamedFiles) . "\n", FILE_APPEND);
 }
 
