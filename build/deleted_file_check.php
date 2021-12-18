@@ -37,8 +37,11 @@ function usage($command)
 	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version [optional]' . PHP_EOL;
 	echo PHP_EOL;
 	echo '<path> can be either of the following:' . PHP_EOL;
-	echo PHP_TAB . '- Path to a full package Zip file' . PHP_EOL;
-	echo PHP_TAB . '- Path to a directory where a full package Zip file has been extracted to' . PHP_EOL;
+	echo PHP_TAB . '- Path to a full package Zip file.' . PHP_EOL;
+	echo PHP_TAB . '- Path to a directory where a full package Zip file has been extracted to.' . PHP_EOL;
+	echo PHP_EOL;
+	echo 'If the "to" parameter is not specified, file "build/tmp/packages/*Full_Package.zip"' . PHP_EOL;
+	echo 'is used if it exists from a previous run of the build script.' . PHP_EOL;
 	echo PHP_EOL;
 }
 
