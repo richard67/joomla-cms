@@ -118,6 +118,13 @@ else
 	exit(1);
 }
 
+/**
+ * @param   string  $folderPath      Path to the folder with the extracted full package
+ * @param   array   $excludeFolders  Excluded folders
+ *
+ * @return  stdClass  An object with arrays "files" and "folders" and the version from
+ *                    the manifest XML file
+ */
 function readFolder($folderPath, $excludeFolders): stdClass
 {
 	$return = new stdClass;
@@ -126,6 +133,13 @@ function readFolder($folderPath, $excludeFolders): stdClass
 	$return->folders = [];
 	$return->version = '<unknown version>';
 
+	/**
+	 * @param   SplFileInfo                      $file      The file being checked
+	 * @param   mixed                            $key       ?
+	 * @param   RecursiveCallbackFilterIterator  $iterator  The iterator being processed
+	 *
+	 * @return  bool  True if you need to recurse or if the item is acceptable
+	 */
 	$releaseFilter = function ($file, $key, $iterator) use ($excludeFolders) {
 		if ($iterator->hasChildren() && !in_array($file->getPathname(), $excludeFolders))
 		{
@@ -162,6 +176,13 @@ function readFolder($folderPath, $excludeFolders): stdClass
 	return $return;
 }
 
+/**
+ * @param   string  $filePath        Path to the full package zip file
+ * @param   array   $excludeFolders  Excluded folders
+ *
+ * @return  stdClass  An object with arrays "files" and "folders" and the version from
+ *                    the manifest XML file
+ */
 function readZipFile($filePath, $excludeFolders): stdClass
 {
 	$return = new stdClass;
