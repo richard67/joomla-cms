@@ -13,7 +13,7 @@
  * --to - Full package zip file or folder with unpacked full package of the
  *        ending point for the comparison, i.e. the newer version.
  *
- * If the "to" parameter is not given, the full packagge zip from a previous
+ * If the "to" parameter is not given, the full package zip from a previous
  * run of the build script is used, if present.
  *
  * @package    Joomla.Build
