@@ -1,9 +1,29 @@
 <?php
+/**
+ * @package     Joomla.Administrator
+ * @subpackage  com_admin
+ *
+ * @copyright   (C) 2021 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
 namespace Joomla\Component\Admin\Administrator\Script;
 
 \defined('_JEXEC') or die;
 
-class DeletedFolders {
+/**
+ * Deleted folders registry for the script file of Joomla CMS
+ *
+ * @since  __DEPLOY_VERSION__
+ */
+class DeletedFolders
+{
+	/**
+	 * The list of folders to be deleted on CMS update
+	 *
+	 * @var    array
+	 * @since  __DEPLOY_VERSION__
+	 */
 	public $folders = [
 		'0' => '/templates/system/images',
 		'1' => '/templates/system/html',
