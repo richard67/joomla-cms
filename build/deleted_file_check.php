@@ -355,7 +355,7 @@ else
 
 asort($excludedFolders);
 
-// Read files and folders lists folders or zip files
+// Read files and folders lists from folders or zip files
 if (is_dir($options['from']))
 {
 	$previousReleaseFilesFolders = readFolder($options['from'], $excludedFolders);
