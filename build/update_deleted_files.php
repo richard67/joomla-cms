@@ -29,7 +29,7 @@ ini_set('display_errors', 1);
 const PHP_TAB = "\t";
 
 /*
- * As long as the previous major version is still in active develolment, i.e.
+ * As long as the previous major version is still in active development, i.e.
  * has not reached end of life, this script will by default clone the repository
  * with Git and run the build script.
  * The below two parameters define the default branch and remote to be used for
@@ -273,6 +273,7 @@ if (!$previousVersionPackageUrl)
 
 $previousVersionPackage = $previousPackagesPath . '/' . basename($previousVersionPackageUrl);
 
+// Download full zip package of latest release before current version if not done before
 if (!is_file($previousVersionPackage))
 {
 	echo PHP_EOL;
