@@ -154,11 +154,11 @@ function getVersionFromZipFile($filePath): string
 // Check from and to if folder or zip file and set versions
 if (is_dir($options['from']))
 {
-	$fromVersion    = getVersionFromFolder($options['from']);
+	$fromVersion = getVersionFromFolder($options['from']);
 }
 elseif (is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip')
 {
-	$fromVersion    = getVersionFromZipFile($options['from']);
+	$fromVersion = getVersionFromZipFile($options['from']);
 }
 else
 {
@@ -170,11 +170,11 @@ else
 
 if (is_dir($options['to']))
 {
-	$toVersion    = getVersionFromFolder($options['to']);
+	$toVersion = getVersionFromFolder($options['to']);
 }
 elseif (is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip')
 {
-	$toVersion    = getVersionFromZipFile($options['to']);
+	$toVersion = getVersionFromZipFile($options['to']);
 }
 else
 {
