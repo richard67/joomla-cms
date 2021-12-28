@@ -25,6 +25,7 @@ class DeletedFolders
 	 * @since  __DEPLOY_VERSION__
 	 */
 	public $folders = [
+		// From 3.10 to 4.0
 		'/templates/system/images',
 		'/templates/system/html',
 		'/templates/protostar/less',
@@ -1208,15 +1209,20 @@ class DeletedFolders
 		'/administrator/components/com_actionlogs/layouts',
 		'/administrator/components/com_actionlogs/helpers',
 		'/administrator/components/com_actionlogs/controllers',
+		// 4.0 from Beta 1 to Beta 2
 		'/libraries/vendor/joomla/controller/src',
 		'/libraries/vendor/joomla/controller',
 		'/api/components/com_installer/src/View/Languages',
 		'/administrator/components/com_finder/src/Indexer/Driver',
+		// 4.0 from Beta 4 to Beta 5
 		'/plugins/content/imagelazyload',
+		// 4.0 from Beta 5 to Beta 6
 		'/media/system/js/core.es6',
 		'/administrator/modules/mod_multilangstatus/src/Helper',
 		'/administrator/modules/mod_multilangstatus/src',
+		// 4.0 from Beta 6 to Beta 7
 		'/media/vendor/skipto/css',
+		// 4.0 from Beta 7 to RC 1
 		'/templates/system/js',
 		'/templates/cassiopeia/scss/tools/mixins',
 		'/plugins/fields/subfields/tmpl',
@@ -1257,11 +1263,13 @@ class DeletedFolders
 		'/administrator/components/com_admin/tmpl/profile',
 		'/administrator/components/com_admin/src/View/Profile',
 		'/administrator/components/com_admin/forms',
+		// 4.0 from RC 5 to RC 6
 		'/templates/cassiopeia/scss/vendor/fontawesome-free',
 		'/templates/cassiopeia/css/vendor/fontawesome-free',
 		'/media/templates/cassiopeia/js/mod_menu',
 		'/media/templates/cassiopeia/js',
 		'/media/templates/cassiopeia',
+		// 4.0 from RC 6 to 4.0.0 (stable)
 		'/libraries/vendor/willdurand/negotiation/tests/Negotiation/Tests',
 		'/libraries/vendor/willdurand/negotiation/tests/Negotiation',
 		'/libraries/vendor/willdurand/negotiation/tests',
@@ -1271,6 +1279,7 @@ class DeletedFolders
 		'/libraries/vendor/algo26-matthias/idna-convert/tests/unit',
 		'/libraries/vendor/algo26-matthias/idna-convert/tests/integration',
 		'/libraries/vendor/algo26-matthias/idna-convert/tests',
+		// 4.0.4
 		'/templates/cassiopeia/images/system',
 	];
 }

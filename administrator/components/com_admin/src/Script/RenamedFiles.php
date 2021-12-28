@@ -25,8 +25,10 @@ class RenamedFiles
 	 * @since  __DEPLOY_VERSION__
 	 */
 	public $files = [
+		// 3.10 changes
 		'/libraries/src/Filesystem/Support/Stringcontroller.php' => '/libraries/src/Filesystem/Support/StringController.php',
 		'/libraries/src/Form/Rule/SubFormRule.php' => '/libraries/src/Form/Rule/SubformRule.php',
+		// 4.0.0
 		'/media/vendor/skipto/js/skipTo.js' => '/media/vendor/skipto/js/skipto.js',
 	];
 }

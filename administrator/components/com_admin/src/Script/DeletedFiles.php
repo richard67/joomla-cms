@@ -25,6 +25,7 @@ class DeletedFiles
 	 * @since  __DEPLOY_VERSION__
 	 */
 	public $files = [
+		// From 3.10 to 4.0
 		'/administrator/components/com_actionlogs/actionlogs.php',
 		'/administrator/components/com_actionlogs/controller.php',
 		'/administrator/components/com_actionlogs/controllers/actionlogs.php',
@@ -336,7 +337,6 @@ class DeletedFiles
 		'/administrator/components/com_admin/sql/updates/sqlazure/3.1.4.sql',
 		'/administrator/components/com_admin/sql/updates/sqlazure/3.1.5.sql',
 		'/administrator/components/com_admin/sql/updates/sqlazure/3.10.0-2021-05-28.sql',
-		'/administrator/components/com_admin/sql/updates/sqlazure/3.10.1-2021-08-17.sql',
 		'/administrator/components/com_admin/sql/updates/sqlazure/3.2.0.sql',
 		'/administrator/components/com_admin/sql/updates/sqlazure/3.2.1.sql',
 		'/administrator/components/com_admin/sql/updates/sqlazure/3.2.2-2013-12-22.sql',
@@ -845,7 +845,6 @@ class DeletedFiles
 		'/administrator/components/com_joomlaupdate/helpers/select.php',
 		'/administrator/components/com_joomlaupdate/joomlaupdate.php',
 		'/administrator/components/com_joomlaupdate/models/default.php',
-		'/administrator/components/com_joomlaupdate/restore.php',
 		'/administrator/components/com_joomlaupdate/views/default/tmpl/complete.php',
 		'/administrator/components/com_joomlaupdate/views/default/tmpl/default.php',
 		'/administrator/components/com_joomlaupdate/views/default/tmpl/default.xml',
@@ -3410,12 +3409,8 @@ class DeletedFiles
 		'/media/com_contenthistory/js/jquery.pretty-text-diff.js',
 		'/media/com_contenthistory/js/jquery.pretty-text-diff.min.js',
 		'/media/com_finder/js/autocompleter.js',
-		'/media/com_joomlaupdate/js/encryption.js',
-		'/media/com_joomlaupdate/js/encryption.min.js',
 		'/media/com_joomlaupdate/js/json2.js',
 		'/media/com_joomlaupdate/js/json2.min.js',
-		'/media/com_joomlaupdate/js/update.js',
-		'/media/com_joomlaupdate/js/update.min.js',
 		'/media/contacts/images/con_address.png',
 		'/media/contacts/images/con_fax.png',
 		'/media/contacts/images/con_info.png',
@@ -4609,6 +4604,7 @@ class DeletedFiles
 		'/templates/system/images/j_button2_readmore.png',
 		'/templates/system/images/j_button2_right.png',
 		'/templates/system/images/selector-arrow.png',
+		// 4.0 from Beta 1 to Beta 2
 		'/administrator/components/com_finder/src/Indexer/Driver/Mysql.php',
 		'/administrator/components/com_finder/src/Indexer/Driver/Postgresql.php',
 		'/administrator/components/com_workflow/access.xml',
@@ -4623,11 +4619,14 @@ class DeletedFiles
 		'/media/com_users/js/admin-users-user.js',
 		'/media/com_users/js/admin-users-user.min.js',
 		'/media/com_users/js/admin-users-user.min.js.gz',
+		// 4.0 from Beta 2 to Beta 3
 		'/administrator/templates/atum/images/logo-blue.svg',
 		'/administrator/templates/atum/images/logo-joomla-blue.svg',
 		'/administrator/templates/atum/images/logo-joomla-white.svg',
 		'/administrator/templates/atum/images/logo.svg',
+		// 4.0 from Beta 3 to Beta 4
 		'/components/com_config/src/Model/CmsModel.php',
+		// 4.0 from Beta 4 to Beta 5
 		'/administrator/components/com_admin/sql/updates/mysql/4.0.0-2018-06-11.sql',
 		'/administrator/components/com_admin/sql/updates/mysql/4.0.0-2020-04-18.sql',
 		'/administrator/components/com_admin/sql/updates/postgresql/4.0.0-2018-06-11.sql',
@@ -4648,6 +4647,7 @@ class DeletedFiles
 		'/templates/cassiopeia/html/layouts/chromes/cardGrey.php',
 		'/templates/cassiopeia/html/layouts/chromes/default.php',
 		'/templates/cassiopeia/scss/vendor/bootstrap/_card.scss',
+		// 4.0 from Beta 5 to Beta 6
 		'/administrator/modules/mod_multilangstatus/src/Helper/MultilangstatusAdminHelper.php',
 		'/administrator/templates/atum/favicon.ico',
 		'/libraries/vendor/nyholm/psr7/phpstan.baseline.dist',
@@ -4674,6 +4674,7 @@ class DeletedFiles
 		'/templates/cassiopeia/scss/_mixin.scss',
 		'/templates/cassiopeia/scss/_variables.scss',
 		'/templates/cassiopeia/scss/blocks/_demo-styling.scss',
+		// 4.0 from Beta 6 to Beta 7
 		'/media/legacy/js/bootstrap-init.js',
 		'/media/legacy/js/bootstrap-init.min.js',
 		'/media/legacy/js/bootstrap-init.min.js.gz',
@@ -4725,6 +4726,7 @@ class DeletedFiles
 		'/media/vendor/bootstrap/scss/utilities/_visibility.scss',
 		'/media/vendor/skipto/css/SkipTo.css',
 		'/media/vendor/skipto/js/dropMenu.js',
+		// 4.0 from Beta 7 to RC 1
 		'/administrator/components/com_admin/forms/profile.xml',
 		'/administrator/components/com_admin/sql/updates/mysql/4.0.0-2016-07-03.sql',
 		'/administrator/components/com_admin/sql/updates/mysql/4.0.0-2016-09-22.sql',
@@ -5326,6 +5328,7 @@ class DeletedFiles
 		'/templates/cassiopeia/scss/tools/mixins/_margin.scss',
 		'/templates/cassiopeia/scss/tools/mixins/_visually-hidden.scss',
 		'/templates/system/js/error-locales.js',
+		// 4.0 from RC 1 to RC 2
 		'/administrator/components/com_fields/tmpl/field/modal.php',
 		'/administrator/templates/atum/scss/pages/_com_admin.scss',
 		'/administrator/templates/atum/scss/pages/_com_finder.scss',
@@ -5337,6 +5340,7 @@ class DeletedFiles
 		'/media/com_fields/js/admin-field-edit-modal.js',
 		'/media/com_fields/js/admin-field-edit-modal.min.js',
 		'/media/com_fields/js/admin-field-edit-modal.min.js.gz',
+		// 4.0 from RC 3 to RC 4
 		'/administrator/components/com_joomlaupdate/tmpl/joomlaupdate/default.php',
 		'/administrator/components/com_joomlaupdate/tmpl/joomlaupdate/default_nodownload.php',
 		'/administrator/components/com_joomlaupdate/tmpl/joomlaupdate/default_noupdate.php',
@@ -5355,6 +5359,7 @@ class DeletedFiles
 		'/media/system/js/fields/joomla-image-select.js',
 		'/media/system/js/fields/joomla-image-select.min.js',
 		'/media/system/js/fields/joomla-image-select.min.js.gz',
+		// 4.0 from RC 4 to RC 5
 		'/media/system/js/fields/calendar-locales/af.min.js',
 		'/media/system/js/fields/calendar-locales/af.min.js.gz',
 		'/media/system/js/fields/calendar-locales/ar.min.js',
@@ -5443,6 +5448,7 @@ class DeletedFiles
 		'/media/system/js/fields/calendar-locales/zh-CN.min.js.gz',
 		'/media/system/js/fields/calendar-locales/zh-TW.min.js',
 		'/media/system/js/fields/calendar-locales/zh-TW.min.js.gz',
+		// 4.0 from RC 5 to RC 6
 		'/media/templates/cassiopeia/js/mod_menu/menu-metismenu-es5.js',
 		'/media/templates/cassiopeia/js/mod_menu/menu-metismenu-es5.min.js',
 		'/media/templates/cassiopeia/js/mod_menu/menu-metismenu-es5.min.js.gz',
@@ -5453,6 +5459,7 @@ class DeletedFiles
 		'/templates/cassiopeia/css/vendor/fontawesome-free/fontawesome.min.css',
 		'/templates/cassiopeia/css/vendor/fontawesome-free/fontawesome.min.css.gz',
 		'/templates/cassiopeia/scss/vendor/fontawesome-free/fontawesome.scss',
+		// 4.0 from RC 6 to 4.0.0 (stable)
 		'/libraries/vendor/algo26-matthias/idna-convert/tests/integration/ToIdnTest.php',
 		'/libraries/vendor/algo26-matthias/idna-convert/tests/integration/ToUnicodeTest.php',
 		'/libraries/vendor/algo26-matthias/idna-convert/tests/unit/.gitkeep',
@@ -5470,6 +5477,9 @@ class DeletedFiles
 		'/libraries/vendor/willdurand/negotiation/tests/Negotiation/Tests/NegotiatorTest.php',
 		'/libraries/vendor/willdurand/negotiation/tests/Negotiation/Tests/TestCase.php',
 		'/libraries/vendor/willdurand/negotiation/tests/bootstrap.php',
+		// 4.0.1
+		'/administrator/components/com_admin/sql/updates/sqlazure/3.10.1-2021-08-17.sql',
+		// 4.0.3
 		'/templates/cassiopeia/css/global/fonts-web_fira-sans.css',
 		'/templates/cassiopeia/css/global/fonts-web_fira-sans.min.css',
 		'/templates/cassiopeia/css/global/fonts-web_fira-sans.min.css.gz',
@@ -5478,11 +5488,18 @@ class DeletedFiles
 		'/templates/cassiopeia/css/global/fonts-web_roboto+noto-sans.min.css.gz',
 		'/templates/cassiopeia/scss/global/fonts-web_fira-sans.scss',
 		'/templates/cassiopeia/scss/global/fonts-web_roboto+noto-sans.scss',
+		// 4.0.4
+		'/administrator/components/com_joomlaupdate/restore.php',
 		'/administrator/templates/atum/scss/_mixin.scss',
+		'/media/com_joomlaupdate/js/encryption.js',
+		'/media/com_joomlaupdate/js/encryption.min.js',
 		'/media/com_joomlaupdate/js/encryption.min.js.gz',
+		'/media/com_joomlaupdate/js/update.js',
+		'/media/com_joomlaupdate/js/update.min.js',
 		'/media/com_joomlaupdate/js/update.min.js.gz',
 		'/templates/cassiopeia/images/system/sort_asc.png',
 		'/templates/cassiopeia/images/system/sort_desc.png',
+		// 4.0.5
 		'/media/vendor/codemirror/lib/#codemirror.js#',
 	];
 }
