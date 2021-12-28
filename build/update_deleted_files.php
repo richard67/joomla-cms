@@ -12,7 +12,6 @@
 // Set flag that this is a parent file.
 const _JEXEC = 1;
 
-use Joomla\CMS\Version;
 use Joomla\Component\Admin\Administrator\Script\DeletedFiles;
 use Joomla\Component\Admin\Administrator\Script\DeletedFolders;
 use Joomla\Component\Admin\Administrator\Script\RenamedFiles;
@@ -61,13 +60,17 @@ function usage($command)
 	echo PHP_TAB . PHP_TAB . '--prevRemote=<remote>:' . PHP_TAB . 'The git remote reference to build the previous major version from, defaults to the most recent tag for the "prevBranch" branch' . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--prevZipUrl=<URL>:' . PHP_TAB . 'Full package zip download URL for the previous major version' . (PREVIOUS_DOWNLOAD_URL ? ', defaults to ' . PREVIOUS_DOWNLOAD_URL : '') . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--currRemote=<remote>:' . PHP_TAB . 'The git remote reference to build the current major version from, defaults to the most recent tag for the current branch' . PHP_EOL;
-	echo PHP_TAB . PHP_TAB . '--reusePackages:' . PHP_TAB . 'Reuse full package zip files from previous builds or downloads if they are present' . PHP_EOL;
-	echo PHP_TAB . PHP_TAB . '--test:' . PHP_TAB . PHP_TAB . PHP_TAB . 'Test mode, changes will not be applied to the source PHP files but to copies in the "build/tmp" folder' . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--currZipUrl=<URL>:' . PHP_TAB . 'Full package zip download URL for the current major version' . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--relZipUrl=<URL>:' . PHP_TAB . 'Full package zip download URL for the latest release of the current major version' . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--init:' . PHP_TAB . PHP_TAB . PHP_TAB . 'Start with empty lists' . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--reuse:' . PHP_TAB . PHP_TAB . 'Reuse full package zip files from previous builds or downloads if they are present' . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--temp:' . PHP_TAB . PHP_TAB . PHP_TAB . 'Changes will not be written to the source PHP files but to their copies in the "build/tmp" folder' . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--test:' . PHP_TAB . PHP_TAB . PHP_TAB . 'Test mode, changes will be reported but not applied' . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--help:' . PHP_TAB . PHP_TAB . PHP_TAB . 'Show this help output' . PHP_EOL;
 	echo PHP_EOL;
 }
 
-$options = getopt('', ['help', 'test', 'prevBranch::', 'prevRemote::', 'prevZipUrl::', 'currRemote::', 'reusePackages::']);
+$options = getopt('', ['init', 'temp', 'test', 'help', 'prevBranch::', 'prevRemote::', 'prevZipUrl::', 'currRemote::', 'currZipUrl::', 'relZipUrl::', 'reuse::']);
 
 if (isset($options['help']))
 {
@@ -90,28 +93,57 @@ catch (Exception $e)
 	$systemGit = 'git';
 }
 
-// Build current version if there is no result present from a previous build
+$packagesPath = __DIR__ . '/tmp/update_deleted_files/packages';
+@mkdir($packagesPath, 0755, true);
+
+// Build current major version if there is no result present from a previous build or download from URL
 $currentVersionPackage = '';
+$currentMajorDownload = $options['currZipUrl'] ?? '';
 
-$files = isset($options['reusePackages']) ? glob(__DIR__ . '/tmp/packages/*Full_Package.zip') : false;
-
-if ($files !== false && count($files) === 1)
+if (empty($currentMajorDownload))
 {
-	$currentVersionPackage = $files[0];
-}
-else
-{
-	echo PHP_EOL;
-	echo 'Runing build script for current version.' . PHP_EOL;
-	echo PHP_EOL;
-
-	system('php ./build.php --remote=' . ($options['currRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-bzip2');
-
-	$files = glob(__DIR__ . '/tmp/packages/*Full_Package.zip');
+	// No download URL: Check if there is a saved package from a previous build.
+	$files = isset($options['reuse']) ? glob(__DIR__ . '/tmp/packages/*Full_Package.zip') : false;
 
 	if ($files !== false && count($files) === 1)
 	{
 		$currentVersionPackage = $files[0];
+	}
+	else
+	{
+		echo PHP_EOL;
+		echo 'Runing build script for current version.' . PHP_EOL;
+		echo PHP_EOL;
+
+		system('php ./build.php --remote=' . ($options['currRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-bzip2');
+
+		$files = glob(__DIR__ . '/tmp/packages/*Full_Package.zip');
+
+		if ($files !== false && count($files) === 1)
+		{
+			$currentVersionPackage = $files[0];
+		}
+
+		@mkdir($packagesPath, 0755, true);
+	}
+}
+else
+{
+	// Use download URL: Check if there is a saved package from a previous download.
+	$currentVersionPackage = $packagesPath . '/' . basename($currentMajorDownload);
+
+	if (!isset($options['reuse']) || !is_file($currentVersionPackage))
+	{
+		// Donwload package.
+		echo PHP_EOL;
+		echo 'Downloading package "' . $currentMajorDownload . '".' . PHP_EOL;
+
+		system('curl -L -o ' . $currentVersionPackage . ' ' . $currentMajorDownload);
+	}
+
+	if (!is_file($currentVersionPackage))
+	{
+		$currentVersionPackage = '';
 	}
 }
 
@@ -123,19 +155,48 @@ if (!$currentVersionPackage)
 	exit(1);
 }
 
+// Get the version of the current major release package
+$currentVersionBuild = '';
+
+$zipArchive = new ZipArchive();
+
+if ($zipArchive->open($currentVersionPackage) !== true)
+{
+	echo PHP_EOL;
+	echo 'Could not open zip archive "' . $currentVersionPackage . '".' . PHP_EOL;
+
+	exit(1);
+}
+
+if (($xmlFileContent = $zipArchive->getFromName('administrator/manifests/files/joomla.xml')) !== false)
+{
+	$xml = simplexml_load_string($xmlFileContent);
+
+	if ($xml instanceof \SimpleXMLElement && isset($xml->version))
+	{
+		$currentVersionBuild = (string) $xml->version;
+	}
+}
+
+if (!$currentVersionBuild)
+{
+	echo PHP_EOL;
+	echo 'Error: Could not get version from manifest XML file in the current version package.' . PHP_EOL;
+
+	exit(1);
+}
+
+$currentVersionBuild = str_replace('-dev', '', $currentVersionBuild);
+
 // Clone and build previous major version or download from URL
-$previousBuildPath    = __DIR__ . '/tmp/update_deleted_files/previous-build';
-$previousPackagesPath = __DIR__ . '/tmp/update_deleted_files/previous-packages';
-
-@mkdir($previousPackagesPath, 0755, true);
-
+$previousBuildPath     = __DIR__ . '/tmp/update_deleted_files/previous-build';
 $previousMajorPackage  = '';
 $previousMajorDownload = $options['prevZipUrl'] ?? PREVIOUS_DOWNLOAD_URL;
 
 if (empty($previousMajorDownload))
 {
 	// No download URL: Check if there is a saved package from a previous build.
-	$files = isset($options['reusePackages']) ? glob($previousPackagesPath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip') : false;
+	$files = isset($options['reuse']) ? glob($packagesPath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip') : false;
 
 	if ($files !== false && count($files) > 0)
 	{
@@ -152,7 +213,7 @@ if (empty($previousMajorDownload))
 			if ($filesBuild !== false && count($filesBuild) === 1)
 			{
 				// Check which of the saved packages belong to the previous build
-				if (($key = array_search($previousPackagesPath . '/' . basename($filesBuild[0]), $files)) !== false)
+				if (($key = array_search($packagesPath . '/' . basename($filesBuild[0]), $files)) !== false)
 				{
 					$previousMajorPackage = $files[$key];
 				}
@@ -171,7 +232,6 @@ if (empty($previousMajorDownload))
 		echo 'Cloning branch "' . $prevMajorBranch . '" into folder "' . $previousBuildPath . '"' . PHP_EOL;
 		echo PHP_EOL;
 
-		@mkdir($previousPackagesPath, 0755, true);
 		@mkdir($previousBuildPath, 0755, true);
 
 		chdir($previousBuildPath);
@@ -190,7 +250,7 @@ if (empty($previousMajorDownload))
 
 		if ($files !== false && count($files) === 1)
 		{
-			$previousMajorPackage = $previousPackagesPath . '/' . basename($files[0]);
+			$previousMajorPackage = $packagesPath . '/' . basename($files[0]);
 
 			copy($files[0], $previousMajorPackage);
 		}
@@ -199,15 +259,20 @@ if (empty($previousMajorDownload))
 else
 {
 	// Use download URL: Check if there is a saved package from a previous download.
-	$previousMajorPackage = $previousPackagesPath . '/' . basename($previousMajorDownload);
+	$previousMajorPackage = $packagesPath . '/' . basename($previousMajorDownload);
 
-	if (!is_file($previousMajorPackage))
+	if (!isset($options['reuse']) || !is_file($previousMajorPackage))
 	{
-		// No package found: Donwload it.
+		// Donwload package.
 		echo PHP_EOL;
 		echo 'Downloading package "' . $previousMajorDownload . '".' . PHP_EOL;
 
 		system('curl -L -o ' . $previousMajorPackage . ' ' . $previousMajorDownload);
+	}
+
+	if (!is_file($previousMajorPackage))
+	{
+		$previousMajorPackage = '';
 	}
 }
 
@@ -215,69 +280,70 @@ else
 if (!$previousMajorPackage)
 {
 	echo PHP_EOL;
-	echo 'Error: Could not find previous major release package "' . $previousPackagesPath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip".' . PHP_EOL;
+	echo 'Error: Could not find previous major release package "' . $packagesPath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip".' . PHP_EOL;
 
 	exit(1);
 }
-
-// Fetch release information from GitHub
-echo PHP_EOL;
-echo 'Fetching releases information from GitHub.' . PHP_EOL;
-
-ob_start();
-passthru('curl -L https://api.github.com/repos/joomla/joomla-cms/releases', $gitHubReleasesString);
-$gitHubReleasesString = trim(ob_get_clean());
-
-if (!$gitHubReleasesString)
-{
-	echo PHP_EOL;
-	echo 'Error: Could not get releases information from GitHub.' . PHP_EOL;
-
-	exit(1);
-}
-
-$gitHubReleases = json_decode($gitHubReleasesString);
-
-// Import the version class to set the version information
-define('JPATH_PLATFORM', 1);
-require_once JPATH_BASE . '/libraries/src/Version.php';
-
-$currentVersion = (new Version)->getShortVersion();
 
 $previousVersionPackageUrl = '';
 
-// Get the latest release before current version
-foreach ($gitHubReleases as $gitHubRelease)
+if (isset($options['relZipUrl']))
 {
-	if (version_compare($gitHubRelease->tag_name, $currentVersion, '<'))
-	{
-		foreach ($gitHubRelease->assets as $asset)
-		{
-			if (preg_match('/^Joomla_.*-Full_Package\.zip$/', $asset->name) === 1)
-			{
-				$previousVersionPackageUrl = $asset->browser_download_url;
+	$previousVersionPackageUrl = $options['relZipUrl'];
+}
+else
+{
+	// Fetch release information from GitHub
+	echo PHP_EOL;
+	echo 'Fetching releases information from GitHub.' . PHP_EOL;
 
-				break 2;
+	ob_start();
+	passthru('curl -L https://api.github.com/repos/joomla/joomla-cms/releases', $gitHubReleasesString);
+	$gitHubReleasesString = trim(ob_get_clean());
+
+	if (!$gitHubReleasesString)
+	{
+		echo PHP_EOL;
+		echo 'Error: Could not get releases information from GitHub.' . PHP_EOL;
+
+		exit(1);
+	}
+
+	$gitHubReleases = json_decode($gitHubReleasesString);
+
+	// Get the latest release before current release build version
+	foreach ($gitHubReleases as $gitHubRelease)
+	{
+		if (version_compare($gitHubRelease->tag_name, $currentVersionBuild, '<'))
+		{
+			foreach ($gitHubRelease->assets as $asset)
+			{
+				if (preg_match('/^Joomla_.*-Full_Package\.zip$/', $asset->name) === 1)
+				{
+					$previousVersionPackageUrl = $asset->browser_download_url;
+
+					break 2;
+				}
 			}
 		}
 	}
+
+	if (!$previousVersionPackageUrl)
+	{
+		echo PHP_EOL;
+		echo 'Error: Could not get package download URL from GitHub.' . PHP_EOL;
+
+		exit(1);
+	}
 }
 
-if (!$previousVersionPackageUrl)
-{
-	echo PHP_EOL;
-	echo 'Error: Could not get package download URL from GitHub.' . PHP_EOL;
-
-	exit(1);
-}
-
-$previousVersionPackage = $previousPackagesPath . '/' . basename($previousVersionPackageUrl);
+$previousVersionPackage = $packagesPath . '/' . basename($previousVersionPackageUrl);
 
 // Download full zip package of latest release before current version if not done before
 if (!is_file($previousVersionPackage))
 {
 	echo PHP_EOL;
-	echo 'Downloading package "' . $previousVersionPackageUrl . '" from GitHub.' . PHP_EOL;
+	echo 'Downloading package "' . $previousVersionPackageUrl . '".' . PHP_EOL;
 
 	system('curl -L -o ' . $previousVersionPackage . ' ' . $previousVersionPackageUrl);
 }
@@ -285,14 +351,83 @@ if (!is_file($previousVersionPackage))
 if (!is_file($previousVersionPackage))
 {
 	echo PHP_EOL;
-	echo 'Error: Could not download package from GitHub.' . PHP_EOL;
+	echo 'Error: Could not download package.' . PHP_EOL;
 
 	exit(1);
 }
 
-$deletedFilesInfoFile   = JPATH_BASE . '/administrator/components/com_admin/src/Script/DeletedFiles.php';
-$deletedFoldersInfoFile = JPATH_BASE . '/administrator/components/com_admin/src/Script/DeletedFolders.php';
-$renamedFilesInfoFile   = JPATH_BASE . '/administrator/components/com_admin/src/Script/RenamedFiles.php';
+$addedFilesFile     = __DIR__ . '/added_files.txt';
+$addedFoldersFile   = __DIR__ . '/added_folders.txt';
+$deletedFilesFile   = __DIR__ . '/deleted_files.txt';
+$deletedFoldersFile = __DIR__ . '/deleted_folders.txt';
+$renamedFilesFile   = __DIR__ . '/renamed_files.txt';
+
+echo PHP_EOL;
+echo 'Comparing from ".' . substr($previousMajorPackage, strlen(__DIR__)) . '"' . PHP_EOL;
+echo '            to ".' . substr($currentVersionPackage, strlen(__DIR__)) . '".' . PHP_EOL;
+
+system('php ./deleted_file_check.php --from=' . $previousMajorPackage . ' --to=' . $currentVersionPackage . ' > /dev/null');
+
+$addedFiles       = file_exists($addedFilesFile) ? explode("\n", file_get_contents($addedFilesFile)) : [];
+$addedFolders     = file_exists($addedFoldersFile) ? explode("\n", file_get_contents($addedFoldersFile)) : [];
+$deletedFiles     = file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : [];
+$deletedFolders   = file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : [];
+$renamedFilesRows = file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : [];
+
+echo PHP_EOL;
+echo 'Comparing from ".' . substr($previousVersionPackage, strlen(__DIR__)) . '"' . PHP_EOL;
+echo '            to ".' . substr($currentVersionPackage, strlen(__DIR__)) . '".' . PHP_EOL;
+
+system('php ./deleted_file_check.php --from=' . $previousVersionPackage . ' --to=' . $currentVersionPackage . ' > /dev/null');
+
+$addedFiles       = array_unique(array_merge($addedFiles, file_exists($addedFilesFile) ? explode("\n", file_get_contents($addedFilesFile)) : []));
+$addedFolders     = array_unique(array_merge($addedFolders, file_exists($addedFoldersFile) ? explode("\n", file_get_contents($addedFoldersFile)) : []));
+$deletedFiles     = array_unique(array_merge($deletedFiles, file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : []));
+$deletedFolders   = array_unique(array_merge($deletedFolders, file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : []));
+$renamedFilesRows = array_unique(array_merge($renamedFilesRows, file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : []));
+
+asort($deletedFiles);
+rsort($deletedFolders);
+asort($renamedFilesRows);
+
+$deletedFilesRowsAdd      = [];
+$deletedFilesRowsRemove   = [];
+$deletedFoldersRowsAdd    = [];
+$deletedFoldersRowsRemove = [];
+$renamedFilesRowsAdd      = [];
+$renamedFilesRowsRemove   = [];
+
+$hasChanges   = false;
+$doInit       = isset($options['init']);
+$useTempFiles = isset($options['temp']);
+
+if ($useTempFiles)
+{
+	$deletedFilesInfoFile   = __DIR__ . '/tmp/DeletedFiles.php';
+	$deletedFoldersInfoFile = __DIR__ . '/tmp/DeletedFolders.php';
+	$renamedFilesInfoFile   = __DIR__ . '/tmp/RenamedFiles.php';
+
+	if (!is_file($deletedFilesInfoFile))
+	{
+		copy(JPATH_BASE . '/administrator/components/com_admin/src/Script/DeletedFiles.php', $deletedFilesInfoFile);
+	}
+
+	if (!is_file($deletedFoldersInfoFile))
+	{
+		copy(JPATH_BASE . '/administrator/components/com_admin/src/Script/DeletedFolders.php', $deletedFoldersInfoFile);
+	}
+
+	if (!is_file($renamedFilesInfoFile))
+	{
+		copy(JPATH_BASE . '/administrator/components/com_admin/src/Script/RenamedFiles.php', $renamedFilesInfoFile);
+	}
+}
+else
+{
+	$deletedFilesInfoFile   = JPATH_BASE . '/administrator/components/com_admin/src/Script/DeletedFiles.php';
+	$deletedFoldersInfoFile = JPATH_BASE . '/administrator/components/com_admin/src/Script/DeletedFolders.php';
+	$renamedFilesInfoFile   = JPATH_BASE . '/administrator/components/com_admin/src/Script/RenamedFiles.php';
+}
 
 require_once $deletedFilesInfoFile;
 require_once $deletedFoldersInfoFile;
@@ -302,223 +437,96 @@ $deletedFilesInfo   = new DeletedFiles;
 $deletedFoldersInfo = new DeletedFolders;
 $renamedFilesInfo   = new RenamedFiles;
 
-function compareTwoVersions($fromPackage, $toPackage, $deletedFilesInfo, $deletedFoldersInfo, $renamedFilesInfo): stdClass
+if ($doInit)
 {
-	$return = new stdClass;
-
-	$return->deletedFilesChanged   = false;
-	$return->deletedFoldersChanged = false;
-	$return->renamedFilesChanged   = false;
-
-	$addedFilesFile     = __DIR__ . '/added_files.txt';
-	$addedFoldersFile   = __DIR__ . '/added_folders.txt';
-	$deletedFilesFile   = __DIR__ . '/deleted_files.txt';
-	$deletedFoldersFile = __DIR__ . '/deleted_folders.txt';
-	$renamedFilesFile   = __DIR__ . '/renamed_files.txt';
-
-	echo PHP_EOL;
-	echo 'Comparing from ".' . substr($fromPackage, strlen(__DIR__)) . '"' . PHP_EOL;
-	echo '            to ".' . substr($toPackage, strlen(__DIR__)) . '".' . PHP_EOL;
-
-	system('php ./deleted_file_check.php --from=' . $fromPackage . ' --to=' . $toPackage . ' > /dev/null');
-
-	$addedFiles       = file_exists($addedFilesFile) ? explode("\n", file_get_contents($addedFilesFile)) : [];
-	$addedFolders     = file_exists($addedFoldersFile) ? explode("\n", file_get_contents($addedFoldersFile)) : [];
-	$deletedFiles     = file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : [];
-	$deletedFolders   = file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : [];
-	$renamedFilesRows = file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : [];
-
-	$deletedFilesAdded     = [];
-	$deletedFilesRemoved   = [];
-	$deletedFoldersAdded   = [];
-	$deletedFoldersRemoved = [];
-	$renamedFilesAdded     = [];
-	$renamedFilesRemoved   = [];
-
-	// Remove files from the deleted or renamed files classes which are added back by the "to" version
-	foreach ($addedFiles as $addedFile)
-	{
-		$addedFile = trim(rtrim($addedFile, ','), "'");
-
-		if (($key = array_search($addedFile, $deletedFilesInfo->files)) !== false)
-		{
-			$deletedFilesRemoved[] = $key;
-
-			unset($deletedFilesInfo->files[$key]);
-
-			$return->deletedFilesChanged = true;
-
-			continue;
-		}
-
-		// Check for files which might have been renamed only
-		$matches = preg_grep('/^' . preg_quote($addedFile, '/') . ' => /', $renamedFilesInfo->files);
-
-		if ($matches !== false)
-		{
-			foreach ($matches as $key => $val)
-			{
-				$renamedFilesRemoved[] = $key;
-
-				unset($renamedFilesInfo->files[$key]);
-
-				$return->renamedFilesChanged = true;
-			}
-		}
-	}
-
-	// Remove folders from previous results which are added back by the "to" version
-	foreach ($addedFolders as $addedFolder)
-	{
-		$addedFolder = trim(rtrim($addedFolder, ','), "'");
-
-		if (($key = array_search($addedFolder, $deletedFoldersInfo->folders)) !== false)
-		{
-			$deletedFoldersRemoved[] = $key;
-
-			unset($deletedFoldersInfo->folders[$key]);
-
-			$return->deletedFoldersChanged = true;
-		}
-	}
-
-	// Append current results
-	foreach ($deletedFiles as $deletedFile)
-	{
-		$deletedFile = trim(rtrim($deletedFile, ','), "'");
-
-		if (($key = array_search($deletedFile, $deletedFilesInfo->files)) === false)
-		{
-			$deletedFilesInfo->files[] = $deletedFile;
-
-			$deletedFilesAdded[] = key(array_slice($deletedFilesInfo->files, -1, 1, true));
-
-			$return->deletedFilesChanged = true;
-		}
-	}
-
-	foreach ($deletedFolders as $deletedFolder)
-	{
-		$deletedFolder = trim(rtrim($deletedFolder, ','), "'");
-
-		if (($key = array_search($deletedFolder, $deletedFoldersInfo->folders)) === false)
-		{
-			$deletedFoldersInfo->folders[] = $deletedFolder;
-
-			$deletedFoldersAdded[] = key(array_slice($deletedFoldersInfo->folders, -1, 1, true));
-
-			$return->deletedFoldersChanged = true;
-		}
-	}
-
-	foreach ($renamedFilesRows as $renamedFilesRow)
-	{
-		if (($pos = strpos($renamedFilesRow, ' => ')) > 1)
-		{
-			$renamedFileOld = trim(substr($renamedFilesRow, 0, $pos), "'");
-			$renamedFileNew = trim(rtrim(substr($renamedFilesRow, $pos + 4), ','), "'");
-
-			if (!array_key_exists($renamedFileOld, $renamedFilesInfo->files))
-			{
-				$renamedFilesInfo->files[$renamedFileOld] = $renamedFileNew;
-
-				$renamedFilesAdded[] = $renamedFileOld;
-
-				$return->renamedFilesChanged = true;
-			}
-		}
-	}
-
-	if (!($return->deletedFilesChanged || $return->deletedFoldersChanged || $return->renamedFilesChanged))
-	{
-		echo PHP_EOL;
-		echo 'There have been no changes for the deleted files and folders and renamed files lists.' . PHP_EOL;
-
-		return $return;
-	}
-
-	if (count($deletedFilesRemoved) > 0)
-	{
-		echo PHP_EOL;
-		echo 'The following files have been removed from the deleted files list because they were added back later:' . PHP_EOL;
-
-		foreach ($deletedFilesRemoved as $key)
-		{
-			echo PHP_TAB . "'" . $deletedFilesInfo->files[$key] . "'" . PHP_EOL;
-		}
-	}
-
-	if (count($deletedFoldersRemoved) > 0)
-	{
-		echo PHP_EOL;
-		echo 'The following folders have been removed from the deleted folders list because they were added back later:' . PHP_EOL;
-
-		foreach ($deletedFoldersRemoved as $key)
-		{
-			echo PHP_TAB . "'" . $deletedFoldersInfo->folders[$key] . "'" . PHP_EOL;
-		}
-	}
-
-	if (count($renamedFilesRemoved) > 0)
-	{
-		echo PHP_EOL;
-		echo 'The following files have been removed from the renamed files list because they were added back later with the old name:' . PHP_EOL;
-
-		foreach ($renamedFilesRemoved as $key)
-		{
-			echo PHP_TAB . "'" . $renamedFilesInfo->files[$key] . "'" . PHP_EOL;
-		}
-	}
-
-	if (count($deletedFilesAdded) > 0)
-	{
-		echo PHP_EOL;
-		echo 'The following files have been added to the deleted files list:' . PHP_EOL;
-
-		foreach ($deletedFilesAdded as $key)
-		{
-			echo PHP_TAB . "'" . $deletedFilesInfo->files[$key] . "'" . PHP_EOL;
-		}
-	}
-
-	if (count($deletedFoldersAdded) > 0)
-	{
-		echo PHP_EOL;
-		echo 'The following folders have been added to the deleted folders list:' . PHP_EOL;
-
-		foreach ($deletedFoldersAdded as $key)
-		{
-			echo PHP_TAB . "'" . $deletedFoldersInfo->folders[$key] . "'" . PHP_EOL;
-		}
-	}
-
-	if (count($renamedFilesAdded) > 0)
-	{
-		echo PHP_EOL;
-		echo 'The following files have been added to the renamed files list:' . PHP_EOL;
-
-		foreach ($renamedFilesAdded as $key)
-		{
-			echo PHP_TAB . "'" . $key . "' => '" . $renamedFilesInfo->files[$key] . "'" . PHP_EOL;
-		}
-	}
-
-	return $return;
+	$deletedFilesInfo->files     = [];
+	$deletedFoldersInfo->folders = [];
+	$renamedFilesInfo->files     = [];
 }
 
-$changes = compareTwoVersions($previousMajorPackage, $currentVersionPackage, $deletedFilesInfo, $deletedFoldersInfo, $renamedFilesInfo);
+// Remove files from the deleted or renamed files classes which are added back by the "to" version
+foreach ($addedFiles as $addedFile)
+{
+	$addedFile = trim(rtrim($addedFile, ','), "'");
 
-$deletedFilesChanged   = $changes->deletedFilesChanged;
-$deletedFoldersChanged = $changes->deletedFoldersChanged;
-$renamedFilesChanged   = $changes->renamedFilesChanged;
+	if (($key = array_search($addedFile, $deletedFilesInfo->files)) !== false)
+	{
+		$deletedFilesRowsRemove[] = "\t\t'" . $addedFile . "',\n";
 
-$changes = compareTwoVersions($previousVersionPackage, $currentVersionPackage, $deletedFilesInfo, $deletedFoldersInfo, $renamedFilesInfo);
+		$hasChanges = true;
 
-$deletedFilesChanged   = $deletedFilesChanged || $changes->deletedFilesChanged;
-$deletedFoldersChanged = $deletedFoldersChanged || $changes->deletedFoldersChanged;
-$renamedFilesChanged   = $renamedFilesChanged || $changes->renamedFilesChanged;
+		continue;
+	}
 
-if (!($deletedFilesChanged || $deletedFoldersChanged || $renamedFilesChanged))
+	// Check for files which might have been renamed only
+	$matches = preg_grep('/^' . preg_quote($addedFile, '/') . ' => /', $renamedFilesInfo->files);
+
+	if ($matches !== false)
+	{
+		foreach ($matches as $key => $value)
+		{
+			$renamedFilesRowsRemove[] = "\t\t'" . $key . "' => '" . $value . "',\n";
+
+			$hasChanges = true;
+		}
+	}
+}
+
+// Remove folders from previous results which are added back by the "to" version
+foreach ($addedFolders as $addedFolder)
+{
+	$addedFolder = trim(rtrim($addedFolder, ','), "'");
+
+	if (($key = array_search($addedFolder, $deletedFoldersInfo->folders)) !== false)
+	{
+		$deletedFoldersRowsRemove[] = "\t\t'" . $addedFolder . "',\n";
+
+		$hasChanges = true;
+	}
+}
+
+// Append current results
+foreach ($deletedFiles as $deletedFile)
+{
+	$deletedFile = trim(rtrim($deletedFile, ','), "'");
+
+	if (($key = array_search($deletedFile, $deletedFilesInfo->files)) === false)
+	{
+		$deletedFilesRowsAdd[] = "\t\t'" . $deletedFile . "',\n";
+
+		$hasChanges = true;
+	}
+}
+
+foreach ($deletedFolders as $deletedFolder)
+{
+	$deletedFolder = trim(rtrim($deletedFolder, ','), "'");
+
+	if (($key = array_search($deletedFolder, $deletedFoldersInfo->folders)) === false)
+	{
+		$deletedFoldersRowsAdd[] = "\t\t'" . $deletedFolder . "',\n";
+
+		$hasChanges = true;
+	}
+}
+
+foreach ($renamedFilesRows as $renamedFilesRow)
+{
+	if (($pos = strpos($renamedFilesRow, ' => ')) > 1)
+	{
+		$renamedFileOld = trim(substr($renamedFilesRow, 0, $pos), "'");
+		$renamedFileNew = trim(rtrim(substr($renamedFilesRow, $pos + 4), ','), "'");
+
+		if (!array_key_exists($renamedFileOld, $renamedFilesInfo->files))
+		{
+			$renamedFilesRowsAdd[] = "\t\t'" . $renamedFileOld . "' => '" . $renamedFileNew . "',\n";
+
+			$hasChanges = true;
+		}
+	}
+}
+
+if (!$hasChanges)
 {
 	echo PHP_EOL;
 	echo 'There have been no changes for the deleted files and folders and renamed files lists.' . PHP_EOL;
@@ -526,7 +534,97 @@ if (!($deletedFilesChanged || $deletedFoldersChanged || $renamedFilesChanged))
 	exit(0);
 }
 
-function safeRegistryFile($filesOrFoldersArray, $filePath, $testMode, $writeKeys = false)
+$deletedFilesChanged   = false;
+$deletedFoldersChanged = false;
+$renamedFilesChanged   = false;
+
+if (count($deletedFilesRowsRemove) > 0)
+{
+	$deletedFilesChanged = true;
+
+	echo PHP_EOL;
+	echo 'The following rows have to be removed from the deleted files list because the files were added back later:' . PHP_EOL;
+
+	foreach ($deletedFilesRowsRemove as $row)
+	{
+		echo $row;
+	}
+}
+
+if (count($deletedFoldersRowsRemove) > 0)
+{
+	$deletedFoldersChanged = true;
+
+	echo PHP_EOL;
+	echo 'The following rows have to be removed from the deleted folders list because the folders were added back later:' . PHP_EOL;
+
+	foreach ($deletedFoldersRowsRemove as $row)
+	{
+		echo $row;
+	}
+}
+
+if (count($renamedFilesRowsRemove) > 0)
+{
+	$renamedFilesChanged = true;
+
+	echo PHP_EOL;
+	echo 'The following rows have to be removed from the renamed files list because the files were added back later with the old name:' . PHP_EOL;
+
+	foreach ($renamedFilesRowsRemove as $row)
+	{
+		echo $row;
+	}
+}
+
+if (count($deletedFilesRowsAdd) > 0)
+{
+	$deletedFilesChanged = true;
+
+	echo PHP_EOL;
+	echo 'The following rows have to be added to the deleted files list:' . PHP_EOL;
+
+	foreach ($deletedFilesRowsAdd as $row)
+	{
+		echo $row;
+	}
+}
+
+if (count($deletedFoldersRowsAdd) > 0)
+{
+	$deletedFoldersChanged = true;
+
+	echo PHP_EOL;
+	echo 'The following rows have to be added to the deleted folders list:' . PHP_EOL;
+
+	foreach ($deletedFoldersRowsAdd as $row)
+	{
+		echo $row;
+	}
+}
+
+if (count($renamedFilesRowsAdd) > 0)
+{
+	$renamedFilesChanged = true;
+
+	echo PHP_EOL;
+	echo 'The following rows have to be added to the renamed files list:' . PHP_EOL;
+
+	foreach ($renamedFilesRowsAdd as $row)
+	{
+		echo $row;
+	}
+}
+
+if (isset($options['test']))
+{
+	echo PHP_EOL;
+	echo 'Test mode: Changes are not saved.' . PHP_EOL;
+
+	exit(0);
+}
+
+function safeRegistryFile($rowsRemove, $rowsAdd, $filePath, $version, $doInit, $tempFiles)
 {
 	$inFilePtr = fopen($filePath, 'r');
 
@@ -553,34 +651,58 @@ function safeRegistryFile($filesOrFoldersArray, $filePath, $testMode, $writeKeys
 		}
 	}
 
-	fclose($inFilePtr);
-
 	if (preg_match('/^\tpublic\s+\$[a-z]+\s+=\s+\[$/', $line) !== 1)
 	{
 		echo PHP_EOL;
 		echo 'Could not find entry point for modification of file "' . $filePath . '".' . PHP_EOL;
 
+		fclose($inFilePtr);
+
 		exit(1);
 	}
 
-	if ($writeKeys)
+	if ($doInit)
 	{
-		foreach ($filesOrFoldersArray as $key => $value)
+		$line = "\t];\n";
+	}
+
+	while (!$doInit && !feof($inFilePtr))
+	{
+		$line = fgets($inFilePtr);
+
+		if ($line === "\t];\n")
 		{
-			$output .= "\t\t'" . $key . "' => '" . $value . "',\n";
+			break;
+		}
+
+		if (!in_array($line, $rowsRemove))
+		{
+			$output .= $line;
 		}
 	}
-	else
+
+	if ($line !== "\t];\n")
 	{
-		foreach ($filesOrFoldersArray as $value)
-		{
-			$output .= "\t\t'" . $value . "',\n";
-		}
+		echo PHP_EOL;
+		echo 'Could not find starting point for appending new values to file "' . $filePath . '".' . PHP_EOL;
+
+		fclose($inFilePtr);
+
+		exit(1);
+	}
+
+	fclose($inFilePtr);
+
+	$output .= "\t\t// " . $version . "\n";
+
+	foreach ($rowsAdd as $row)
+	{
+		$output .= $row;
 	}
 
 	$output .= "\t];\n}\n";
 
-	$outputFilePath = $testMode ? __DIR__ . '/tmp/' . basename($filePath) : $filePath;
+	$outputFilePath = $tempFiles ? __DIR__ . '/tmp/' . basename($filePath) : $filePath;
 
 	echo PHP_EOL;
 	echo 'Writing file "' . $outputFilePath . '".' . PHP_EOL;
@@ -588,19 +710,17 @@ function safeRegistryFile($filesOrFoldersArray, $filePath, $testMode, $writeKeys
 	file_put_contents($outputFilePath, $output);
 }
 
-$testOnly = isset($options['test']);
-
 if ($deletedFilesChanged)
 {
-	safeRegistryFile($deletedFilesInfo->files, $deletedFilesInfoFile, $testOnly);
+	safeRegistryFile($deletedFilesRowsRemove, $deletedFilesRowsAdd, $deletedFilesInfoFile, $currentVersionBuild, $doInit, $useTempFiles);
 }
 
 if ($deletedFoldersChanged)
 {
-	safeRegistryFile($deletedFoldersInfo->folders, $deletedFoldersInfoFile, $testOnly);
+	safeRegistryFile($deletedFoldersRowsRemove, $deletedFoldersRowsAdd, $deletedFoldersInfoFile, $currentVersionBuild, $doInit, $useTempFiles);
 }
 
 if ($renamedFilesChanged)
 {
-	safeRegistryFile($renamedFilesInfo->files, $renamedFilesInfoFile, $testOnly, true);
+	safeRegistryFile($renamedFilesRowsRemove, $renamedFilesRowsAdd, $renamedFilesInfoFile, $currentVersionBuild, $doInit, $useTempFiles);
 }
