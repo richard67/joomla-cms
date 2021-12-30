@@ -42,20 +42,26 @@ class MysqlChangeItem extends ChangeItem
 
 		// Change status to skipped
 		$this->checkStatus = -1;
+
 		$result = null;
+		$splitIntoWords = "~'[^']*'(*SKIP)(*F)|\s+~u";
+		$splitIntoActions = "~'[^']*'(*SKIP)(*F)|\([^)]*\)(*SKIP)(*F)|,~u";
 
 		// Remove any newlines
 		$this->updateQuery = str_replace("\n", '', $this->updateQuery);
+
+		// Remove trailing whitespace and semicolon
+		$this->updateQuery = rtrim($this->updateQuery, "; \t\n\r\0\x0B");
 
 		// Fix up extra spaces around () and in general
 		$find = array('#((\s*)\(\s*([^)\s]+)\s*)(\))#', '#(\s)(\s*)#');
 		$replace = array('($3)', '$1');
 		$updateQuery = preg_replace($find, $replace, $this->updateQuery);
-		$wordArray = preg_split("~'[^']*'(*SKIP)(*F)|\s+~u", trim($updateQuery, "; \t\n\r\0\x0B"));
+		$wordArray = preg_split($splitIntoWords, $updateQuery, null, PREG_SPLIT_NO_EMPTY);
 
-		// First, make sure we have an array of at least 5 elements
-		// if not, we can't make a check query for this one
-		if (\count($wordArray) < 5)
+		$totalWords = \count($wordArray);
+
+		if ($totalWords < 5)
 		{
 			// Done with method
 			return;
@@ -78,7 +84,7 @@ class MysqlChangeItem extends ChangeItem
 		}
 
 		// For the remaining query types make sure we have an array of at least 6 elements
-		if (\count($wordArray) < 6)
+		if ($totalWords < 6)
 		{
 			// Done with method
 			return;
@@ -86,6 +92,16 @@ class MysqlChangeItem extends ChangeItem
 
 		if ($command === 'ALTER TABLE')
 		{
+			// Check only the last action
+			$actions = ltrim(substr($updateQuery, strpos($updateQuery, $wordArray[2]) + \strlen($wordArray[2])));
+			$actions = preg_split($splitIntoActions, $actions);
+
+			// Get the last action
+			$lastActionArray = preg_split($splitIntoWords, end($actions), null, PREG_SPLIT_NO_EMPTY);
+
+			// Replace all actions by the last one
+			array_splice($wordArray, 3, $totalWords, $lastActionArray);
+
 			$alterCommand = strtoupper($wordArray[3] . ' ' . $wordArray[4]);
 
 			if ($alterCommand === 'ADD COLUMN')
