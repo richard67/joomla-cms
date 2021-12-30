@@ -5501,5 +5501,7 @@ class DeletedFiles
 		'/templates/cassiopeia/images/system/sort_desc.png',
 		// 4.0.5
 		'/media/vendor/codemirror/lib/#codemirror.js#',
+		// 4.0.6
+		'/media/vendor/mediaelement/css/mejs-controls.png',
 	];
 }
