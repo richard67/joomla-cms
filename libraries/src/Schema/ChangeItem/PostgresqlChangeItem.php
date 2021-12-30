@@ -84,44 +84,55 @@ class PostgresqlChangeItem extends ChangeItem
 			// Replace all actions by the last one
 			array_splice($wordArray, 3, $totalWords, $lastActionArray);
 
-			$alterCommand = strtoupper($wordArray[3] . ' ' . $wordArray[4]);
+			$uWord3 = strtoupper($wordArray[3]);
+			$uWord4 = strtoupper($wordArray[4]);
+
+			$alterCommand  = $uWord3 . ' ' . $uWord4;
+			$nextWordIdx   = 7;
+
+			// Check for column rename with ALTER TABLE and optional keyword "COLUMN" missing
+			if ($uWord3 === 'RENAME' && !in_array($uWord4, ['COLUMN', 'TO']))
+			{
+				$alterCommand = 'RENAME COLUMN';
+				$nextWordIdx  = 6;
+			}
 
 			if ($alterCommand === 'RENAME TO')
 			{
-				$table = $this->fixQuote($wordArray[5]);
+				$table  = $this->fixQuote($wordArray[5]);
 				$result = 'SELECT table_name FROM information_schema.tables WHERE table_name=' . $table;
-				$this->queryType = 'RENAME_TABLE';
+
+				$this->queryType          = 'RENAME_TABLE';
 				$this->checkQueryExpected = 1;
-				$this->msgElements = array($table);
+				$this->msgElements        = array($table);
 			}
 			elseif ($alterCommand === 'ADD COLUMN')
 			{
-				$result = 'SELECT column_name'
-					. ' FROM information_schema.columns'
-					. ' WHERE table_name='
-					. $this->fixQuote($wordArray[2])
-					. ' AND column_name=' . $this->fixQuote($wordArray[5]);
+				$table  = $this->fixQuote($wordArray[2]);
+				$column = $this->fixQuote($wordArray[5]);
+				$result = 'SELECT column_name FROM information_schema.columns WHERE table_name=' . $table . ' AND column_name=' . $column;
 
-				$this->queryType = 'ADD_COLUMN';
-				$this->msgElements = array(
-					$this->fixQuote($wordArray[2]),
-					$this->fixQuote($wordArray[5])
-				);
+				$this->queryType   = 'ADD_COLUMN';
+				$this->msgElements = array($table, $column);
 			}
 			elseif ($alterCommand === 'DROP COLUMN')
 			{
-				$result = 'SELECT column_name'
-					. ' FROM information_schema.columns'
-					. ' WHERE table_name='
-					. $this->fixQuote($wordArray[2])
-					. ' AND column_name=' . $this->fixQuote($wordArray[5]);
+				$table  = $this->fixQuote($wordArray[2]);
+				$column = $this->fixQuote($wordArray[5]);
+				$result = 'SELECT column_name FROM information_schema.columns WHERE table_name=' . $table . ' AND column_name=' . $column;
 
-				$this->queryType = 'DROP_COLUMN';
+				$this->queryType          = 'DROP_COLUMN';
 				$this->checkQueryExpected = 0;
-				$this->msgElements = array(
-					$this->fixQuote($wordArray[2]),
-					$this->fixQuote($wordArray[5])
-				);
+				$this->msgElements        = array($table, $column);
+			}
+			elseif ($alterCommand === 'RENAME COLUMN')
+			{
+				$table  = $this->fixQuote($wordArray[2]);
+				$column = $this->fixQuote($wordArray[$nextWordIdx]);
+				$result = 'SELECT column_name FROM information_schema.columns WHERE table_name=' . $table . ' AND column_name=' . $column;
+
+				$this->queryType   = 'ADD_COLUMN';
+				$this->msgElements = array($table, $column);
 			}
 			elseif ($alterCommand === 'ALTER COLUMN')
 			{
@@ -260,9 +271,10 @@ class PostgresqlChangeItem extends ChangeItem
 			}
 
 			$result = 'SELECT * FROM pg_indexes WHERE indexname=' . $idx;
-			$this->queryType = 'DROP_INDEX';
+
+			$this->queryType = 'DROP_INDEX_POSTGRESQL';
 			$this->checkQueryExpected = 0;
-			$this->msgElements = array($this->fixQuote($idx));
+			$this->msgElements = array($idx);
 		}
 		elseif ($command === 'CREATE INDEX' || (strtoupper($command . $wordArray[2]) === 'CREATE UNIQUE INDEX'))
 		{
@@ -278,9 +290,30 @@ class PostgresqlChangeItem extends ChangeItem
 			}
 
 			$result = 'SELECT * FROM pg_indexes WHERE indexname=' . $idx . ' AND tablename=' . $table;
-			$this->queryType = 'ADD_INDEX';
+
+			$this->queryType          = 'ADD_INDEX';
 			$this->checkQueryExpected = 1;
-			$this->msgElements = array($table, $idx);
+			$this->msgElements        = array($table, $idx);
+		}
+		elseif ($command === 'ALTER INDEX')
+		{
+			if (strtoupper($wordArray[2] . $wordArray[3]) === 'IFEXISTS')
+			{
+				$idxIndexName = 4;
+			}
+			else
+			{
+				$idxIndexName = 2;
+			}
+
+			if (strtoupper($wordArray[$idxIndexName + 1] . $wordArray[$idxIndexName + 2]) === 'RENAMETO')
+			{
+				$result = 'SELECT * FROM pg_indexes WHERE indexname=' . $idx;
+
+				$this->queryType = 'RENAME_INDEX_POSTGRESQL';
+				$this->checkQueryExpected = 1;
+				$this->msgElements = array($this->fixQuote($wordArray[$idxIndexName + 3]));
+			}
 		}
 
 		if ($command === 'CREATE TABLE')
@@ -295,9 +328,10 @@ class PostgresqlChangeItem extends ChangeItem
 			}
 
 			$result = 'SELECT table_name FROM information_schema.tables WHERE table_name=' . $table;
-			$this->queryType = 'CREATE_TABLE';
+
+			$this->queryType          = 'CREATE_TABLE';
 			$this->checkQueryExpected = 1;
-			$this->msgElements = array($table);
+			$this->msgElements        = array($table);
 		}
 
 		// Set fields based on results
