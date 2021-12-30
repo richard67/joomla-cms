@@ -104,7 +104,14 @@ class MysqlChangeItem extends ChangeItem
 
 			$alterCommand = strtoupper($wordArray[3] . ' ' . $wordArray[4]);
 
-			if ($alterCommand === 'ADD COLUMN')
+			if ($alterCommand === 'RENAME TO')
+			{
+				$table  = $this->fixQuote($wordArray[5]);
+				$result = 'SHOW TABLES LIKE ' . $table;
+				$this->queryType   = 'RENAME_TABLE';
+				$this->msgElements = array($table);
+			}
+			elseif ($alterCommand === 'ADD COLUMN')
 			{
 				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $this->fixQuote($wordArray[5]);
 				$this->queryType = 'ADD_COLUMN';
