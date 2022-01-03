@@ -61,6 +61,7 @@ class MysqlChangeItem extends ChangeItem
 
 		$totalWords = \count($wordArray);
 
+		// Make sure we have an array of at least 5 elements
 		if ($totalWords < 5)
 		{
 			// Done with method
@@ -80,13 +81,6 @@ class MysqlChangeItem extends ChangeItem
 			$this->msgElements        = array($table);
 			$this->checkStatus        = 0;
 
-			// Done with method
-			return;
-		}
-
-		// For the remaining query types make sure we have an array of at least 6 elements
-		if ($totalWords < 6)
-		{
 			// Done with method
 			return;
 		}
@@ -116,12 +110,18 @@ class MysqlChangeItem extends ChangeItem
 				$alterCommand = 'RENAME TO';
 				$nextWordIdx  = 4;
 			}
-			elseif (in_array($uWord3, ['ADD', 'ALTER', 'CHANGE', 'DROP', 'MODIFY']
-				&& !in_array($uWord4, ['COLUMN', 'CONSTRAINT', 'FOREIGN', 'FULLTEXT', 'INDEX', 'KEY', 'PARTITION', 'PERIOD', 'PRIMARY', 'SPATIAL', 'SYSTEM', 'UNIQUE'])
+			elseif (in_array($uWord3, ['ADD', 'ALTER', 'CHANGE', 'DROP', 'MODIFY'])
+				&& !in_array($uWord4, ['COLUMN', 'CONSTRAINT', 'FOREIGN', 'FULLTEXT', 'INDEX', 'KEY', 'PARTITION', 'PERIOD', 'PRIMARY', 'SPATIAL', 'SYSTEM', 'UNIQUE']))
 			{
 				// Column action with optional keyword "COLUMN" missing
 				$alterCommand = $uWord3 . ' COLUMN';
 				$nextWordIdx  = 4;
+			}
+
+			if ($totalWords < $nextWordIdx + 1)
+			{
+				// Done with method
+				return;
 			}
 
 			if ($alterCommand === 'RENAME TO')
@@ -285,13 +285,18 @@ class MysqlChangeItem extends ChangeItem
 
 		if ($command === 'CREATE TABLE')
 		{
-			if (strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS')
+			if ($totalWords > 5 && strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS')
 			{
 				$table = $this->fixQuote($wordArray[5]);
 			}
-			else
+			elseif ($totalWords > 2)
 			{
 				$table = $this->fixQuote($wordArray[2]);
+			}
+			else
+			{
+				// Done with method
+				return;
 			}
 
 			$result = 'SHOW TABLES LIKE ' . $table;
