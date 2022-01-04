@@ -96,7 +96,7 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` RENAME `#__bar`'],
+				['query' => 'ALTER TABLE `#__foo` RENAME TO `#__bar`'],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
 					'queryType' => 'RENAME_TABLE',
@@ -106,7 +106,7 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` RENAME TO `#__bar`'],
+				['query' => 'ALTER TABLE `#__foo` RENAME `#__bar`'],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
 					'queryType' => 'RENAME_TABLE',
