@@ -44,8 +44,8 @@ class PostgresqlChangeItem extends ChangeItem
 		$this->checkStatus = -1;
 
 		$result = null;
-		$splitIntoWords = "~'[^']*'(*SKIP)(*F)|\s+~";
-		$splitIntoActions = "~'[^']*'(*SKIP)(*F)|\([^)]*\)(*SKIP)(*F)|,~";
+		$splitIntoWords = "~'[^']*'(*SKIP)(*F)|\s+~u";
+		$splitIntoActions = "~'[^']*'(*SKIP)(*F)|\([^)]*\)(*SKIP)(*F)|,~u";
 
 		// Remove any newlines
 		$this->updateQuery = str_replace("\n", '', $this->updateQuery);
@@ -61,9 +61,8 @@ class PostgresqlChangeItem extends ChangeItem
 
 		$totalWords = \count($wordArray);
 
-		// First, make sure we have an array of at least 6 elements
-		// if not, we can't make a check query for this one
-		if ($totalWords < 6)
+		// Make sure we have an array of at least 5 elements
+		if ($totalWords < 5)
 		{
 			// Done with method
 			return;
@@ -87,14 +86,20 @@ class PostgresqlChangeItem extends ChangeItem
 			$uWord3 = strtoupper($wordArray[3]);
 			$uWord4 = strtoupper($wordArray[4]);
 
-			$alterCommand  = $uWord3 . ' ' . $uWord4;
-			$nextWordIdx   = 7;
+			$alterCommand = $uWord3 . ' ' . $uWord4;
+			$nextWordIdx  = 5;
 
 			// Check for column rename with ALTER TABLE and optional keyword "COLUMN" missing
 			if ($uWord3 === 'RENAME' && !in_array($uWord4, ['COLUMN', 'TO']))
 			{
 				$alterCommand = 'RENAME COLUMN';
-				$nextWordIdx  = 6;
+				$nextWordIdx  = 4;
+			}
+
+			if ($totalWords < $nextWordIdx + 1)
+			{
+				// Done with method
+				return;
 			}
 
 			if ($alterCommand === 'RENAME TO')
@@ -127,11 +132,17 @@ class PostgresqlChangeItem extends ChangeItem
 			}
 			elseif ($alterCommand === 'RENAME COLUMN')
 			{
+				if ($totalWords < $nextWordIdx + 3)
+				{
+					// Done with method
+					return;
+				}
+
 				$table  = $this->fixQuote($wordArray[2]);
-				$column = $this->fixQuote($wordArray[$nextWordIdx]);
+				$column = $this->fixQuote($wordArray[$nextWordIdx + 2]);
 				$result = 'SELECT column_name FROM information_schema.columns WHERE table_name=' . $table . ' AND column_name=' . $column;
 
-				$this->queryType   = 'ADD_COLUMN';
+				$this->queryType   = 'RENAME_COLUMN';
 				$this->msgElements = array($table, $column);
 			}
 			elseif ($alterCommand === 'ALTER COLUMN')
@@ -318,13 +329,18 @@ class PostgresqlChangeItem extends ChangeItem
 
 		if ($command === 'CREATE TABLE')
 		{
-			if (strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS')
+			if ($totalWords > 5 && strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS')
 			{
 				$table = $this->fixQuote($wordArray[5]);
 			}
-			else
+			elseif ($totalWords > 2)
 			{
 				$table = $this->fixQuote($wordArray[2]);
+			}
+			else
+			{
+				// Done with method
+				return;
 			}
 
 			$result = 'SELECT table_name FROM information_schema.tables WHERE table_name=' . $table;
