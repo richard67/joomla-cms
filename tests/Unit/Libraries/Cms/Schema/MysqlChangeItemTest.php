@@ -76,46 +76,6 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'RENAME TABLE `#__foo` TO `#__bar`'],
-				[
-					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
-					'queryType' => 'RENAME_TABLE',
-					'checkQueryExpected' => 1,
-					'msgElements' => ["'jos_bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			[
-				['query' => 'RENAME TABLE #__foo TO #__bar'],
-				[
-					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
-					'queryType' => 'RENAME_TABLE',
-					'checkQueryExpected' => 1,
-					'msgElements' => ["'jos_bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			[
-				['query' => 'ALTER TABLE `#__foo` RENAME TO `#__bar`'],
-				[
-					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
-					'queryType' => 'RENAME_TABLE',
-					'checkQueryExpected' => 1,
-					'msgElements' => ["'jos_bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			[
-				['query' => 'ALTER TABLE `#__foo` RENAME `#__bar`'],
-				[
-					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
-					'queryType' => 'RENAME_TABLE',
-					'checkQueryExpected' => 1,
-					'msgElements' => ["'jos_bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			[
 				['query' => 'ALTER TABLE `#__foo` ADD COLUMN `bar` text'],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar'",
@@ -142,36 +102,6 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 					'queryType' => 'ADD_COLUMN',
 					'checkQueryExpected' => 1,
 					'msgElements' => ["'jos_foo'", "'bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			[
-				['query' => 'ALTER TABLE `#__foo` DROP COLUMN `bar`'],
-				[
-					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar'",
-					'queryType' => 'DROP_COLUMN',
-					'checkQueryExpected' => 0,
-					'msgElements' => ["'jos_foo'", "'bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			[
-				['query' => 'ALTER TABLE `#__foo` DROP `bar`'],
-				[
-					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar'",
-					'queryType' => 'DROP_COLUMN',
-					'checkQueryExpected' => 0,
-					'msgElements' => ["'jos_foo'", "'bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			[
-				['query' => 'ALTER TABLE `#__foo` RENAME COLUMN `bar_old` TO `bar_new`'],
-				[
-					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar_new'",
-					'queryType' => 'RENAME_COLUMN',
-					'checkQueryExpected' => 1,
-					'msgElements' => ["'jos_foo'", "'bar_new'"],
 					'checkStatus' => 0,
 				],
 			],
@@ -276,6 +206,56 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
+				['query' => 'ALTER TABLE `#__foo` ALTER COLUMN `bar` DROP DEFAULT'],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND `default` IS NULL",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "NOT DEFAULT"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => "ALTER TABLE `#__foo` ALTER COLUMN `bar` SET DEFAULT NULL"],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND `default` IS NULL",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "DEFAULT NULL"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => "ALTER TABLE `#__foo` ALTER COLUMN `bar` SET DEFAULT ''"],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND `default` = ''",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "DEFAULT ''"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => 'ALTER TABLE `#__foo` DROP COLUMN `bar`'],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar'",
+					'queryType' => 'DROP_COLUMN',
+					'checkQueryExpected' => 0,
+					'msgElements' => ["'jos_foo'", "'bar'"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => 'ALTER TABLE `#__foo` DROP `bar`'],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar'",
+					'queryType' => 'DROP_COLUMN',
+					'checkQueryExpected' => 0,
+					'msgElements' => ["'jos_foo'", "'bar'"],
+					'checkStatus' => 0,
+				],
+			],
+			[
 				['query' => 'ALTER TABLE `#__foo` DROP INDEX `idx_bar`'],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
@@ -292,6 +272,16 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 					'queryType' => 'DROP_INDEX',
 					'checkQueryExpected' => 0,
 					'msgElements' => ["'jos_foo'", "'idx_bar'"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => 'ALTER TABLE `#__foo` RENAME COLUMN `bar_old` TO `bar_new`'],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar_new'",
+					'queryType' => 'RENAME_COLUMN',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'"],
 					'checkStatus' => 0,
 				],
 			],
@@ -316,6 +306,26 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
+				['query' => 'ALTER TABLE `#__foo` RENAME TO `#__bar`'],
+				[
+					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
+					'queryType' => 'RENAME_TABLE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_bar'"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => 'ALTER TABLE `#__foo` RENAME `#__bar`'],
+				[
+					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
+					'queryType' => 'RENAME_TABLE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_bar'"],
+					'checkStatus' => 0,
+				],
+			],
+			[
 				['query' => 'CREATE TABLE `#__foo` (`bar` text)'],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_foo'",
@@ -332,6 +342,26 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 					'queryType' => 'CREATE_TABLE',
 					'checkQueryExpected' => 1,
 					'msgElements' => ["'jos_foo'"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => 'RENAME TABLE `#__foo` TO `#__bar`'],
+				[
+					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
+					'queryType' => 'RENAME_TABLE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_bar'"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => 'RENAME TABLE #__foo TO #__bar'],
+				[
+					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
+					'queryType' => 'RENAME_TABLE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_bar'"],
 					'checkStatus' => 0,
 				],
 			],

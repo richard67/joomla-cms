@@ -158,6 +158,40 @@ class MysqlChangeItem extends ChangeItem
 				$this->queryType   = 'RENAME_COLUMN';
 				$this->msgElements = array($this->fixQuote($wordArray[2]), $column);
 			}
+			elseif ($alterCommand === 'ALTER COLUMN')
+			{
+				if ($totalWords < $nextWordIdx + 3 || strtoupper($wordArray[$nextWordIdx + 2]) !== 'DEFAULT')
+				{
+					// Done with method
+					return;
+				}
+
+				$column      = $this->fixQuote($wordArray[$nextWordIdx]);
+				$alterAction = strtoupper($wordArray[$nextWordIdx + 1]);
+
+				if ($alterAction === 'DROP')
+				{
+					$type   = 'NOT DEFAULT';
+					$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column
+						. ' AND `default` IS NULL';
+				}
+				elseif ($alterAction === 'SET')
+				{
+					$changesArray = \array_slice($wordArray, $nextWordIdx + 2);
+					$defaultCheck = $this->checkDefault($changesArray, '');
+					$type         = 'DEFAULT ' . $wordArray[$nextWordIdx + 3];
+					$result       = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column
+						. ' AND' . $defaultCheck;
+				}
+				else
+				{
+					// Done with method
+					return;
+				}
+
+				$this->queryType   = 'CHANGE_COLUMN_TYPE';
+				$this->msgElements = array($this->fixQuote($wordArray[2]), $column, $type);
+			}
 			elseif ($alterCommand === 'ADD INDEX' || $alterCommand === 'ADD KEY')
 			{
 				if ($pos = strpos($wordArray[5], '('))
