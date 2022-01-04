@@ -76,16 +76,6 @@ class PostgresqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE "#__foo" RENAME TO "#__bar"'],
-				[
-					'checkQuery' => "SELECT table_name FROM information_schema.tables WHERE table_name='jos_bar'",
-					'queryType' => 'RENAME_TABLE',
-					'checkQueryExpected' => 1,
-					'msgElements' => ["'jos_bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			[
 				['query' => 'ALTER TABLE "#__foo" ADD COLUMN "bar" text'],
 				[
 					'checkQuery' => "SELECT column_name FROM information_schema.columns WHERE table_name='jos_foo' AND column_name='bar'",
@@ -122,6 +112,16 @@ class PostgresqlChangeItemTest extends \PHPUnit\Framework\TestCase
 					'queryType' => 'RENAME_COLUMN',
 					'checkQueryExpected' => 1,
 					'msgElements' => ["'jos_foo'", "'bar_new'"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				['query' => 'ALTER TABLE "#__foo" RENAME TO "#__bar"'],
+				[
+					'checkQuery' => "SELECT table_name FROM information_schema.tables WHERE table_name='jos_bar'",
+					'queryType' => 'RENAME_TABLE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_bar'"],
 					'checkStatus' => 0,
 				],
 			],
