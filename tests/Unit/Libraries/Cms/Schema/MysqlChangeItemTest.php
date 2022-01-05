@@ -9,12 +9,12 @@
 namespace Joomla\Tests\Unit\Libraries\Cms\Schema;
 
 use Joomla\CMS\Schema\ChangeItem\MysqlChangeItem;
-use Joomla\Database\DatabaseDriver;
+use Joomla\Database\Mysqli\MysqliDriver;
 
 class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 {
 	/**
-	 * @var  DatabaseDriver|MockObject
+	 * @var  MysqliDriver|MockObject
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
@@ -30,7 +30,7 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 	 */
 	protected function setUp():void
 	{
-		$this->db = $this->createMock(DatabaseDriver::class);
+		$this->db = $this->createMock(MysqliDriver::class);
 
 		$this->db->expects($this->once())
 			->method('getServerType')
@@ -66,7 +66,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 	{
 		return [
 			[
-				['query' => 'WHATEVER'],
+				[
+					'query' => 'WHATEVER',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => null,
 					'queryType' => null,
@@ -76,7 +79,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD COLUMN `bar` text'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD COLUMN `bar` text',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar'",
 					'queryType' => 'ADD_COLUMN',
@@ -86,7 +92,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE #__foo ADD COLUMN bar text'],
+				[
+					'query' => 'ALTER TABLE #__foo ADD COLUMN bar text',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN #__foo WHERE field = 'bar'",
 					'queryType' => 'ADD_COLUMN',
@@ -96,7 +105,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD `bar` text'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD `bar` text',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar'",
 					'queryType' => 'ADD_COLUMN',
@@ -106,7 +118,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD INDEX `idx_bar` (`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD INDEX `idx_bar` (`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -116,7 +131,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD INDEX `idx_bar`(`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD INDEX `idx_bar`(`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -126,7 +144,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD KEY `idx_bar` (`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD KEY `idx_bar` (`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -136,7 +157,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD KEY `idx_bar`(`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD KEY `idx_bar`(`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -146,7 +170,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD UNIQUE `idx_bar` (`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD UNIQUE `idx_bar` (`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -156,7 +183,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD UNIQUE `idx_bar`(`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD UNIQUE `idx_bar`(`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -166,7 +196,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD UNIQUE INDEX `idx_bar` (`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD UNIQUE INDEX `idx_bar` (`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -176,7 +209,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD UNIQUE INDEX `idx_bar`(`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD UNIQUE INDEX `idx_bar`(`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -186,7 +222,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD UNIQUE KEY `idx_bar` (`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD UNIQUE KEY `idx_bar` (`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -196,7 +235,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ADD UNIQUE KEY `idx_bar`(`bar`)'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ADD UNIQUE KEY `idx_bar`(`bar`)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'ADD_INDEX',
@@ -206,7 +248,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` ALTER COLUMN `bar` DROP DEFAULT'],
+				[
+					'query' => 'ALTER TABLE `#__foo` ALTER COLUMN `bar` DROP DEFAULT',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND `default` IS NULL",
 					'queryType' => 'CHANGE_COLUMN_TYPE',
@@ -216,7 +261,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => "ALTER TABLE `#__foo` ALTER COLUMN `bar` SET DEFAULT NULL"],
+				[
+					'query' => "ALTER TABLE `#__foo` ALTER COLUMN `bar` SET DEFAULT NULL",
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND `default` IS NULL",
 					'queryType' => 'CHANGE_COLUMN_TYPE',
@@ -226,7 +274,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => "ALTER TABLE `#__foo` ALTER COLUMN `bar` SET DEFAULT ''"],
+				[
+					'query' => "ALTER TABLE `#__foo` ALTER COLUMN `bar` SET DEFAULT ''",
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND `default` = ''",
 					'queryType' => 'CHANGE_COLUMN_TYPE',
@@ -236,7 +287,166 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` DROP COLUMN `bar`'],
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE COLUMN `bar` `bar_new` mediumtext",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) = 'MEDIUMTEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "mediumtext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE COLUMN `bar` `bar_new` mediumtext",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) IN ('MEDIUMTEXT','LONGTEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "mediumtext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE COLUMN `bar` `bar_new` text",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) = 'TEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "text"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE COLUMN `bar` `bar_new` text",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) IN ('TEXT','MEDIUMTEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "text"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE COLUMN `bar` `bar_new` tinytext",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) = 'TINYTEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "tinytext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE COLUMN `bar` `bar_new` tinytext",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) IN ('TINYTEXT','TEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "tinytext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE `bar` `bar_new` mediumtext",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) = 'MEDIUMTEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "mediumtext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE `bar` `bar_new` mediumtext",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) IN ('MEDIUMTEXT','LONGTEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "mediumtext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE `bar` `bar_new` text",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) = 'TEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "text"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE `bar` `bar_new` text",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) IN ('TEXT','MEDIUMTEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "text"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE `bar` `bar_new` tinytext",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) = 'TINYTEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "tinytext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` CHANGE `bar` `bar_new` tinytext",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) IN ('TINYTEXT','TEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar_new'", "tinytext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => 'ALTER TABLE `#__foo` DROP COLUMN `bar`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar'",
 					'queryType' => 'DROP_COLUMN',
@@ -246,7 +456,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` DROP `bar`'],
+				[
+					'query' => 'ALTER TABLE `#__foo` DROP `bar`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar'",
 					'queryType' => 'DROP_COLUMN',
@@ -256,7 +469,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` DROP INDEX `idx_bar`'],
+				[
+					'query' => 'ALTER TABLE `#__foo` DROP INDEX `idx_bar`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'DROP_INDEX',
@@ -266,7 +482,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` DROP KEY `idx_bar`'],
+				[
+					'query' => 'ALTER TABLE `#__foo` DROP KEY `idx_bar`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
 					'queryType' => 'DROP_INDEX',
@@ -276,7 +495,166 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` RENAME COLUMN `bar_old` TO `bar_new`'],
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY COLUMN `bar` mediumtext",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) = 'MEDIUMTEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "mediumtext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY COLUMN `bar` mediumtext",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) IN ('MEDIUMTEXT','LONGTEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "mediumtext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY COLUMN `bar` text",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) = 'TEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "text"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY COLUMN `bar` text",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) IN ('TEXT','MEDIUMTEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "text"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY COLUMN `bar` tinytext",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) = 'TINYTEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "tinytext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY COLUMN `bar` tinytext",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) IN ('TINYTEXT','TEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "tinytext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY `bar` mediumtext",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) = 'MEDIUMTEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "mediumtext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY `bar` mediumtext",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) IN ('MEDIUMTEXT','LONGTEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "mediumtext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY `bar` text",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) = 'TEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "text"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY `bar` text",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) IN ('TEXT','MEDIUMTEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "text"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY `bar` tinytext",
+					'utf8mb4' => false,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) = 'TINYTEXT'",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "tinytext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => "ALTER TABLE `#__foo` MODIFY `bar` tinytext",
+					'utf8mb4' => true,
+				],
+				[
+					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE field = 'bar' AND UPPER(type) IN ('TINYTEXT','TEXT')",
+					'queryType' => 'CHANGE_COLUMN_TYPE',
+					'checkQueryExpected' => 1,
+					'msgElements' => ["'jos_foo'", "'bar'", "tinytext"],
+					'checkStatus' => 0,
+				],
+			],
+			[
+				[
+					'query' => 'ALTER TABLE `#__foo` RENAME COLUMN `bar_old` TO `bar_new`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW COLUMNS IN `#__foo` WHERE Field = 'bar_new'",
 					'queryType' => 'RENAME_COLUMN',
@@ -286,7 +664,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` RENAME INDEX `idx_bar_old` TO `idx_bar_new`'],
+				[
+					'query' => 'ALTER TABLE `#__foo` RENAME INDEX `idx_bar_old` TO `idx_bar_new`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar_new'",
 					'queryType' => 'RENAME_INDEX',
@@ -296,7 +677,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` RENAME KEY `idx_bar_old` TO `idx_bar_new`'],
+				[
+					'query' => 'ALTER TABLE `#__foo` RENAME KEY `idx_bar_old` TO `idx_bar_new`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar_new'",
 					'queryType' => 'RENAME_INDEX',
@@ -306,7 +690,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` RENAME TO `#__bar`'],
+				[
+					'query' => 'ALTER TABLE `#__foo` RENAME TO `#__bar`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
 					'queryType' => 'RENAME_TABLE',
@@ -316,7 +703,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'ALTER TABLE `#__foo` RENAME `#__bar`'],
+				[
+					'query' => 'ALTER TABLE `#__foo` RENAME `#__bar`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
 					'queryType' => 'RENAME_TABLE',
@@ -326,7 +716,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'CREATE TABLE `#__foo` (`bar` text)'],
+				[
+					'query' => 'CREATE TABLE `#__foo` (`bar` text)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_foo'",
 					'queryType' => 'CREATE_TABLE',
@@ -336,7 +729,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'CREATE TABLE IF NOT EXISTS `#__foo` (`bar` text)'],
+				[
+					'query' => 'CREATE TABLE IF NOT EXISTS `#__foo` (`bar` text)',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_foo'",
 					'queryType' => 'CREATE_TABLE',
@@ -346,7 +742,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'RENAME TABLE `#__foo` TO `#__bar`'],
+				[
+					'query' => 'RENAME TABLE `#__foo` TO `#__bar`',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
 					'queryType' => 'RENAME_TABLE',
@@ -356,7 +755,10 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 				],
 			],
 			[
-				['query' => 'RENAME TABLE #__foo TO #__bar'],
+				[
+					'query' => 'RENAME TABLE #__foo TO #__bar',
+					'utf8mb4' => null,
+				],
 				[
 					'checkQuery' => "SHOW TABLES LIKE 'jos_bar'",
 					'queryType' => 'RENAME_TABLE',
@@ -379,9 +781,21 @@ class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function testBuildCheckQuery($options, $expects)
 	{
-		$file    = '/not/really/used/4.0.0-2018-03-05.sql';
-		$item    = MysqlChangeItem::getInstance($this->db, $file, $options['query']);
-		$message = "Test '%s' for query '". $options['query'] . "' failed.";
+		$message = "Test '%s' for query '". $options['query'] . "'";
+		$utf8mb4 = $options['utf8mb4'] ?? true;
+
+		if (!$utf8mb4)
+		{
+			$message .= ' without utf8mb4 support';
+		}
+
+		$message .= ' failed.';
+
+		$this->db->expects($this->any())
+			->method('hasUTF8mb4Support')
+			->willReturn($utf8mb4);
+
+		$item = MysqlChangeItem::getInstance($this->db, '/not/really/used/4.0.0-2018-03-05.sql', $options['query']);
 
 		$this->assertEquals($expects['checkQuery'], $item->checkQuery, sprintf($message, 'checkQuery'));
 		$this->assertEquals($expects['queryType'], $item->queryType, sprintf($message, 'queryType'));
