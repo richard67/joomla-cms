@@ -159,9 +159,8 @@ class PostgresqlChangeItemTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function testBuildCheckQuery($options, $expects)
 	{
-		$file    = '/not/really/used/4.0.0-2018-03-05.sql';
-		$item    = PostgresqlChangeItem::getInstance($this->db, $file, $options['query']);
 		$message = "Test '%s' for query '". $options['query'] . "' failed.";
+		$item    = PostgresqlChangeItem::getInstance($this->db, '/not/really/used/4.0.0-2018-03-05.sql', $options['query']);
 
 		$this->assertEquals($expects['checkQuery'], $item->checkQuery, sprintf($message, 'checkQuery'));
 		$this->assertEquals($expects['queryType'], $item->queryType, sprintf($message, 'queryType'));
