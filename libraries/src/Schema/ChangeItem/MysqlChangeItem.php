@@ -259,7 +259,7 @@ class MysqlChangeItem extends ChangeItem
 
 				// Kludge to fix problem with "integer unsigned"
 				$idxTypeEnd = $nextWordIdx + 1;
-				$type       = $wordArray[$idxType];
+				$type       = $wordArray[$idxTypeEnd];
 
 				if (isset($wordArray[$idxTypeEnd + 1]))
 				{
