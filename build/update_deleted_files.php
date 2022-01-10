@@ -124,6 +124,7 @@ if (empty($currentMajorDownload))
 			$currentVersionPackage = $files[0];
 		}
 
+		// Create the packages folder again because it has been deleted by the build
 		@mkdir($packagesPath, 0755, true);
 	}
 }
@@ -198,36 +199,20 @@ $currentVersionBuild = str_replace('-dev', '', $currentVersionBuild);
 $currentMinorVersion = $currentVersionBuildParts['major'] . '.' . $currentVersionBuildParts['minor'];
 
 // Clone and build previous major version or download from URL
-$previousBuildPath     = __DIR__ . '/tmp/update_deleted_files/previous-build';
-$previousMajorPackage  = '';
-$previousMajorDownload = $options['prevZipUrl'] ?? PREVIOUS_DOWNLOAD_URL;
+$previousBuildPath        = __DIR__ . '/tmp/update_deleted_files/previous-build';
+$previousBuildPackagePath = __DIR__ . '/tmp/update_deleted_files/previous-package';
+$previousMajorPackage     = '';
+$previousMajorDownload    = $options['prevZipUrl'] ?? PREVIOUS_DOWNLOAD_URL;
 
 if (empty($previousMajorDownload))
 {
 	// No download URL: Check if there is a saved package from a previous build.
-	$files = isset($options['reuse']) ? glob($packagesPath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip') : false;
+	$files = isset($options['reuse']) ? glob($previousBuildPackagePath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip') : false;
 
 	if ($files !== false && count($files) > 0)
 	{
-		if (count($files) === 1)
-		{
-			// There is one matching saved package from a previous build.
-			$previousMajorPackage = $files[0];
-		}
-		else
-		{
-			// There is more than one saved package from a previous build or download.
-			$filesBuild = glob($previousBuildPath . '/build/tmp/packages/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip');
-
-			if ($filesBuild !== false && count($filesBuild) === 1)
-			{
-				// Check which of the saved packages belong to the previous build
-				if (($key = array_search($packagesPath . '/' . basename($filesBuild[0]), $files)) !== false)
-				{
-					$previousMajorPackage = $files[$key];
-				}
-			}
-		}
+		// There is one matching saved package from a previous build.
+		$previousMajorPackage = $files[0];
 	}
 
 	// No package found from previous build: Clone the repository and build the previous release.
@@ -242,6 +227,7 @@ if (empty($previousMajorDownload))
 		echo PHP_EOL;
 
 		@mkdir($previousBuildPath, 0755, true);
+		@mkdir($previousBuildPackagePath, 0755, true);
 
 		chdir($previousBuildPath);
 
@@ -259,16 +245,18 @@ if (empty($previousMajorDownload))
 
 		if ($files !== false && count($files) === 1)
 		{
-			$previousMajorPackage = $packagesPath . '/' . basename($files[0]);
+			$previousMajorPackage = $previousBuildPackagePath . '/' . basename($files[0]);
 
 			copy($files[0], $previousMajorPackage);
 		}
+
+		system('rm -rf ' . $previousBuildPath);
 	}
 }
 else
 {
 	// Use download URL: Check if there is a saved package from a previous download.
-	$previousMajorPackage = $packagesPath . '/' . basename($previousMajorDownload);
+	$previousMajorPackage = $previousBuildPackagePath . '/' . basename($previousMajorDownload);
 
 	if (!isset($options['reuse']) || !is_file($previousMajorPackage))
 	{
