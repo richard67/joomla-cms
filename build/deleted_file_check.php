@@ -64,13 +64,13 @@ if (empty($options['from']))
 	exit(1);
 }
 
-// Import the version class to get the version information
-define('JPATH_PLATFORM', 1);
-require_once dirname(__DIR__) . '/libraries/src/Version.php';
-
 // If the "to" parameter is not specified, use the default
 if (empty($options['to']))
 {
+	// Import the version class to get the version information
+	define('JPATH_PLATFORM', 1);
+	require_once dirname(__DIR__) . '/libraries/src/Version.php';
+
 	$fullVersion      = (new Version)->getShortVersion();
 	$packageStability = str_replace(' ', '_', Version::DEV_STATUS);
 	$packageFile      = __DIR__ . '/tmp/packages/Joomla_' . $fullVersion . '-' . $packageStability . '-Full_Package.zip';
@@ -90,77 +90,8 @@ if (empty($options['to']))
 	}
 }
 
-// Function to get the version information from 'administrator/manifests/files/joomla.xml' in a folder
-function getVersionFromFolder($folderPath): string
-{
-	$return = '';
-
-	$xml = simplexml_load_file($folderPath . '/administrator/manifests/files/joomla.xml');
-
-	if ($xml instanceof \SimpleXMLElement && isset($xml->version))
-	{
-		$return = (string) $xml->version;
-	}
-
-	if ($return === '')
-	{
-		echo PHP_EOL;
-		echo 'Could not read version from file "' . $folderPath . '/administrator/manifests/files/joomla.xml".' . PHP_EOL;
-
-		exit(1);
-	}
-
-	return $return;
-}
-
-// Function to get the version information from 'administrator/manifests/files/joomla.xml' in a zip file
-function getVersionFromZipFile($filePath): string
-{
-	$return = '';
-
-	$zipArchive = new ZipArchive();
-
-	if ($zipArchive->open($filePath) !== true)
-	{
-		echo PHP_EOL;
-		echo 'Could not open zip archive "' . $filePath . '".' . PHP_EOL;
-
-		exit(1);
-	}
-
-	if (($xmlFileContent = $zipArchive->getFromName('administrator/manifests/files/joomla.xml')) !== false)
-	{
-		$xml = simplexml_load_string($xmlFileContent);
-
-		if ($xml instanceof \SimpleXMLElement && isset($xml->version))
-		{
-			$return = (string) $xml->version;
-		}
-	}
-
-	$zipArchive->close();
-
-	if ($return === '')
-	{
-		echo PHP_EOL;
-		echo 'Could not extract version from zip file "' . $filePath . '".' . PHP_EOL;
-
-		exit(1);
-	}
-
-	return $return;
-}
-
-// Check from and to if folder or zip file and set versions
-if (is_dir($options['from']))
-{
-	$fromVersion = getVersionFromFolder($options['from']);
-}
-elseif (is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip')
-{
-	$fromVersion = getVersionFromZipFile($options['from']);
-}
-else
+// Check from and to if folder or zip file
+if (!is_dir($options['from']) && !(is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip'))
 {
 	echo PHP_EOL;
 	echo 'The "from" parameter is neither a directory nor a zip file' . PHP_EOL;
@@ -168,45 +99,10 @@ else
 	exit(1);
 }
 
-if (is_dir($options['to']))
-{
-	$toVersion = getVersionFromFolder($options['to']);
-}
-elseif (is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip')
-{
-	$toVersion = getVersionFromZipFile($options['to']);
-}
-else
+if (!is_dir($options['to']) && !(is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip'))
 {
 	echo PHP_EOL;
 	echo 'The "to" parameter is neither a directory nor a zip file' . PHP_EOL;
-
-	exit(1);
-}
-
-// Check versions
-$fromIsPreviousMajor = preg_match('/^' . str_replace('.', '\.', PREVIOUS_VERSION) . '\..*/', $fromVersion) === 1;
-
-if (!$fromIsPreviousMajor && preg_match('/^' . Version::MAJOR_VERSION . '\..*/', $fromVersion) !== 1)
-{
-	echo PHP_EOL;
-	echo 'The starting version has to be "' . PREVIOUS_VERSION . '.*" or "' . Version::MAJOR_VERSION . '.*".' . PHP_EOL;
-
-	exit(1);
-}
-
-if (preg_match('/^' . Version::MAJOR_VERSION . '\..*/', $toVersion) !== 1)
-{
-	echo PHP_EOL;
-	echo 'The ending version has to be "' . Version::MAJOR_VERSION . '.*".' . PHP_EOL;
-
-	exit(1);
-}
-
-if (version_compare($fromVersion, $toVersion, '>='))
-{
-	echo PHP_EOL;
-	echo 'The starting version has to be lower than the ending version.' . PHP_EOL;
 
 	exit(1);
 }
@@ -325,8 +221,8 @@ function readZipFile($filePath, $excludeFolders): stdClass
 	return $return;
 }
 
-// Directories of the previous major version to skip for the check
-$previousMajorExclude = [
+// Directories to skip for the check
+$excludedFolders = [
 	'administrator/components/com_search',
 	'components/com_search',
 	'images/sampledata',
@@ -338,22 +234,6 @@ $previousMajorExclude = [
 	'plugins/quickicon/eos310',
 	'plugins/search',
 ];
-
-// Directories of the current major version to skip for the check
-$currentMajorExclude = [
-	'installation'
-];
-
-if ($fromIsPreviousMajor)
-{
-	$excludedFolders = array_unique(array_merge($previousMajorExclude, $currentMajorExclude));
-}
-else
-{
-	$excludedFolders = $currentMajorExclude;
-}
-
-asort($excludedFolders);
 
 // Read files and folders lists from folders or zip files
 if (is_dir($options['from']))
