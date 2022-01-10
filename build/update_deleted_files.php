@@ -5,7 +5,7 @@
  *
  * @package    Joomla.Build
  *
- * @copyright  (C) 2021 Open Source Matters, Inc. <https://www.joomla.org>
+ * @copyright  (C) 2022 Open Source Matters, Inc. <https://www.joomla.org>
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -186,7 +186,16 @@ if (!$currentVersionBuild)
 	exit(1);
 }
 
+if (!preg_match('/^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)/i', $currentVersionBuild, $currentVersionBuildParts))
+{
+	echo PHP_EOL;
+	echo 'Error: Could not get version parts from manifest XML file in the current version package.' . PHP_EOL;
+
+	exit(1);
+}
+
 $currentVersionBuild = str_replace('-dev', '', $currentVersionBuild);
+$currentMinorVersion = $currentVersionBuildParts['major'] . '.' . $currentVersionBuildParts['minor'];
 
 // Clone and build previous major version or download from URL
 $previousBuildPath     = __DIR__ . '/tmp/update_deleted_files/previous-build';
@@ -314,7 +323,8 @@ else
 	// Get the latest release before current release build version
 	foreach ($gitHubReleases as $gitHubRelease)
 	{
-		if (version_compare($gitHubRelease->tag_name, $currentVersionBuild, '<'))
+		if (version_compare(substr($gitHubRelease->tag_name, 0, strlen($currentMinorVersion)), $currentMinorVersion, '=')
+			&& version_compare($gitHubRelease->tag_name, $currentVersionBuild, '<'))
 		{
 			foreach ($gitHubRelease->assets as $asset)
 			{
