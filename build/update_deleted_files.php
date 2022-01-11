@@ -299,14 +299,14 @@ else
 	// Get the latest release before current release build version
 	foreach ($gitHubReleases as $gitHubRelease)
 	{
+		if ($gitHubRelease->draft)
+		{
+			continue;
+		}
+
 		if (version_compare(substr($gitHubRelease->tag_name, 0, strlen($currentMinorVersion)), $currentMinorVersion, '=')
 			&& version_compare($gitHubRelease->tag_name, $currentVersionBuild, '<'))
 		{
-			if ($gitHubRelease->draft)
-			{
-				continue;
-			}
-
 			foreach ($gitHubRelease->assets as $asset)
 			{
 				if (preg_match('/^Joomla_.*-Full_Package\.zip$/', $asset->name) === 1)
