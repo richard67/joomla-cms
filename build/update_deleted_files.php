@@ -41,7 +41,7 @@ function usage($command)
 	echo PHP_EOL;
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
 	echo PHP_TAB . '[options]:' . PHP_EOL;
-	echo PHP_TAB . PHP_TAB . '--prevBranch=<branch>:' . PHP_TAB . 'The git branch to build the previous major version from' . (PREVIOUS_BRANCH ? ', defaults to ' . PREVIOUS_BRANCH : '') . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--prevBranch=<branch>:' . PHP_TAB . 'The git branch to build the previous major version from' . (PREVIOUS_CHECK ? ', defaults to ' . PREVIOUS_BRANCH : '') . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--prevRemote=<remote>:' . PHP_TAB . 'The git remote reference to build the previous major version from, defaults to the most recent tag for the "prevBranch" branch' . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--prevZipUrl=<URL>:' . PHP_TAB . 'Full package zip download URL for the previous major version' . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--currRemote=<remote>:' . PHP_TAB . 'The git remote reference to build the current major version from, defaults to the most recent tag for the current branch' . PHP_EOL;
@@ -283,7 +283,7 @@ else
 	echo 'Fetching releases information from GitHub.' . PHP_EOL;
 
 	ob_start();
-	passthru('curl -L https://api.github.com/repos/joomla/joomla-cms/releases', $gitHubReleasesString);
+	passthru('curl -H "Accept: application/vnd.github.v3+json" -L https://api.github.com/repos/joomla/joomla-cms/releases', $gitHubReleasesString);
 	$gitHubReleasesString = trim(ob_get_clean());
 
 	if (!$gitHubReleasesString)
@@ -302,6 +302,11 @@ else
 		if (version_compare(substr($gitHubRelease->tag_name, 0, strlen($currentMinorVersion)), $currentMinorVersion, '=')
 			&& version_compare($gitHubRelease->tag_name, $currentVersionBuild, '<'))
 		{
+			if ($gitHubRelease->draft)
+			{
+				continue;
+			}
+
 			foreach ($gitHubRelease->assets as $asset)
 			{
 				if (preg_match('/^Joomla_.*-Full_Package\.zip$/', $asset->name) === 1)
