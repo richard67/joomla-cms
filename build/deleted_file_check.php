@@ -29,8 +29,6 @@ use Joomla\CMS\Version;
  */
 const PHP_TAB = "\t";
 
-const PREVIOUS_VERSION = '3.10';
-
 function usage($command)
 {
 	echo PHP_EOL;
@@ -106,6 +104,20 @@ if (!is_dir($options['to']) && !(is_file($options['to']) && substr(strtolower($o
 
 	exit(1);
 }
+
+// Directories to skip for the check
+$excludedFolders = [
+	'administrator/components/com_search',
+	'components/com_search',
+	'images/sampledata',
+	'installation',
+	'media/plg_quickicon_eos310',
+	'media/system/images',
+	'modules/mod_search',
+	'plugins/fields/repeatable',
+	'plugins/quickicon/eos310',
+	'plugins/search',
+];
 
 /**
  * @param   string  $folderPath      Path to the folder with the extracted full package
@@ -220,20 +232,6 @@ function readZipFile($filePath, $excludeFolders): stdClass
 
 	return $return;
 }
-
-// Directories to skip for the check
-$excludedFolders = [
-	'administrator/components/com_search',
-	'components/com_search',
-	'images/sampledata',
-	'installation',
-	'media/plg_quickicon_eos310',
-	'media/system/images',
-	'modules/mod_search',
-	'plugins/fields/repeatable',
-	'plugins/quickicon/eos310',
-	'plugins/search',
-];
 
 // Read files and folders lists from folders or zip files
 if (is_dir($options['from']))
