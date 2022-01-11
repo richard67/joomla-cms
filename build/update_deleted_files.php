@@ -27,27 +27,12 @@ ini_set('display_errors', 1);
  */
 const PHP_TAB = "\t";
 
-/*
- * As long as the previous major version is still in active development, i.e.
- * has not reached end of life, this script will by default clone the repository
- * with Git and run the build script.
- * The below two parameters define the default branch and remote to be used for
- * that.
- * How to change the default behavior the previous major version has reached end
- * of life see the comment for the constant after these two.
- */
+// Change the following value to false when the previous major release has reached end of development.
+const PREVIOUS_CHECK = true;
+
 const PREVIOUS_VERSION = '3.10';
 
 const PREVIOUS_BRANCH = '3.10-dev';
-
-/*
- * When the previous major version has reached end of life, change the following
- * constant to a valid download URL for the latest full installation zip package
- * of that major version. Then this script here will use that by default instead
- * of cloning the repository with Git and running the build script, and it will
- * show this default value in the help.
- */
-const PREVIOUS_DOWNLOAD_URL = '';
 
 const GITHUB_REPO = 'https://github.com/joomla/joomla-cms.git';
 
@@ -56,9 +41,9 @@ function usage($command)
 	echo PHP_EOL;
 	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
 	echo PHP_TAB . '[options]:' . PHP_EOL;
-	echo PHP_TAB . PHP_TAB . '--prevBranch=<branch>:' . PHP_TAB . 'The git branch to build the previous major version from, defaults to ' . PREVIOUS_BRANCH . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--prevBranch=<branch>:' . PHP_TAB . 'The git branch to build the previous major version from' . (PREVIOUS_BRANCH ? ', defaults to ' . PREVIOUS_BRANCH : '') . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--prevRemote=<remote>:' . PHP_TAB . 'The git remote reference to build the previous major version from, defaults to the most recent tag for the "prevBranch" branch' . PHP_EOL;
-	echo PHP_TAB . PHP_TAB . '--prevZipUrl=<URL>:' . PHP_TAB . 'Full package zip download URL for the previous major version' . (PREVIOUS_DOWNLOAD_URL ? ', defaults to ' . PREVIOUS_DOWNLOAD_URL : '') . PHP_EOL;
+	echo PHP_TAB . PHP_TAB . '--prevZipUrl=<URL>:' . PHP_TAB . 'Full package zip download URL for the previous major version' . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--currRemote=<remote>:' . PHP_TAB . 'The git remote reference to build the current major version from, defaults to the most recent tag for the current branch' . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--currZipUrl=<URL>:' . PHP_TAB . 'Full package zip download URL for the current major version' . PHP_EOL;
 	echo PHP_TAB . PHP_TAB . '--relZipUrl=<URL>:' . PHP_TAB . 'Full package zip download URL for the latest release of the current major version' . PHP_EOL;
@@ -199,87 +184,90 @@ $currentVersionBuild = str_replace('-dev', '', $currentVersionBuild);
 $currentMinorVersion = $currentVersionBuildParts['major'] . '.' . $currentVersionBuildParts['minor'];
 
 // Clone and build previous major version or download from URL
-$previousBuildPath        = __DIR__ . '/tmp/update_deleted_files/previous-build';
-$previousBuildPackagePath = __DIR__ . '/tmp/update_deleted_files/previous-package';
-$previousMajorPackage     = '';
-$previousMajorDownload    = $options['prevZipUrl'] ?? PREVIOUS_DOWNLOAD_URL;
-
-if (empty($previousMajorDownload))
+if (PREVIOUS_CHECK)
 {
-	// No download URL: Check if there is a saved package from a previous build.
-	$files = isset($options['reuse']) ? glob($previousBuildPackagePath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip') : false;
+	$previousBuildPath        = __DIR__ . '/tmp/update_deleted_files/previous-build';
+	$previousBuildPackagePath = __DIR__ . '/tmp/update_deleted_files/previous-package';
+	$previousMajorPackage     = '';
+	$previousMajorDownload    = $options['prevZipUrl'] ?? '';
 
-	if ($files !== false && count($files) > 0)
+	if (empty($previousMajorDownload))
 	{
-		// There is one matching saved package from a previous build.
-		$previousMajorPackage = $files[0];
-	}
+		// No download URL: Check if there is a saved package from a previous build.
+		$files = isset($options['reuse']) ? glob($previousBuildPackagePath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip') : false;
 
-	// No package found from previous build: Clone the repository and build the previous release.
-	if ($previousMajorPackage === '')
-	{
-		system('rm -rf ' . $previousBuildPath);
-
-		$prevMajorBranch = $options['prevBranch'] ?? PREVIOUS_BRANCH;
-
-		echo PHP_EOL;
-		echo 'Cloning branch "' . $prevMajorBranch . '" into folder "' . $previousBuildPath . '"' . PHP_EOL;
-		echo PHP_EOL;
-
-		@mkdir($previousBuildPath, 0755, true);
-		@mkdir($previousBuildPackagePath, 0755, true);
-
-		chdir($previousBuildPath);
-
-		system($systemGit . ' clone -b ' . $prevMajorBranch . ' ' . GITHUB_REPO . ' .');
-
-		echo PHP_EOL;
-		echo 'Runing build script for previous major version.' . PHP_EOL;
-		echo PHP_EOL;
-
-		system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-bzip2');
-
-		chdir(__DIR__);
-
-		$files = glob($previousBuildPath . '/build/tmp/packages/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip');
-
-		if ($files !== false && count($files) === 1)
+		if ($files !== false && count($files) > 0)
 		{
-			$previousMajorPackage = $previousBuildPackagePath . '/' . basename($files[0]);
-
-			copy($files[0], $previousMajorPackage);
+			// There is one matching saved package from a previous build.
+			$previousMajorPackage = $files[0];
 		}
 
-		system('rm -rf ' . $previousBuildPath);
-	}
-}
-else
-{
-	// Use download URL: Check if there is a saved package from a previous download.
-	$previousMajorPackage = $previousBuildPackagePath . '/' . basename($previousMajorDownload);
+		// No package found from previous build: Clone the repository and build the previous release.
+		if ($previousMajorPackage === '')
+		{
+			system('rm -rf ' . $previousBuildPath);
 
-	if (!isset($options['reuse']) || !is_file($previousMajorPackage))
+			$prevMajorBranch = $options['prevBranch'] ?? PREVIOUS_BRANCH;
+
+			echo PHP_EOL;
+			echo 'Cloning branch "' . $prevMajorBranch . '" into folder "' . $previousBuildPath . '"' . PHP_EOL;
+			echo PHP_EOL;
+
+			@mkdir($previousBuildPath, 0755, true);
+			@mkdir($previousBuildPackagePath, 0755, true);
+
+			chdir($previousBuildPath);
+
+			system($systemGit . ' clone -b ' . $prevMajorBranch . ' ' . GITHUB_REPO . ' .');
+
+			echo PHP_EOL;
+			echo 'Runing build script for previous major version.' . PHP_EOL;
+			echo PHP_EOL;
+
+			system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-bzip2');
+
+			chdir(__DIR__);
+
+			$files = glob($previousBuildPath . '/build/tmp/packages/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip');
+
+			if ($files !== false && count($files) === 1)
+			{
+				$previousMajorPackage = $previousBuildPackagePath . '/' . basename($files[0]);
+
+				copy($files[0], $previousMajorPackage);
+			}
+
+			system('rm -rf ' . $previousBuildPath);
+		}
+	}
+	else
 	{
-		// Donwload package.
+		// Use download URL: Check if there is a saved package from a previous download.
+		$previousMajorPackage = $previousBuildPackagePath . '/' . basename($previousMajorDownload);
+
+		if (!isset($options['reuse']) || !is_file($previousMajorPackage))
+		{
+			// Donwload package.
+			echo PHP_EOL;
+			echo 'Downloading package "' . $previousMajorDownload . '".' . PHP_EOL;
+
+			system('curl -L -o ' . $previousMajorPackage . ' ' . $previousMajorDownload);
+		}
+
+		if (!is_file($previousMajorPackage))
+		{
+			$previousMajorPackage = '';
+		}
+	}
+
+	// If nothing found for the previous major version we can't continue.
+	if (!$previousMajorPackage)
+	{
 		echo PHP_EOL;
-		echo 'Downloading package "' . $previousMajorDownload . '".' . PHP_EOL;
+		echo 'Error: Could not find previous major release package "' . $packagesPath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip".' . PHP_EOL;
 
-		system('curl -L -o ' . $previousMajorPackage . ' ' . $previousMajorDownload);
+		exit(1);
 	}
-
-	if (!is_file($previousMajorPackage))
-	{
-		$previousMajorPackage = '';
-	}
-}
-
-// If nothing found for the previous major version we can't continue.
-if (!$previousMajorPackage)
-{
-	echo PHP_EOL;
-	echo 'Error: Could not find previous major release package "' . $packagesPath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip".' . PHP_EOL;
-
-	exit(1);
 }
 
 $previousVersionPackageUrl = '';
@@ -360,17 +348,28 @@ $deletedFilesFile   = __DIR__ . '/deleted_files.txt';
 $deletedFoldersFile = __DIR__ . '/deleted_folders.txt';
 $renamedFilesFile   = __DIR__ . '/renamed_files.txt';
 
-echo PHP_EOL;
-echo 'Comparing from ".' . substr($previousMajorPackage, strlen(__DIR__)) . '"' . PHP_EOL;
-echo '            to ".' . substr($currentVersionPackage, strlen(__DIR__)) . '".' . PHP_EOL;
+if (PREVIOUS_CHECK)
+{
+	echo PHP_EOL;
+	echo 'Comparing from ".' . substr($previousMajorPackage, strlen(__DIR__)) . '"' . PHP_EOL;
+	echo '            to ".' . substr($currentVersionPackage, strlen(__DIR__)) . '".' . PHP_EOL;
 
-system('php ./deleted_file_check.php --from=' . $previousMajorPackage . ' --to=' . $currentVersionPackage . ' > /dev/null');
+	system('php ./deleted_file_check.php --from=' . $previousMajorPackage . ' --to=' . $currentVersionPackage . ' > /dev/null');
 
-$addedFiles       = file_exists($addedFilesFile) ? explode("\n", file_get_contents($addedFilesFile)) : [];
-$addedFolders     = file_exists($addedFoldersFile) ? explode("\n", file_get_contents($addedFoldersFile)) : [];
-$deletedFiles     = file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : [];
-$deletedFolders   = file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : [];
-$renamedFilesRows = file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : [];
+	$addedFiles       = file_exists($addedFilesFile) ? explode("\n", file_get_contents($addedFilesFile)) : [];
+	$addedFolders     = file_exists($addedFoldersFile) ? explode("\n", file_get_contents($addedFoldersFile)) : [];
+	$deletedFiles     = file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : [];
+	$deletedFolders   = file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : [];
+	$renamedFilesRows = file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : [];
+}
+else
+{
+	$addedFiles       = [];
+	$addedFolders     = [];
+	$deletedFiles     = [];
+	$deletedFolders   = [];
+	$renamedFilesRows = [];
+}
 
 echo PHP_EOL;
 echo 'Comparing from ".' . substr($previousVersionPackage, strlen(__DIR__)) . '"' . PHP_EOL;
