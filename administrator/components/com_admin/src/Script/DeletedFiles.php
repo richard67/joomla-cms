@@ -5717,5 +5717,7 @@ class DeletedFiles
 		'/templates/system/scss/general.scss',
 		'/templates/system/scss/offline.scss',
 		'/templates/system/scss/offline_rtl.scss',
+		// From 4.1.0-beta3 to 4.1.0-rc1
+		'/api/components/com_media/src/Helper/AdapterTrait.php',
 	];
 }
