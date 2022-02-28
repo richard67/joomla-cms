@@ -53,9 +53,10 @@ class MysqlChangeItem extends ChangeItem
 		$updateQuery = preg_replace($find, $replace, $this->updateQuery);
 		$wordArray = preg_split("~'[^']*'(*SKIP)(*F)|\s+~u", trim($updateQuery, "; \t\n\r\0\x0B"));
 
-		// First, make sure we have an array of at least 5 elements
-		// if not, we can't make a check query for this one
-		if (\count($wordArray) < 5)
+		$totalWords = \count($wordArray);
+
+		// Make sure we have an array of at least 5 elements
+		if ($totalWords < 5)
 		{
 			// Done with method
 			return;
@@ -77,22 +78,102 @@ class MysqlChangeItem extends ChangeItem
 			return;
 		}
 
-		// For the remaining query types make sure we have an array of at least 6 elements
-		if (\count($wordArray) < 6)
-		{
-			// Done with method
-			return;
-		}
-
 		if ($command === 'ALTER TABLE')
 		{
-			$alterCommand = strtoupper($wordArray[3] . ' ' . $wordArray[4]);
+			$uWord3 = strtoupper($wordArray[3]);
+			$uWord4 = strtoupper($wordArray[4]);
 
-			if ($alterCommand === 'ADD COLUMN')
+			$alterCommand = $uWord3 . ' ' . $uWord4;
+			$nextWordIdx  = 5;
+
+			// Check for missing optional keywords
+			if ($uWord3 === 'RENAME' && !in_array($uWord4, ['COLUMN', 'INDEX', 'KEY', 'TO']))
 			{
-				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $this->fixQuote($wordArray[5]);
-				$this->queryType = 'ADD_COLUMN';
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $this->fixQuote($wordArray[5]));
+				// Table rename with ALTER TABLE and optional keyword "TO" missing
+				$alterCommand = 'RENAME TO';
+				$nextWordIdx  = 4;
+			}
+			elseif (in_array($uWord3, ['ADD', 'ALTER', 'CHANGE', 'DROP', 'MODIFY'])
+				&& !in_array($uWord4, ['COLUMN', 'CONSTRAINT', 'FOREIGN', 'FULLTEXT', 'INDEX', 'KEY', 'PARTITION', 'PERIOD', 'PRIMARY', 'SPATIAL', 'SYSTEM', 'UNIQUE']))
+			{
+				// Column action with optional keyword "COLUMN" missing
+				$alterCommand = $uWord3 . ' COLUMN';
+				$nextWordIdx  = 4;
+			}
+
+			if ($totalWords < $nextWordIdx + 1)
+			{
+				// Done with method
+				return;
+			}
+
+			if ($alterCommand === 'RENAME TO')
+			{
+				$table  = $this->fixQuote($wordArray[$nextWordIdx]);
+				$result = 'SHOW TABLES LIKE ' . $table;
+
+				$this->queryType          = 'RENAME_TABLE';
+				$this->checkQueryExpected = 1;
+				$this->msgElements        = array($table);
+			}
+			elseif ($alterCommand === 'ADD COLUMN')
+			{
+				$column = $this->fixQuote($wordArray[$nextWordIdx]);
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column;
+
+				$this->queryType   = 'ADD_COLUMN';
+				$this->msgElements = array($this->fixQuote($wordArray[2]), $column);
+			}
+			elseif ($alterCommand === 'DROP COLUMN')
+			{
+				$column = $this->fixQuote($wordArray[$nextWordIdx]);
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE Field = ' . $column;
+
+				$this->queryType          = 'DROP_COLUMN';
+				$this->checkQueryExpected = 0;
+				$this->msgElements        = array($this->fixQuote($wordArray[2]), $column);
+			}
+			elseif ($alterCommand === 'RENAME COLUMN')
+			{
+				$column = $this->fixQuote($wordArray[7]);
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE Field = ' . $column;
+
+				$this->queryType   = 'RENAME_COLUMN';
+				$this->msgElements = array($this->fixQuote($wordArray[2]), $column);
+			}
+			elseif ($alterCommand === 'ALTER COLUMN')
+			{
+				if ($totalWords < $nextWordIdx + 3 || strtoupper($wordArray[$nextWordIdx + 2]) !== 'DEFAULT')
+				{
+					// Done with method
+					return;
+				}
+
+				$column      = $this->fixQuote($wordArray[$nextWordIdx]);
+				$alterAction = strtoupper($wordArray[$nextWordIdx + 1]);
+
+				if ($alterAction === 'DROP')
+				{
+					$type   = 'NOT DEFAULT';
+					$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column
+						. ' AND `default` IS NULL';
+				}
+				elseif ($alterAction === 'SET')
+				{
+					$changesArray = \array_slice($wordArray, $nextWordIdx + 2);
+					$defaultCheck = $this->checkDefault($changesArray, '');
+					$type         = 'DEFAULT ' . $wordArray[$nextWordIdx + 3];
+					$result       = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column
+						. ' AND' . $defaultCheck;
+				}
+				else
+				{
+					// Done with method
+					return;
+				}
+
+				$this->queryType   = 'CHANGE_COLUMN_TYPE';
+				$this->msgElements = array($this->fixQuote($wordArray[2]), $column, $type);
 			}
 			elseif ($alterCommand === 'ADD INDEX' || $alterCommand === 'ADD KEY')
 			{
@@ -106,7 +187,8 @@ class MysqlChangeItem extends ChangeItem
 				}
 
 				$result = 'SHOW INDEXES IN ' . $wordArray[2] . ' WHERE Key_name = ' . $index;
-				$this->queryType = 'ADD_INDEX';
+
+				$this->queryType   = 'ADD_INDEX';
 				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
 			}
 			elseif ($alterCommand === 'ADD UNIQUE')
@@ -133,37 +215,42 @@ class MysqlChangeItem extends ChangeItem
 				}
 
 				$result = 'SHOW INDEXES IN ' . $wordArray[2] . ' WHERE Key_name = ' . $index;
-				$this->queryType = 'ADD_INDEX';
+
+				$this->queryType   = 'ADD_INDEX';
 				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
 			}
 			elseif ($alterCommand === 'DROP INDEX' || $alterCommand === 'DROP KEY')
 			{
-				$index = $this->fixQuote($wordArray[5]);
+				$index  = $this->fixQuote($wordArray[5]);
 				$result = 'SHOW INDEXES IN ' . $wordArray[2] . ' WHERE Key_name = ' . $index;
-				$this->queryType = 'DROP_INDEX';
-				$this->checkQueryExpected = 0;
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
-			}
-			elseif ($alterCommand === 'DROP COLUMN')
-			{
-				$index = $this->fixQuote($wordArray[5]);
-				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE Field = ' . $index;
-				$this->queryType = 'DROP_COLUMN';
-				$this->checkQueryExpected = 0;
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
-			}
-			elseif (strtoupper($wordArray[3]) === 'MODIFY')
-			{
-				// Kludge to fix problem with "integer unsigned"
-				$type = $wordArray[5];
 
-				if (isset($wordArray[6]))
+				$this->queryType          = 'DROP_INDEX';
+				$this->checkQueryExpected = 0;
+				$this->msgElements        = array($this->fixQuote($wordArray[2]), $index);
+			}
+			elseif ($alterCommand === 'RENAME INDEX' || $alterCommand === 'RENAME KEY')
+			{
+				$index  = $this->fixQuote($wordArray[7]);
+				$result = 'SHOW INDEXES IN ' . $wordArray[2] . ' WHERE Key_name = ' . $index;
+
+				$this->queryType   = 'RENAME_INDEX';
+				$this->msgElements = array($this->fixQuote($wordArray[2]), $index);
+			}
+			elseif ($alterCommand === 'MODIFY COLUMN')
+			{
+				$column = $this->fixQuote($wordArray[$nextWordIdx]);
+
+				// Kludge to fix problem with "integer unsigned"
+				$idxTypeEnd = $nextWordIdx + 1;
+				$type       = $wordArray[$idxTypeEnd];
+
+				if (isset($wordArray[$idxTypeEnd + 1]))
 				{
-					$type = $this->fixInteger($wordArray[5], $wordArray[6]);
+					$type = $this->fixInteger($wordArray[$idxTypeEnd], $wordArray[++$idxTypeEnd]);
 				}
 
 				// Detect changes in NULL and in DEFAULT column attributes
-				$changesArray = \array_slice($wordArray, 6);
+				$changesArray = \array_slice($wordArray, $idxTypeEnd + 1);
 				$defaultCheck = $this->checkDefault($changesArray, $type);
 				$nullCheck = $this->checkNull($changesArray);
 
@@ -173,25 +260,28 @@ class MysqlChangeItem extends ChangeItem
 				 */
 				$typeCheck = $this->fixUtf8mb4TypeChecks($type);
 
-				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $this->fixQuote($wordArray[4])
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $column
 					. ' AND ' . $typeCheck
 					. ($defaultCheck ? ' AND ' . $defaultCheck : '')
 					. ($nullCheck ? ' AND ' . $nullCheck : '');
 				$this->queryType = 'CHANGE_COLUMN_TYPE';
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $this->fixQuote($wordArray[4]), $type);
+				$this->msgElements = array($this->fixQuote($wordArray[2]), $column, $type);
 			}
-			elseif (strtoupper($wordArray[3]) === 'CHANGE')
+			elseif ($alterCommand === 'CHANGE COLUMN')
 			{
-				// Kludge to fix problem with "integer unsigned"
-				$type = $wordArray[6];
+				$columnNameNew = $this->fixQuote($wordArray[$nextWordIdx + 1]);
 
-				if (isset($wordArray[7]))
+				// Kludge to fix problem with "integer unsigned"
+				$idxTypeEnd = $nextWordIdx + 2;
+				$type       = $wordArray[$idxTypeEnd];
+
+				if (isset($wordArray[$idxTypeEnd + 1]))
 				{
-					$type = $this->fixInteger($wordArray[6], $wordArray[7]);
+					$type = $this->fixInteger($wordArray[$idxTypeEnd], $wordArray[++$idxTypeEnd]);
 				}
 
 				// Detect changes in NULL and in DEFAULT column attributes
-				$changesArray = \array_slice($wordArray, 6);
+				$changesArray = \array_slice($wordArray, $idxTypeEnd + 1);
 				$defaultCheck = $this->checkDefault($changesArray, $type);
 				$nullCheck = $this->checkNull($changesArray);
 
@@ -201,29 +291,36 @@ class MysqlChangeItem extends ChangeItem
 				 */
 				$typeCheck = $this->fixUtf8mb4TypeChecks($type);
 
-				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $this->fixQuote($wordArray[5])
+				$result = 'SHOW COLUMNS IN ' . $wordArray[2] . ' WHERE field = ' . $columnNameNew
 					. ' AND ' . $typeCheck
 					. ($defaultCheck ? ' AND ' . $defaultCheck : '')
 					. ($nullCheck ? ' AND ' . $nullCheck : '');
 				$this->queryType = 'CHANGE_COLUMN_TYPE';
-				$this->msgElements = array($this->fixQuote($wordArray[2]), $this->fixQuote($wordArray[5]), $type);
+				$this->msgElements = array($this->fixQuote($wordArray[2]), $columnNameNew, $type);
 			}
 		}
 
 		if ($command === 'CREATE TABLE')
 		{
-			if (strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS')
+			if ($totalWords > 5 && strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS')
 			{
-				$table = $wordArray[5];
+				$table = $this->fixQuote($wordArray[5]);
+			}
+			elseif ($totalWords > 2)
+			{
+				$table = $this->fixQuote($wordArray[2]);
 			}
 			else
 			{
-				$table = $wordArray[2];
+				// Done with method
+				return;
 			}
 
-			$result = 'SHOW TABLES LIKE ' . $this->fixQuote($table);
-			$this->queryType = 'CREATE_TABLE';
-			$this->msgElements = array($this->fixQuote($table));
+			$result = 'SHOW TABLES LIKE ' . $table;
+
+			$this->queryType          = 'CREATE_TABLE';
+			$this->checkQueryExpected = 1;
+			$this->msgElements        = array($table);
 		}
 
 		// Set fields based on results
