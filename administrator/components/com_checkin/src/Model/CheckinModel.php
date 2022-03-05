@@ -207,10 +207,8 @@ class CheckinModel extends ListModel
 				{
 					$query->where($db->quoteName('checked_out') . ' IS NOT NULL');
 				}
-				else
-				{
-					$query->where($db->quoteName('checked_out') . ' > 0');
-				}
+
+				$query->where($db->quoteName('checked_out') . ' > 0');
 
 				$db->setQuery($query);
 				$count = $db->loadResult();
