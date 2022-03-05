@@ -125,6 +125,7 @@ class CheckinModel extends ListModel
 
 			if ($fields['checked_out']->Null === 'YES')
 			{
+				// This includes also old zero values so they will be fixed (set to NULL) on check in
 				$query->where($db->quoteName('checked_out') . ' IS NOT NULL');
 			}
 			else
@@ -208,6 +209,7 @@ class CheckinModel extends ListModel
 					$query->where($db->quoteName('checked_out') . ' IS NOT NULL');
 				}
 
+				// Don't handle zero values as checked out in any case
 				$query->where($db->quoteName('checked_out') . ' > 0');
 
 				$db->setQuery($query);
