@@ -5772,6 +5772,6 @@ class DeletedFiles
 		// From 4.1.1 to 4.1.2
 		'/administrator/components/com_users/src/Field/PrimaryauthprovidersField.php',
 		// From 4.1.2 to 4.1.3
-		'libraries/vendor/webmozart/assert/.php_cs',
+		'/libraries/vendor/webmozart/assert/.php_cs',
 	];
 }
