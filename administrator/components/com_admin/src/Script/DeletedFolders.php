@@ -25,7 +25,7 @@ class DeletedFolders
 	 * @since  __DEPLOY_VERSION__
 	 */
 	public $folders = [
-		// From 3.10 to 4.0
+		// From 3.10 to 4.1
 		'/templates/system/images',
 		'/templates/system/html',
 		'/templates/protostar/less',
@@ -1334,5 +1334,26 @@ class DeletedFolders
 		'/administrator/templates/atum/css',
 		// From 4.1.0-beta3 to 4.1.0-rc1
 		'/api/components/com_media/src/Helper',
+		// From 4.1.0 to 4.1.1
+		'/libraries/vendor/tobscure/json-api/tests/Exception/Handler',
+		'/libraries/vendor/tobscure/json-api/tests/Exception',
+		'/libraries/vendor/tobscure/json-api/tests',
+		'/libraries/vendor/tobscure/json-api/.git/refs/tags',
+		'/libraries/vendor/tobscure/json-api/.git/refs/remotes/origin',
+		'/libraries/vendor/tobscure/json-api/.git/refs/remotes',
+		'/libraries/vendor/tobscure/json-api/.git/refs/heads',
+		'/libraries/vendor/tobscure/json-api/.git/refs',
+		'/libraries/vendor/tobscure/json-api/.git/objects/pack',
+		'/libraries/vendor/tobscure/json-api/.git/objects/info',
+		'/libraries/vendor/tobscure/json-api/.git/objects',
+		'/libraries/vendor/tobscure/json-api/.git/logs/refs/remotes/origin',
+		'/libraries/vendor/tobscure/json-api/.git/logs/refs/remotes',
+		'/libraries/vendor/tobscure/json-api/.git/logs/refs/heads',
+		'/libraries/vendor/tobscure/json-api/.git/logs/refs',
+		'/libraries/vendor/tobscure/json-api/.git/logs',
+		'/libraries/vendor/tobscure/json-api/.git/info',
+		'/libraries/vendor/tobscure/json-api/.git/hooks',
+		'/libraries/vendor/tobscure/json-api/.git/branches',
+		'/libraries/vendor/tobscure/json-api/.git',
 	];
 }
