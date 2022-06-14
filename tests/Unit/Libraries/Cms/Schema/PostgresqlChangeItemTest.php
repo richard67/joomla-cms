@@ -137,12 +137,15 @@ class PostgresqlChangeItemTest extends UnitTestCase
 	}
 
 	/**
+	 * @testdox  A PostgresqlChangeItem instance is retreived with the right properties for the given SQL query
+	 *
+	 * @covers        Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem::getInstance
+	 * @dataProvider  constructData
+	 *
 	 * @param   array  $options  Options array to inject
 	 * @param   array  $expects  Expected data values
 	 *
-	 * @dataProvider constructData
-	 *
-	 * @return void
+	 * @return  void
 	 * @since   __DEPLOY_VERSION__
 	 */
 	public function testBuildCheckQuery($options, $expects)
