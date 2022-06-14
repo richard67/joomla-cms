@@ -10,8 +10,9 @@ namespace Joomla\Tests\Unit\Libraries\Cms\Schema;
 
 use Joomla\CMS\Schema\ChangeItem\MysqlChangeItem;
 use Joomla\Database\Mysqli\MysqliDriver;
+use Joomla\Tests\Unit\UnitTestCase;
 
-class MysqlChangeItemTest extends \PHPUnit\Framework\TestCase
+class MysqlChangeItemTest extends UnitTestCase
 {
 	/**
 	 * @var  MysqliDriver|MockObject

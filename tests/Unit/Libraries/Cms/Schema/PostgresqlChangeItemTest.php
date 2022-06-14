@@ -10,8 +10,9 @@ namespace Joomla\Tests\Unit\Libraries\Cms\Schema;
 
 use Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem;
 use Joomla\Database\DatabaseDriver;
+use Joomla\Tests\Unit\UnitTestCase;
 
-class PostgresqlChangeItemTest extends \PHPUnit\Framework\TestCase
+class PostgresqlChangeItemTest extends UnitTestCase
 {
 	/**
 	 * @var  DatabaseDriver|MockObject
