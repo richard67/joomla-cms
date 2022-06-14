@@ -49,12 +49,15 @@ class ChangeItemTest extends \PHPUnit\Framework\TestCase
 	}
 
 	/**
+	 * @testdox  A ChangeItem instance is retreived with the right subclass for the given database server type
+	 *
+	 * @covers        Joomla\CMS\Schema\ChangeItem::getInstance
+	 * @dataProvider  dataGetInstance
+	 *
 	 * @param   string  $servertype    The value to be returned by the getServerType method of the database driver
 	 * @param   string  $itemSubclass  The subclass of ChangeItem that is expected
 	 *
-	 * @dataProvider  dataGetInstance
-	 *
-	 * @return void
+	 * @return  void
 	 * @since   __DEPLOY_VERSION__
 	 */
 	public function testGetInstanceReturnsTheCorrectObject($serverType, $itemSubclass)
@@ -69,7 +72,11 @@ class ChangeItemTest extends \PHPUnit\Framework\TestCase
 	}
 
 	/**
-	 * @return void
+	 * @testdox  A runtime exception is thrown when trying to retrieve a ChangeItem instance for an invalid database server type
+	 *
+	 * @covers  Joomla\CMS\Schema\ChangeItem::getInstance
+	 *
+	 * @return  void
 	 * @since   __DEPLOY_VERSION__
 	 */
 	public function testGetInstanceThrowsAnExceptionForAnUnsupportedDbServerType()
