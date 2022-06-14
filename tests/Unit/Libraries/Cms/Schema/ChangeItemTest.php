@@ -10,8 +10,9 @@ namespace Joomla\Tests\Unit\Libraries\Cms\Schema;
 
 use Joomla\CMS\Schema\ChangeItem;
 use Joomla\Database\DatabaseDriver;
+use Joomla\Tests\Unit\UnitTestCase;
 
-class ChangeItemTest extends \PHPUnit\Framework\TestCase
+class ChangeItemTest extends UnitTestCase
 {
 	/**
 	 * @var  DatabaseDriver|MockObject
