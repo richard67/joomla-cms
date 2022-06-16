@@ -6,54 +6,62 @@
  * @copyright   (C) 2022 Open Source Matters, Inc. <https://www.joomla.org>
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
+
 namespace Joomla\Tests\Unit\Libraries\Cms\Schema;
 
 use Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem;
-use Joomla\Database\DatabaseDriver;
+use Joomla\Database\Pgsql\PgsqlDriver;
 use Joomla\Tests\Unit\UnitTestCase;
 
+/**
+ * Test class for \Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem
+ *
+ * @package     Joomla.UnitTest
+ * @subpackage  Schema
+ *
+ * @testdox     The PostgresqlChangeItem
+ *
+ * @since       __DEPLOY_VERSION__
+ */
 class PostgresqlChangeItemTest extends UnitTestCase
 {
 	/**
-	 * @var  DatabaseDriver|MockObject
+	 * @testdox  can build the right query
 	 *
-	 * @since   __DEPLOY_VERSION__
-	 */
-	protected $db;
-
-	/**
-	 * Sets up the database mock.
-	 * This method is called before a test is executed.
+	 * @dataProvider  constructData
+	 *
+	 * @param   array  $options  Options array to inject
+	 * @param   array  $expects  Expected data values
 	 *
 	 * @return  void
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	protected function setUp():void
+	public function testBuildCheckQuery($options, $expects)
 	{
-		$this->db = $this->createMock(DatabaseDriver::class);
+		$message = "Test '%s' for query '". $options['query'] . "' failed.";
 
-		$this->db->expects($this->once())
-			->method('getServerType')
-			->willReturn('postgresql');
+		$db = $this->createStub(PgsqlDriver::class);
+		$db->method('getServerType')->willReturn('postgresql');
+		$db->method('getPrefix')->willReturn('jos_');
+		$db->method('quote')->will(
+			$this->returnCallback(function ($arg) {
+				return "'" . $arg . "'";
+			})
+		);
+		$db->method('quoteName')->will(
+			$this->returnCallback(function ($arg) {
+				return '"' . $arg . '"';
+			})
+		);
 
-		$this->db->expects($this->any())
-			->method('getPrefix')
-			->willReturn('jos_');
+		$item = new PostgresqlChangeItem($db, '', $options['query']);
 
-		$this->db->expects($this->any())
-			->method('quote')->will(
-				$this->returnCallback(function ($arg) {
-					return "'" . $arg . "'";
-				})
-			);
-
-		$this->db->expects($this->any())
-			->method('quoteName')->will(
-				$this->returnCallback(function ($arg) {
-					return '"' . $arg . '"';
-				})
-			);
+		$this->assertEquals($expects['checkQuery'], $item->checkQuery, sprintf($message, 'checkQuery'));
+		$this->assertEquals($expects['queryType'], $item->queryType, sprintf($message, 'queryType'));
+		$this->assertEquals($expects['checkQueryExpected'], $item->checkQueryExpected, sprintf($message, 'checkQueryExpected'));
+		$this->assertEquals($expects['msgElements'], $item->msgElements, sprintf($message, 'msgElements'));
+		$this->assertEquals($expects['checkStatus'], $item->checkStatus, sprintf($message, 'checkStatus'));
 	}
 
 	/**
@@ -134,29 +142,5 @@ class PostgresqlChangeItemTest extends UnitTestCase
 				],
 			],
 		];
-	}
-
-	/**
-	 * @testdox  A PostgresqlChangeItem instance is retreived with the right properties for the given SQL query
-	 *
-	 * @covers        Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem::getInstance
-	 * @dataProvider  constructData
-	 *
-	 * @param   array  $options  Options array to inject
-	 * @param   array  $expects  Expected data values
-	 *
-	 * @return  void
-	 * @since   __DEPLOY_VERSION__
-	 */
-	public function testBuildCheckQuery($options, $expects)
-	{
-		$message = "Test '%s' for query '". $options['query'] . "' failed.";
-		$item    = PostgresqlChangeItem::getInstance($this->db, '/not/really/used/4.0.0-2018-03-05.sql', $options['query']);
-
-		$this->assertEquals($expects['checkQuery'], $item->checkQuery, sprintf($message, 'checkQuery'));
-		$this->assertEquals($expects['queryType'], $item->queryType, sprintf($message, 'queryType'));
-		$this->assertEquals($expects['checkQueryExpected'], $item->checkQueryExpected, sprintf($message, 'checkQueryExpected'));
-		$this->assertEquals($expects['msgElements'], $item->msgElements, sprintf($message, 'msgElements'));
-		$this->assertEquals($expects['checkStatus'], $item->checkStatus, sprintf($message, 'checkStatus'));
 	}
 }
