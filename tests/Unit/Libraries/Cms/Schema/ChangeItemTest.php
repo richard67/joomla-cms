@@ -26,18 +26,18 @@ use Joomla\Tests\Unit\UnitTestCase;
 class ChangeItemTest extends UnitTestCase
 {
 	/**
-	 * @testdox  has the right subclass
+	 * @testdox  has the right subclass for the given database server type
 	 *
-	 * @dataProvider  constructData
+	 * @dataProvider  getInstanceSubclassData
 	 *
-	 * @param   string  $servertype    The value to be returned by the getServerType method of the database driver
+	 * @param   string  $servertype    The value returned by the getServerType method of the database driver
 	 * @param   string  $itemSubclass  The subclass of ChangeItem that is expected
 	 *
 	 * @return  void
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function testChangeItemSubclass($serverType, $itemSubclass)
+	public function testGetInstanceSubclass($serverType, $itemSubclass)
 	{
 		$db = $this->createStub(DatabaseDriver::class);
 
@@ -45,17 +45,17 @@ class ChangeItemTest extends UnitTestCase
 
 		$item = ChangeItem::getInstance($db, '', '');
 
-		$this->assertInstanceOf('\\Joomla\\CMS\\Schema\\ChangeItem\\' . $itemSubclass . 'ChangeItem', $item, 'The correct ChangeItem subclass was not instantiated');
+		$this->assertInstanceOf('\\Joomla\\CMS\\Schema\\ChangeItem\\' . $itemSubclass . 'ChangeItem', $item);
 	}
 
 	/**
-	 * @testdox  throws a runtime exception if invalid database server type
+	 * @testdox  throws a runtime exception with an unsupported database server type
 	 *
 	 * @return  void
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function testChangeItemException()
+	public function testGetInstanceUnsupportedDatabaseServerType()
 	{
 		$db = $this->createStub(DatabaseDriver::class);
 
@@ -67,15 +67,16 @@ class ChangeItemTest extends UnitTestCase
 	}
 
 	/**
-	 * Provides constructor data for test methods
+	 * Provides constructor data for the testGetInstanceSubclass method
 	 *
 	 * @return  array
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function constructData(): array
+	public function getInstanceSubclassData(): array
 	{
 		return [
+			// 'data set name' => ['database server type', 'ChangeItem subclass']
 			'MySQL'      => ['mysql', 'Mysql'],
 			'PostgreSQL' => ['postgresql', 'Postgresql'],
 		];
