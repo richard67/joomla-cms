@@ -28,7 +28,7 @@ class ChangeItemTest extends UnitTestCase
 	/**
 	 * @testdox  has the right subclass for the given database server type
 	 *
-	 * @dataProvider  getInstanceSubclassData
+	 * @dataProvider  dataGetInstanceSubclass
 	 *
 	 * @param   string  $servertype    The value returned by the getServerType method of the database driver
 	 * @param   string  $itemSubclass  The subclass of ChangeItem that is expected
@@ -55,7 +55,7 @@ class ChangeItemTest extends UnitTestCase
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function testGetInstanceUnsupportedDatabaseServerType()
+	public function testGetInstanceUnsupportedDatabaseType()
 	{
 		$db = $this->createStub(DatabaseDriver::class);
 
@@ -73,7 +73,7 @@ class ChangeItemTest extends UnitTestCase
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function getInstanceSubclassData(): array
+	public function dataGetInstanceSubclass(): array
 	{
 		return [
 			// 'data set name' => ['database server type', 'ChangeItem subclass']
