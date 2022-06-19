@@ -10,6 +10,8 @@
 namespace Joomla\Tests\Unit\Libraries\Cms\Schema;
 
 use Joomla\CMS\Schema\ChangeItem;
+use Joomla\CMS\Schema\ChangeItem\MysqlChangeItem;
+use Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Tests\Unit\UnitTestCase;
 
@@ -45,7 +47,7 @@ class ChangeItemTest extends UnitTestCase
 
 		$item = ChangeItem::getInstance($db, '', '');
 
-		$this->assertInstanceOf('\\Joomla\\CMS\\Schema\\ChangeItem\\' . $itemSubclass . 'ChangeItem', $item);
+		$this->assertInstanceOf($itemSubclass, $item);
 	}
 
 	/**
@@ -77,8 +79,8 @@ class ChangeItemTest extends UnitTestCase
 	{
 		return [
 			// 'data set name' => ['database server type', 'ChangeItem subclass']
-			'MySQL'      => ['mysql', 'Mysql'],
-			'PostgreSQL' => ['postgresql', 'Postgresql'],
+			'MySQL'      => ['mysql', MysqlChangeItem::class],
+			'PostgreSQL' => ['postgresql', PostgresqlChangeItem::class],
 		];
 	}
 }
