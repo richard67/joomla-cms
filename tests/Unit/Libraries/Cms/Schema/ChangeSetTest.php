@@ -66,6 +66,47 @@ class ChangeSetTest extends UnitTestCase
 	}
 
 	/**
+	 * @testdox  the object is instantiated correctly
+	 *
+	 * @dataProvider  dataObjectIsInstantiatedCorrectly
+	 *
+	 * @param   string  $servertype      The value returned by the getServerType method of the database driver
+	 * @param   string  $driverSubclass  The subclass of DatabaseDriver that is expected
+	 * @param   string  $itemSubclass    The subclass of ChangeItem that is expected
+	 *
+	 * @return  void
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function testObjectIsInstantiatedCorrectly($serverType, $driverSubclass, $itemSubclass)
+	{
+		$db = $this->createStub($driverSubclass);
+		$db->method('getServerType')->willReturn($serverType);
+
+		$changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+		$this->assertAttributeInstanceOf($driverSubclass, 'db', $changeSet, 'The database driver was not correctly injected');
+		$this->assertAttributeContainsOnly($itemSubclass, 'changeItems', $changeSet, null, 'The list of change items was not correctly set');
+	}
+
+	/**
+	 * Provides constructor data for the testGetInstanceSubclass method
+	 *
+	 * @return  array
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function dataObjectIsInstantiatedCorrectly(): array
+	{
+		return [
+			// 'Test set name' => ['database server type', 'DatabaseDriver subclass', 'ChangeItem subclass']
+			'MySQLi'           => ['mysql', MysqliDriver::class, MysqlChangeItem::class],
+			'MySQL (PDO)'      => ['mysql', MysqlDriver::class, MysqlChangeItem::class],
+			'PostgreSQL (PDO)' => ['postgresql', PgsqlDriver::class, PostgresqlChangeItem::class],
+		];
+	}
+
+	/**
 	 * @testdox  the schema's status is correctly initialized
 	 *
 	 * @return  void
