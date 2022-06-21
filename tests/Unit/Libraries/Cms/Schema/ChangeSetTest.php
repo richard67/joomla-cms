@@ -45,9 +45,15 @@ class ChangeSetTest extends UnitTestCase
 			mkdir(__DIR__ . '/tmp');
 		}
 
-		touch(__DIR__ . '/tmp/4.1.0-2022-07-01.sql');
-		touch(__DIR__ . '/tmp/4.2.0-2022-05-31.sql');
-		touch(__DIR__ . '/tmp/4.2.0-2022-06-01.sql');
+		if (!is_dir(__DIR__ . '/tmp/mysql'))
+		{
+			mkdir(__DIR__ . '/tmp/mysql');
+		}
+
+		if (!is_dir(__DIR__ . '/tmp/postgresql'))
+		{
+			mkdir(__DIR__ . '/tmp/postgresql');
+		}
 	}
 
 	/**
@@ -70,7 +76,6 @@ class ChangeSetTest extends UnitTestCase
 	 *
 	 * @dataProvider  dataObjectIsInstantiatedCorrectly
 	 *
-	 * @param   string  $servertype      The value returned by the getServerType method of the database driver
 	 * @param   string  $driverSubclass  The subclass of DatabaseDriver that is expected
 	 * @param   string  $itemSubclass    The subclass of ChangeItem that is expected
 	 *
@@ -80,13 +85,28 @@ class ChangeSetTest extends UnitTestCase
 	 */
 	public function testObjectIsInstantiatedCorrectly($serverType, $driverSubclass, $itemSubclass)
 	{
+		// Make sure that there will be two change items
+		file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-01.sql', "DUMMYTEXT\n");
+		file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-02.sql', "DUMMYTEXT\n");
+
 		$db = $this->createStub($driverSubclass);
 		$db->method('getServerType')->willReturn($serverType);
 
 		$changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
-		$this->assertAttributeInstanceOf($driverSubclass, 'db', $changeSet, 'The database driver was not correctly injected');
-		$this->assertAttributeContainsOnly($itemSubclass, 'changeItems', $changeSet, null, 'The list of change items was not correctly set');
+		// Use reflection to test protected properties
+		$reflectionClass = new \ReflectionClass($changeSet);
+		$changeSetDb     = $reflectionClass->getProperty('db');
+		$changeItems     = $reflectionClass->getProperty('changeItems');
+
+		$changeSetDb->setAccessible(true);
+		$changeItems->setAccessible(true);
+
+		$this->assertInstanceOf($driverSubclass, $changeSetDb->getValue($changeSet), 'The database driver should be correctly injected');
+
+		$this->assertContainsOnlyInstancesOf($itemSubclass, $changeItems->getValue($changeSet), 'The change items should have the right subclass');
+
+		$this->assertEquals(2, count($changeItems->getValue($changeSet)), 'There should be two change items');
 	}
 
 	/**
@@ -113,14 +133,22 @@ class ChangeSetTest extends UnitTestCase
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function testChangeSetGetStatus()
+	public function testGetStatus()
 	{
-		$db = $this->createStub(DatabaseDriver::class);
+		// Make sure that there will be two change items which will be skipped
+		file_put_contents(__DIR__ . '/tmp/mysql/4.2.0-2022-06-01.sql', "DUMMYTEXT\n");
+		file_put_contents(__DIR__ . '/tmp/mysql/4.2.0-2022-06-02.sql', "DUMMYTEXT\n");
 
-		// Use postgresql because this doesn't require utf8mb4 specific methods which exists in the MysqliDriver only
-		$db->method('getServerType')->willReturn('postgresql');
+		$db = $this->createStub(DatabaseDriver::class);
+		$db->method('getServerType')->willReturn('mysql');
 
 		$changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+		// Use reflection to test protected property
+		$reflectionClass = new \ReflectionClass($changeSet);
+		$changeItems     = $reflectionClass->getProperty('changeItems');
+
+		$changeItems->setAccessible(true);
 
 		$status = $changeSet->getStatus();
 
@@ -129,10 +157,10 @@ class ChangeSetTest extends UnitTestCase
 		$this->assertArrayHasKey('error', $status);
 		$this->assertArrayHasKey('skipped', $status);
 
-		$this->assertEquals([], $status['unchecked'], 'There should not be any unchecked items');
-		$this->assertEquals([], $status['ok'], 'There should not be any checked items');
-		$this->assertEquals([], $status['error'], 'There should not be any items with errors');
-		$this->assertEquals([], $status['skipped'], 'There should not be any skipped items');
+		$this->assertEquals([], $status['unchecked'], 'There should not be any unchecked change items');
+		$this->assertEquals([], $status['ok'], 'There should not be any checked change items');
+		$this->assertEquals([], $status['error'], 'There should not be any change items with errors');
+		$this->assertEquals($changeItems->getValue($changeSet), $status['skipped'], 'All change items should be skipped');
 	}
 
 	/**
@@ -142,12 +170,17 @@ class ChangeSetTest extends UnitTestCase
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function testChangeSetGetSchema()
+	public function testGetSchema()
 	{
 		$db = $this->createStub(DatabaseDriver::class);
+		$db->method('getServerType')->willReturn('mysql');
+
+		touch(__DIR__ . '/tmp/mysql/4.0.6-2021-12-23.sql');
+		touch(__DIR__ . '/tmp/mysql/4.1.0-2021-11-20.sql');
+		touch(__DIR__ . '/tmp/mysql/4.1.0-2021-11-28.sql');
 
 		$changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
-		$this->assertSame('4.2.0-2022-06-01', $changeSet->getSchema());
+		$this->assertSame('4.1.0-2021-11-28', $changeSet->getSchema());
 	}
 }
