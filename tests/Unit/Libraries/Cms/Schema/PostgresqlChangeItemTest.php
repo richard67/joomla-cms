@@ -26,6 +26,107 @@ use Joomla\Tests\Unit\UnitTestCase;
 class PostgresqlChangeItemTest extends UnitTestCase
 {
 	/**
+	 * @testdox  can build the right query for CREATE TABLE statements
+	 *
+	 * @dataProvider  dataBuildCheckQueryCreateTable
+	 *
+	 * @param   array  $query  CREATE TABLE statement
+	 *
+	 * @return  void
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function testBuildCheckQueryCreateTable($query)
+	{
+		$db = $this->createStub(PgsqlDriver::class);
+		$db->method('getPrefix')->willReturn('jos_');
+		$db->method('quote')->will(
+			$this->returnCallback(function ($arg) {
+				return "'" . $arg . "'";
+			})
+		);
+		$db->method('quoteName')->will(
+			$this->returnCallback(function ($arg) {
+				return '"' . $arg . '"';
+			})
+		);
+
+		$item = new PostgresqlChangeItem($db, '', $query);
+
+		$this->assertEquals("SELECT table_name FROM information_schema.tables WHERE table_name='jos_foo'", $item->checkQuery);
+		$this->assertEquals('CREATE_TABLE', $item->queryType);
+		$this->assertEquals(1, $item->checkQueryExpected);
+		$this->assertEquals(["'jos_foo'"], $item->msgElements);
+		$this->assertEquals(0, $item->checkStatus);
+	}
+
+	/**
+	 * Provides constructor data for the testBuildCheckQueryCreateTable method
+	 *
+	 * @return  array
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function dataBuildCheckQueryCreateTable(): array
+	{
+		return [
+			['CREATE TABLE "#__foo" ("bar" text NOT NULL)'],
+			['CREATE TABLE #__foo ("bar" text NOT NULL)'],
+			['CREATE TABLE IF NOT EXISTS "#__foo" ("bar" text)'],
+		];
+	}
+
+	/**
+	 * @testdox  can build the right query for RENAME TABLE statements
+	 *
+	 * @dataProvider  dataBuildCheckQueryRenameTable
+	 *
+	 * @param   array  $query  RENAME TABLE statement
+	 *
+	 * @return  void
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function testBuildCheckQueryRenameTable($query)
+	{
+		$db = $this->createStub(PgsqlDriver::class);
+		$db->method('getPrefix')->willReturn('jos_');
+		$db->method('quote')->will(
+			$this->returnCallback(function ($arg) {
+				return "'" . $arg . "'";
+			})
+		);
+		$db->method('quoteName')->will(
+			$this->returnCallback(function ($arg) {
+				return '"' . $arg . '"';
+			})
+		);
+
+		$item = new PostgresqlChangeItem($db, '', $query);
+
+		$this->assertEquals("SELECT table_name FROM information_schema.tables WHERE table_name='jos_bar'", $item->checkQuery);
+		$this->assertEquals('RENAME_TABLE', $item->queryType);
+		$this->assertEquals(1, $item->checkQueryExpected);
+		$this->assertEquals(["'jos_bar'"], $item->msgElements);
+		$this->assertEquals(0, $item->checkStatus);
+	}
+
+	/**
+	 * Provides constructor data for the testBuildCheckQueryRenameTable method
+	 *
+	 * @return  array
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function dataBuildCheckQueryRenameTable(): array
+	{
+		return [
+			['ALTER TABLE "#__foo" RENAME TO "#__bar"'],
+			['ALTER TABLE #__foo RENAME TO #__bar'],
+		];
+	}
+
+	/**
 	 * @testdox  can build the right query
 	 *
 	 * @dataProvider  constructData
@@ -111,33 +212,6 @@ class PostgresqlChangeItemTest extends UnitTestCase
 					'queryType' => 'RENAME_TABLE',
 					'checkQueryExpected' => 1,
 					'msgElements' => ["'jos_bar'"],
-					'checkStatus' => 0,
-				],
-			],
-			/*
-			 * The following "CREATE TABLE" statement is the shortest possible.
-			 * It is valid SQL, but currently the database schema check doesn't
-			 * understand it because it's shorter than expected.
-			 * This is a bug which has to be fixed, then this test has to be adapted
-			 * and this comment can be removed.
-			 */
-			[
-				['query' => 'CREATE TABLE "#__foo" ("bar" text)'],
-				[
-					'checkQuery' => null,
-					'queryType' => null,
-					'checkQueryExpected' => 1,
-					'msgElements' => [],
-					'checkStatus' => -1,
-				],
-			],
-			[
-				['query' => 'CREATE TABLE IF NOT EXISTS "#__foo" ("bar" text)'],
-				[
-					'checkQuery' => "SELECT table_name FROM information_schema.tables WHERE table_name='jos_foo'",
-					'queryType' => 'CREATE_TABLE',
-					'checkQueryExpected' => 1,
-					'msgElements' => ["'jos_foo'"],
 					'checkStatus' => 0,
 				],
 			],
