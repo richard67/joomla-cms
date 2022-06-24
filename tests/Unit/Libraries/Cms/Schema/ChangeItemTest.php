@@ -89,7 +89,7 @@ class ChangeItemTest extends UnitTestCase
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function testCheckEmptyCheckQuery()
+	public function testEmptyCheckQuery()
 	{
 		$item = new class($this->createStub(DatabaseDriver::class), '', '') extends ChangeItem
 		{
@@ -139,12 +139,12 @@ class ChangeItemTest extends UnitTestCase
 		// Let the check query be not empty
 		$item->checkQuery = 'Something';
 
-		// Check if no result is returned as expected
+		// Check with success if no result is returned as expected
 		$item->checkQueryExpected = 0;
 		$item->check();
 		$this->assertEquals(1, $item->checkStatus, 'The ChangeItem should be checked with success');
 
-		// Check if one result is expected
+		// Check with error if no result is returned but one is expected
 		$item->checkQueryExpected = 1;
 		$item->check();
 		$this->assertEquals(-2, $item->checkStatus, 'The ChangeItem should be checked with error');
@@ -178,10 +178,12 @@ class ChangeItemTest extends UnitTestCase
 		// Let the check query be not empty
 		$item->checkQuery = 'Something';
 
+		// Check with success if one result is returned as expected
 		$item->checkQueryExpected = 1;
 		$item->check();
 		$this->assertEquals(1, $item->checkStatus, 'The ChangeItem should be checked with success');
 
+		// Check with error if one result is returned but none is expected
 		$item->checkQueryExpected = 0;
 		$item->check();
 		$this->assertEquals(-2, $item->checkStatus, 'The ChangeItem should be checked with error');
