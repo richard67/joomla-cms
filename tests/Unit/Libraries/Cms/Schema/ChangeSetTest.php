@@ -110,7 +110,7 @@ class ChangeSetTest extends UnitTestCase
 	}
 
 	/**
-	 * Provides constructor data for the testGetInstanceSubclass method
+	 * Provides data for the testObjectIsInstantiatedCorrectly method
 	 *
 	 * @return  array
 	 *
