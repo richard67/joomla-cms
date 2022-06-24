@@ -50,7 +50,7 @@ class ChangeItemTest extends UnitTestCase
 	}
 
 	/**
-	 * Provides constructor data for the testGetInstanceSubclass method
+	 * Provides data for the testGetInstanceSubclass method
 	 *
 	 * @return  array
 	 *
@@ -83,37 +83,118 @@ class ChangeItemTest extends UnitTestCase
 	}
 
 	/**
-	 * @testdox  the check() method sets the right check status
+	 * @testdox  the check() method sets the ChangeItem to be skipped if there is no check query
 	 *
 	 * @return  void
 	 *
 	 * @since   __DEPLOY_VERSION__
 	 */
-	public function testCheckMethodSetsRightCheckStatus()
+	public function testCheckEmptyCheckQuery()
 	{
-		$db = $this->createStub(DatabaseDriver::class);
-		$db->method('getServerType')->willReturn('mysql');
-		$db->method('loadRowList')->willReturn([]);
+		$item = new class($this->createStub(DatabaseDriver::class), '', '') extends ChangeItem
+		{
+			public function check()
+			{
+				return parent::check();
+			}
 
-		$item = ChangeItem::getInstance($db, '', '');
+			public function buildCheckQuery()
+			{}
+		};
 
 		$item->checkQuery = null;
 		$item->check();
-		$this->assertEquals(-1, $item->checkStatus, 'The ChangeItem should be skipped if no check query');
+		$this->assertEquals(-1, $item->checkStatus, 'The ChangeItem should be skipped if the check query is null');
 
 		$item->checkQuery = '';
 		$item->check();
 		$this->assertEquals(-1, $item->checkStatus, 'The ChangeItem should be skipped if the check query is empty');
+	}
 
-		// Success if result count from loadRowList for the checkQuery is as expected
+	/**
+	 * @testdox  the check() method sets the right check status if the check query returns no result
+	 *
+	 * @return  void
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function testCheckQueryWithoutResult()
+	{
+		$db = $this->createStub(DatabaseDriver::class);
+
+		// Let the loadRowList method of the driver return no result
+		$db->method('loadRowList')->willReturn([]);
+
+		$item = new class($db, '', '') extends ChangeItem
+		{
+			public function check()
+			{
+				return parent::check();
+			}
+
+			public function buildCheckQuery()
+			{}
+		};
+
+		// Let the check query be not empty
 		$item->checkQuery = 'Something';
+
+		// Check if no result is returned as expected
 		$item->checkQueryExpected = 0;
 		$item->check();
 		$this->assertEquals(1, $item->checkStatus, 'The ChangeItem should be checked with success');
 
-		// Error if result count from loadRowList for the checkQuery is not as expected
+		// Check if one result is expected
 		$item->checkQueryExpected = 1;
 		$item->check();
-		$this->assertEquals(-2, $item->checkStatus, 'The ChangeItem should be checked with errir');
+		$this->assertEquals(-2, $item->checkStatus, 'The ChangeItem should be checked with error');
 	}
+
+	/**
+	 * @testdox  the check() method sets the right check status if the check query returns one result
+	 *
+	 * @return  void
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function testCheckQueryWithOneResult()
+	{
+		$db = $this->createStub(DatabaseDriver::class);
+
+		// Let the loadRowList method of the driver return one result
+		$db->method('loadRowList')->willReturn(['Something']);
+
+		$item = new class($db, '', '') extends ChangeItem
+		{
+			public function check()
+			{
+				return parent::check();
+			}
+
+			public function buildCheckQuery()
+			{}
+		};
+
+		// Let the check query be not empty
+		$item->checkQuery = 'Something';
+
+		$item->checkQueryExpected = 1;
+		$item->check();
+		$this->assertEquals(1, $item->checkStatus, 'The ChangeItem should be checked with success');
+
+		$item->checkQueryExpected = 0;
+		$item->check();
+		$this->assertEquals(-2, $item->checkStatus, 'The ChangeItem should be checked with error');
+	}
+
+	/**
+	 * @testdox  the fix() method runs the update query and sets the check status and rerun status right
+	 *
+	 * @return  void
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	/*public function testFixMethod()
+	{
+	}*/
 }
