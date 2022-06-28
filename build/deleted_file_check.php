@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is used to build the lists of deleted files, deleted folders and
  * renamed files between two Joomla versions.
@@ -31,18 +32,18 @@ const PHP_TAB = "\t";
 
 function usage($command)
 {
-	echo PHP_EOL;
-	echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
-	echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to starting version' . PHP_EOL;
-	echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version [optional]' . PHP_EOL;
-	echo PHP_EOL;
-	echo '<path> can be either of the following:' . PHP_EOL;
-	echo PHP_TAB . '- Path to a full package Zip file.' . PHP_EOL;
-	echo PHP_TAB . '- Path to a directory where a full package Zip file has been extracted to.' . PHP_EOL;
-	echo PHP_EOL;
-	echo 'If the "to" parameter is not specified, file "build/tmp/packages/*Full_Package.zip"' . PHP_EOL;
-	echo 'is used if it exists from a previous run of the build script.' . PHP_EOL;
-	echo PHP_EOL;
+    echo PHP_EOL;
+    echo 'Usage: php ' . $command . ' [options]' . PHP_EOL;
+    echo PHP_TAB . '--from <path>:' . PHP_TAB . 'Path to starting version' . PHP_EOL;
+    echo PHP_TAB . '--to <path>:' . PHP_TAB . 'Path to ending version [optional]' . PHP_EOL;
+    echo PHP_EOL;
+    echo '<path> can be either of the following:' . PHP_EOL;
+    echo PHP_TAB . '- Path to a full package Zip file.' . PHP_EOL;
+    echo PHP_TAB . '- Path to a directory where a full package Zip file has been extracted to.' . PHP_EOL;
+    echo PHP_EOL;
+    echo 'If the "to" parameter is not specified, file "build/tmp/packages/*Full_Package.zip"' . PHP_EOL;
+    echo 'is used if it exists from a previous run of the build script.' . PHP_EOL;
+    echo PHP_EOL;
 }
 
 /*
@@ -52,71 +53,64 @@ function usage($command)
 $options = getopt('', ['from:', 'to::']);
 
 // We need the "from" parameter, otherwise we're doomed to fail
-if (empty($options['from']))
-{
-	echo PHP_EOL;
-	echo 'Missing "from" parameter' . PHP_EOL;
+if (empty($options['from'])) {
+    echo PHP_EOL;
+    echo 'Missing "from" parameter' . PHP_EOL;
 
-	usage($argv[0]);
+    usage($argv[0]);
 
-	exit(1);
+    exit(1);
 }
 
 // If the "to" parameter is not specified, use the default
-if (empty($options['to']))
-{
-	// Import the version class to get the version information
-	define('JPATH_PLATFORM', 1);
-	require_once dirname(__DIR__) . '/libraries/src/Version.php';
+if (empty($options['to'])) {
+    // Import the version class to get the version information
+    define('JPATH_PLATFORM', 1);
+    require_once dirname(__DIR__) . '/libraries/src/Version.php';
 
-	$fullVersion      = (new Version)->getShortVersion();
-	$packageStability = str_replace(' ', '_', Version::DEV_STATUS);
-	$packageFile      = __DIR__ . '/tmp/packages/Joomla_' . $fullVersion . '-' . $packageStability . '-Full_Package.zip';
+    $fullVersion      = (new Version())->getShortVersion();
+    $packageStability = str_replace(' ', '_', Version::DEV_STATUS);
+    $packageFile      = __DIR__ . '/tmp/packages/Joomla_' . $fullVersion . '-' . $packageStability . '-Full_Package.zip';
 
-	if (is_file($packageFile))
-	{
-		$options['to'] = $packageFile;
-	}
-	else
-	{
-		echo PHP_EOL;
-		echo 'Missing "to" parameter and no zip file "' . $packageFile . '" found.' . PHP_EOL;
+    if (is_file($packageFile)) {
+        $options['to'] = $packageFile;
+    } else {
+        echo PHP_EOL;
+        echo 'Missing "to" parameter and no zip file "' . $packageFile . '" found.' . PHP_EOL;
 
-		usage($argv[0]);
+        usage($argv[0]);
 
-		exit(1);
-	}
+        exit(1);
+    }
 }
 
 // Check from and to if folder or zip file
-if (!is_dir($options['from']) && !(is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip'))
-{
-	echo PHP_EOL;
-	echo 'The "from" parameter is neither a directory nor a zip file' . PHP_EOL;
+if (!is_dir($options['from']) && !(is_file($options['from']) && substr(strtolower($options['from']), -4) === '.zip')) {
+    echo PHP_EOL;
+    echo 'The "from" parameter is neither a directory nor a zip file' . PHP_EOL;
 
-	exit(1);
+    exit(1);
 }
 
-if (!is_dir($options['to']) && !(is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip'))
-{
-	echo PHP_EOL;
-	echo 'The "to" parameter is neither a directory nor a zip file' . PHP_EOL;
+if (!is_dir($options['to']) && !(is_file($options['to']) && substr(strtolower($options['to']), -4) === '.zip')) {
+    echo PHP_EOL;
+    echo 'The "to" parameter is neither a directory nor a zip file' . PHP_EOL;
 
-	exit(1);
+    exit(1);
 }
 
 // Directories to skip for the check
 $excludedFolders = [
-	'administrator/components/com_search',
-	'components/com_search',
-	'images/sampledata',
-	'installation',
-	'media/plg_quickicon_eos310',
-	'media/system/images',
-	'modules/mod_search',
-	'plugins/fields/repeatable',
-	'plugins/quickicon/eos310',
-	'plugins/search',
+    'administrator/components/com_search',
+    'components/com_search',
+    'images/sampledata',
+    'installation',
+    'media/plg_quickicon_eos310',
+    'media/system/images',
+    'modules/mod_search',
+    'plugins/fields/repeatable',
+    'plugins/quickicon/eos310',
+    'plugins/search',
 ];
 
 /**
@@ -127,52 +121,48 @@ $excludedFolders = [
  */
 function readFolder($folderPath, $excludeFolders): stdClass
 {
-	$return = new stdClass;
+    $return = new stdClass();
 
-	$return->files   = [];
-	$return->folders = [];
+    $return->files   = [];
+    $return->folders = [];
 
-	$skipFolders = [];
+    $skipFolders = [];
 
-	foreach ($excludeFolders as $excludeFolder)
-	{
-		$skipFolders[] = $folderPath . '/' . $excludeFolder;
-	}
+    foreach ($excludeFolders as $excludeFolder) {
+        $skipFolders[] = $folderPath . '/' . $excludeFolder;
+    }
 
-	/**
-	 * @param   SplFileInfo                      $file      The file being checked
-	 * @param   mixed                            $key       ?
-	 * @param   RecursiveCallbackFilterIterator  $iterator  The iterator being processed
-	 *
-	 * @return  bool  True if you need to recurse or if the item is acceptable
-	 */
-	$releaseFilter = function ($file, $key, $iterator) use ($skipFolders) {
-		if ($iterator->hasChildren() && !in_array($file->getPathname(), $skipFolders))
-		{
-			return true;
-		}
+    /**
+     * @param   SplFileInfo                      $file      The file being checked
+     * @param   mixed                            $key       ?
+     * @param   RecursiveCallbackFilterIterator  $iterator  The iterator being processed
+     *
+     * @return  bool  True if you need to recurse or if the item is acceptable
+     */
+    $releaseFilter = function ($file, $key, $iterator) use ($skipFolders) {
+        if ($iterator->hasChildren() && !in_array($file->getPathname(), $skipFolders)) {
+            return true;
+        }
 
-		return $file->isFile();
-	};
+        return $file->isFile();
+    };
 
-	$releaseDirIterator = new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS);
-	$releaseIterator = new RecursiveIteratorIterator(
-		new RecursiveCallbackFilterIterator($releaseDirIterator, $releaseFilter),
-		RecursiveIteratorIterator::SELF_FIRST
-	);
+    $releaseDirIterator = new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS);
+    $releaseIterator = new RecursiveIteratorIterator(
+        new RecursiveCallbackFilterIterator($releaseDirIterator, $releaseFilter),
+        RecursiveIteratorIterator::SELF_FIRST
+    );
 
-	foreach ($releaseIterator as $info)
-	{
-		if ($info->isDir())
-		{
-			$return->folders[] = "'" . str_replace($folderPath, '', $info->getPathname()) . "',";
-			continue;
-		}
+    foreach ($releaseIterator as $info) {
+        if ($info->isDir()) {
+            $return->folders[] = "'" . str_replace($folderPath, '', $info->getPathname()) . "',";
+            continue;
+        }
 
-		$return->files[] = "'" . str_replace($folderPath, '', $info->getPathname()) . "',";
-	}
+        $return->files[] = "'" . str_replace($folderPath, '', $info->getPathname()) . "',";
+    }
 
-	return $return;
+    return $return;
 }
 
 /**
@@ -183,73 +173,60 @@ function readFolder($folderPath, $excludeFolders): stdClass
  */
 function readZipFile($filePath, $excludeFolders): stdClass
 {
-	$return = new stdClass;
+    $return = new stdClass();
 
-	$return->files   = [];
-	$return->folders = [];
+    $return->files   = [];
+    $return->folders = [];
 
-	$zipArchive = new ZipArchive();
+    $zipArchive = new ZipArchive();
 
-	if ($zipArchive->open($filePath) !== true)
-	{
-		echo PHP_EOL;
-		echo 'Could not open zip archive "' . $filePath . '".' . PHP_EOL;
+    if ($zipArchive->open($filePath) !== true) {
+        echo PHP_EOL;
+        echo 'Could not open zip archive "' . $filePath . '".' . PHP_EOL;
 
-		exit(1);
-	}
+        exit(1);
+    }
 
-	$excludeRegexp = '/^(';
+    $excludeRegexp = '/^(';
 
-	foreach ($excludeFolders as $excludeFolder)
-	{
-		$excludeRegexp .= preg_quote($excludeFolder, '/') . '|';
-	}
+    foreach ($excludeFolders as $excludeFolder) {
+        $excludeRegexp .= preg_quote($excludeFolder, '/') . '|';
+    }
 
-	$excludeRegexp = rtrim($excludeRegexp, '|') . ')\/.*/';
+    $excludeRegexp = rtrim($excludeRegexp, '|') . ')\/.*/';
 
-	for ($i = 0; $i < $zipArchive->numFiles; $i++)
-	{
-		$stat = $zipArchive->statIndex($i);
+    for ($i = 0; $i < $zipArchive->numFiles; $i++) {
+        $stat = $zipArchive->statIndex($i);
 
-		$name = $stat['name'];
+        $name = $stat['name'];
 
-		if (preg_match($excludeRegexp, $name) === 1)
-		{
-			continue;
-		}
+        if (preg_match($excludeRegexp, $name) === 1) {
+            continue;
+        }
 
-		if (substr($name, -1) === '/')
-		{
-			$return->folders[] = "'/" . rtrim($name, '/') . "',";
-		}
-		else
-		{
-			$return->files[] = "'/" . $name . "',";
-		}
-	}
+        if (substr($name, -1) === '/') {
+            $return->folders[] = "'/" . rtrim($name, '/') . "',";
+        } else {
+            $return->files[] = "'/" . $name . "',";
+        }
+    }
 
-	$zipArchive->close();
+    $zipArchive->close();
 
-	return $return;
+    return $return;
 }
 
 // Read files and folders lists from folders or zip files
-if (is_dir($options['from']))
-{
-	$previousReleaseFilesFolders = readFolder($options['from'], $excludedFolders);
-}
-else
-{
-	$previousReleaseFilesFolders = readZipFile($options['from'], $excludedFolders);
+if (is_dir($options['from'])) {
+    $previousReleaseFilesFolders = readFolder($options['from'], $excludedFolders);
+} else {
+    $previousReleaseFilesFolders = readZipFile($options['from'], $excludedFolders);
 }
 
-if (is_dir($options['to']))
-{
-	$newReleaseFilesFolders = readFolder($options['to'], $excludedFolders);
-}
-else
-{
-	$newReleaseFilesFolders = readZipFile($options['to'], $excludedFolders);
+if (is_dir($options['to'])) {
+    $newReleaseFilesFolders = readFolder($options['to'], $excludedFolders);
+} else {
+    $newReleaseFilesFolders = readZipFile($options['to'], $excludedFolders);
 }
 
 $filesDifferenceAdd      = array_diff($newReleaseFilesFolders->files, $previousReleaseFilesFolders->files);
@@ -259,45 +236,44 @@ $foldersDifferenceDelete = array_diff($previousReleaseFilesFolders->folders, $ne
 
 // Specific files (e.g. language files) that we want to keep on upgrade
 $filesToKeep = [
-	"'/administrator/components/com_joomlaupdate/restore_finalisation.php',",
-	"'/administrator/language/en-GB/en-GB.com_search.ini',",
-	"'/administrator/language/en-GB/en-GB.com_search.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_editors-xtd_weblink.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_editors-xtd_weblink.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_fields_repeatable.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_fields_repeatable.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_quickicon_eos310.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_quickicon_eos310.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_categories.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_categories.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_contacts.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_contacts.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_content.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_content.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_newsfeeds.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_newsfeeds.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_tags.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_tags.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_weblinks.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_search_weblinks.sys.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_system_weblinks.ini',",
-	"'/administrator/language/en-GB/en-GB.plg_system_weblinks.sys.ini',",
-	"'/language/en-GB/en-GB.com_search.ini',",
-	"'/language/en-GB/en-GB.mod_search.ini',",
-	"'/language/en-GB/en-GB.mod_search.sys.ini',",
+    "'/administrator/components/com_joomlaupdate/restore_finalisation.php',",
+    "'/administrator/language/en-GB/en-GB.com_search.ini',",
+    "'/administrator/language/en-GB/en-GB.com_search.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_editors-xtd_weblink.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_editors-xtd_weblink.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_fields_repeatable.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_fields_repeatable.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_quickicon_eos310.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_quickicon_eos310.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_categories.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_categories.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_contacts.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_contacts.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_content.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_content.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_newsfeeds.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_newsfeeds.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_tags.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_tags.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_weblinks.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_search_weblinks.sys.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_system_weblinks.ini',",
+    "'/administrator/language/en-GB/en-GB.plg_system_weblinks.sys.ini',",
+    "'/language/en-GB/en-GB.com_search.ini',",
+    "'/language/en-GB/en-GB.mod_search.ini',",
+    "'/language/en-GB/en-GB.mod_search.sys.ini',",
 ];
 
 // Specific folders that we want to keep on upgrade
 $foldersToKeep = [
-	"'/bin',",
+    "'/bin',",
 ];
 
 // Remove folders from the results which we want to keep on upgrade
-foreach ($foldersToKeep as $folder)
-{
-	if (($key = array_search($folder, $foldersDifferenceDelete)) !== false) {
-		unset($foldersDifferenceDelete[$key]);
-	}
+foreach ($foldersToKeep as $folder) {
+    if (($key = array_search($folder, $foldersDifferenceDelete)) !== false) {
+        unset($foldersDifferenceDelete[$key]);
+    }
 }
 
 asort($filesDifferenceDelete);
@@ -306,34 +282,29 @@ rsort($foldersDifferenceDelete);
 $deletedFiles = [];
 $renamedFiles = [];
 
-foreach ($filesDifferenceDelete as $file)
-{
-	// Don't remove any specific files (e.g. language files) that we want to keep on upgrade
-	if (array_search($file, $filesToKeep) !== false)
-	{
-		continue;
-	}
+foreach ($filesDifferenceDelete as $file) {
+    // Don't remove any specific files (e.g. language files) that we want to keep on upgrade
+    if (array_search($file, $filesToKeep) !== false) {
+        continue;
+    }
 
-	// Check for files which might have been renamed only
-	$matches = preg_grep('/^' . preg_quote($file, '/') . '$/i', $newReleaseFilesFolders->files);
+    // Check for files which might have been renamed only
+    $matches = preg_grep('/^' . preg_quote($file, '/') . '$/i', $newReleaseFilesFolders->files);
 
-	if ($matches !== false)
-	{
-		foreach ($matches as $match)
-		{
-			if (dirname($match) === dirname($file) && strtolower(basename($match)) === strtolower(basename($file)))
-			{
-				// File has been renamed only: Add to renamed files list
-				$renamedFiles[] = substr($file, 0, -1) . ' => ' . $match;
+    if ($matches !== false) {
+        foreach ($matches as $match) {
+            if (dirname($match) === dirname($file) && strtolower(basename($match)) === strtolower(basename($file))) {
+                // File has been renamed only: Add to renamed files list
+                $renamedFiles[] = substr($file, 0, -1) . ' => ' . $match;
 
-				// Go on with the next file in $filesDifferenceDelete
-				continue 2;
-			}
-		}
-	}
+                // Go on with the next file in $filesDifferenceDelete
+                continue 2;
+            }
+        }
+    }
 
-	// File has been really deleted and not just renamed
-	$deletedFiles[] = $file;
+    // File has been really deleted and not just renamed
+    $deletedFiles[] = $file;
 }
 
 // Write the lists to files for later reference
@@ -349,29 +320,24 @@ $renamedFilesFile   = __DIR__ . '/renamed_files.txt';
 @unlink($deletedFoldersFile);
 @unlink($renamedFilesFile);
 
-if (count($filesDifferenceAdd) > 0)
-{
-	file_put_contents($addedFilesFile, implode("\n", $filesDifferenceAdd));
+if (count($filesDifferenceAdd) > 0) {
+    file_put_contents($addedFilesFile, implode("\n", $filesDifferenceAdd));
 }
 
-if (count($foldersDifferenceAdd) > 0)
-{
-	file_put_contents($addedFoldersFile, implode("\n", $foldersDifferenceAdd));
+if (count($foldersDifferenceAdd) > 0) {
+    file_put_contents($addedFoldersFile, implode("\n", $foldersDifferenceAdd));
 }
 
-if (count($deletedFiles) > 0)
-{
-	file_put_contents($deletedFilesFile, implode("\n", $deletedFiles));
+if (count($deletedFiles) > 0) {
+    file_put_contents($deletedFilesFile, implode("\n", $deletedFiles));
 }
 
-if (count($foldersDifferenceDelete) > 0)
-{
-	file_put_contents($deletedFoldersFile, implode("\n", $foldersDifferenceDelete));
+if (count($foldersDifferenceDelete) > 0) {
+    file_put_contents($deletedFoldersFile, implode("\n", $foldersDifferenceDelete));
 }
 
-if (count($renamedFiles) > 0)
-{
-	file_put_contents($renamedFilesFile, implode("\n", $renamedFiles));
+if (count($renamedFiles) > 0) {
+    file_put_contents($renamedFilesFile, implode("\n", $renamedFiles));
 }
 
 echo PHP_EOL;
@@ -388,9 +354,8 @@ echo ' to "' . $options['to'] . '"' . PHP_EOL;
 echo PHP_EOL;
 echo 'The following folders and their subfolders have been skipped so they were not included in the comparison:' . PHP_EOL;
 
-foreach ($excludedFolders as $excludedFolder)
-{
-	echo ' - ' . $excludedFolder . PHP_EOL;
+foreach ($excludedFolders as $excludedFolder) {
+    echo ' - ' . $excludedFolder . PHP_EOL;
 }
 
 echo PHP_EOL;
