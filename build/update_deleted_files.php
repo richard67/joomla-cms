@@ -403,7 +403,7 @@ foreach ($addedFiles as $addedFile) {
     $addedFile = trim(rtrim($addedFile, ','), "'");
 
     if (($key = array_search($addedFile, $deletedFilesInfo->files)) !== false) {
-        $deletedFilesRowsRemove[] = "\t\t'" . $addedFile . "',\n";
+        $deletedFilesRowsRemove[] = str_pad($addedFile, 8, ' ', STR_PAD_LEFT)  . "',\n";
 
         $hasChanges = true;
 
@@ -415,7 +415,7 @@ foreach ($addedFiles as $addedFile) {
 
     if ($matches !== false) {
         foreach ($matches as $key => $value) {
-            $renamedFilesRowsRemove[] = "\t\t'" . $key . "' => '" . $value . "',\n";
+            $renamedFilesRowsRemove[] = str_pad($key, 8, ' ', STR_PAD_LEFT) . "' => '" . $value . "',\n";
 
             $hasChanges = true;
         }
@@ -427,7 +427,7 @@ foreach ($addedFolders as $addedFolder) {
     $addedFolder = trim(rtrim($addedFolder, ','), "'");
 
     if (($key = array_search($addedFolder, $deletedFoldersInfo->folders)) !== false) {
-        $deletedFoldersRowsRemove[] = "\t\t'" . $addedFolder . "',\n";
+        $deletedFoldersRowsRemove[] = str_pad($addedFolder, 8, ' ', STR_PAD_LEFT) . "',\n";
 
         $hasChanges = true;
     }
@@ -438,7 +438,7 @@ foreach ($deletedFiles as $deletedFile) {
     $deletedFile = trim(rtrim($deletedFile, ','), "'");
 
     if (($key = array_search($deletedFile, $deletedFilesInfo->files)) === false) {
-        $deletedFilesRowsAdd[] = "\t\t'" . $deletedFile . "',\n";
+        $deletedFilesRowsAdd[] = str_pad($deletedFile, 8, ' ', STR_PAD_LEFT) . "',\n";
 
         $hasChanges = true;
     }
@@ -448,7 +448,7 @@ foreach ($deletedFolders as $deletedFolder) {
     $deletedFolder = trim(rtrim($deletedFolder, ','), "'");
 
     if (($key = array_search($deletedFolder, $deletedFoldersInfo->folders)) === false) {
-        $deletedFoldersRowsAdd[] = "\t\t'" . $deletedFolder . "',\n";
+        $deletedFoldersRowsAdd[] = str_pad($deletedFolder, 8, ' ', STR_PAD_LEFT) . "',\n";
 
         $hasChanges = true;
     }
@@ -460,7 +460,7 @@ foreach ($renamedFilesRows as $renamedFilesRow) {
         $renamedFileNew = trim(rtrim(substr($renamedFilesRow, $pos + 4), ','), "'");
 
         if (!array_key_exists($renamedFileOld, $renamedFilesInfo->files)) {
-            $renamedFilesRowsAdd[] = "\t\t'" . $renamedFileOld . "' => '" . $renamedFileNew . "',\n";
+            $renamedFilesRowsAdd[] = str_pad($renamedFileOld, 8, ' ', STR_PAD_LEFT) . "' => '" . $renamedFileNew . "',\n";
 
             $hasChanges = true;
         }
@@ -570,12 +570,12 @@ function safeRegistryFile($rowsRemove, $rowsAdd, $filePath, $version, $doInit, $
 
         $output .= $line;
 
-        if (preg_match('/^\tpublic\s+\$[a-z]+\s+=\s+\[$/', $line) === 1) {
+        if (preg_match('/^\s+public\s+\$[a-z]+\s+=\s+\[$/', $line) === 1) {
             break;
         }
     }
 
-    if (preg_match('/^\tpublic\s+\$[a-z]+\s+=\s+\[$/', $line) !== 1) {
+    if (preg_match('/^\s+public\s+\$[a-z]+\s+=\s+\[$/', $line) !== 1) {
         echo PHP_EOL;
         echo 'Could not find entry point for modification of file "' . $filePath . '".' . PHP_EOL;
 
@@ -584,14 +584,16 @@ function safeRegistryFile($rowsRemove, $rowsAdd, $filePath, $version, $doInit, $
         exit(1);
     }
 
+    $lineCloseArray = str_pad("];\n", 4, ' ', STR_PAD_LEFT);
+
     if ($doInit) {
-        $line = "\t];\n";
+        $line = $lineCloseArray;
     }
 
     while (!$doInit && !feof($inFilePtr)) {
         $line = fgets($inFilePtr);
 
-        if ($line === "\t];\n") {
+        if ($line === $lineCloseArray) {
             break;
         }
 
@@ -600,7 +602,7 @@ function safeRegistryFile($rowsRemove, $rowsAdd, $filePath, $version, $doInit, $
         }
     }
 
-    if ($line !== "\t];\n") {
+    if ($line !== $lineCloseArray) {
         echo PHP_EOL;
         echo 'Could not find starting point for appending new values to file "' . $filePath . '".' . PHP_EOL;
 
@@ -611,13 +613,13 @@ function safeRegistryFile($rowsRemove, $rowsAdd, $filePath, $version, $doInit, $
 
     fclose($inFilePtr);
 
-    $output .= "\t\t// " . $version . "\n";
+    $output .= str_pad('// ', 8, ' ', STR_PAD_LEFT) . $version . "\n";
 
     foreach ($rowsAdd as $row) {
         $output .= $row;
     }
 
-    $output .= "\t];\n}\n";
+    $output .= $lineCloseArray . "}\n";
 
     $outputFilePath = $tempFiles ? __DIR__ . '/tmp/' . basename($filePath) : $filePath;
 
