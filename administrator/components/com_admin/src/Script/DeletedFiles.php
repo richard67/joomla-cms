@@ -5869,5 +5869,11 @@ class DeletedFiles
         '/plugins/task/requests/requests.php',
         '/plugins/task/sitestatus/sitestatus.php',
         '/plugins/user/profile/src/Field/DobField.php',
+        // From 4.2.0-beta2 to 4.2.0-beta3
+        '/plugins/system/webauthn/src/Exception/AjaxNonCmsAppException.php',
+        '/plugins/system/webauthn/src/Helper/CredentialsCreation.php',
+        '/plugins/system/webauthn/src/Helper/Joomla.php',
+        '/plugins/system/webauthn/webauthn.php',
+        '/plugins/task/demotasks/demotasks.php',
     ];
 }
