@@ -9,6 +9,7 @@
 
 namespace Joomla\CMS\Schema;
 
+use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\Exception\ExecutionFailureException;
@@ -112,6 +113,15 @@ abstract class ChangeItem
     public $rerunStatus = 0;
 
     /**
+     * The application object
+     *
+     * @var    CMSApplicationInterface
+     *
+     * @since  __DEPLOY_VERSION__
+     */
+    private $application;
+
+   /**
      * Constructor: builds check query and message from $updateQuery
      *
      * @param   DatabaseDriver  $db     Database connector object
@@ -196,7 +206,7 @@ abstract class ChangeItem
                 $rows = $this->db->loadRowList(0);
             } catch (\RuntimeException $e) {
                 // Still render the error message from the Exception object
-                Factory::getApplication()->enqueueMessage($e->getMessage(), 'error');
+                ($this->getApplication() ?? Factory::getApplication())->enqueueMessage($e->getMessage(), 'error');
                 $this->checkStatus = -2;
 
                 return $this->checkStatus;
@@ -241,5 +251,31 @@ abstract class ChangeItem
                 $this->rerunStatus = -2;
             }
         }
+    }
+
+    /**
+     * Returns the internal application or null when not set.
+     *
+     * @return  CMSApplicationInterface|null
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    protected function getApplication(): ?CMSApplicationInterface
+    {
+        return $this->application;
+    }
+
+    /**
+     * Sets the application to use.
+     *
+     * @param   CMSApplicationInterface  $application  The application
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function setApplication(CMSApplicationInterface $application): void
+    {
+        $this->application = $application;
     }
 }

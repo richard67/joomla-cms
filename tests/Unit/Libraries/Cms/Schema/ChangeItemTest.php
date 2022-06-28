@@ -10,6 +10,7 @@
 
 namespace Joomla\Tests\Unit\Libraries\Cms\Schema;
 
+use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Schema\ChangeItem;
 use Joomla\CMS\Schema\ChangeItem\MysqlChangeItem;
 use Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem;
@@ -207,6 +208,8 @@ class ChangeItemTest extends UnitTestCase
         // Let the loadRowList method of the driver return one result
         $db->method('loadRowList')->will($this->throwException(new \RuntimeException('Some error message')));
 
+        $app = $this->createStub(CMSApplicationInterface::class);
+
         $item = new class ($db, '', '') extends ChangeItem
         {
             public function check()
@@ -218,6 +221,8 @@ class ChangeItemTest extends UnitTestCase
             {
             }
         };
+
+        $item->setApplication($app);
 
         // Let the check query be not empty
         $item->checkQuery = 'Something';
