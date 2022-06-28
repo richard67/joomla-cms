@@ -15,6 +15,7 @@ use Joomla\CMS\Schema\ChangeItem;
 use Joomla\CMS\Schema\ChangeItem\MysqlChangeItem;
 use Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem;
 use Joomla\Database\DatabaseDriver;
+use Joomla\Database\Exception\ExecutionFailureException;
 use Joomla\Tests\Unit\UnitTestCase;
 
 /**
@@ -195,18 +196,20 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the check() method sets the check status to error if the database driver raises a runtime exception
+     * @testdox  the check() method sets the check status to error when the check query fails with a RuntimeException
      *
      * @return  void
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testCheckQueryException()
+    public function testCheckQueryRuntimeException()
     {
         $db = $this->createStub(DatabaseDriver::class);
 
-        // Let the loadRowList method of the driver return one result
-        $db->method('loadRowList')->will($this->throwException(new \RuntimeException('Some error message')));
+        // Let the loadRowList method of the driver return no result
+        $db->method('loadRowList')->willReturn([]);
+
+        $db->method('setQuery')->will($this->throwException(new \RuntimeException('Exception message')));
 
         $app = $this->createStub(CMSApplicationInterface::class);
 
@@ -227,20 +230,98 @@ class ChangeItemTest extends UnitTestCase
         // Let the check query be not empty
         $item->checkQuery = 'Something';
 
-        // Check with error if the database driver raises a runtime exception
+        // Make sure the item would be checked with success if no RuntimeException
         $item->checkQueryExpected = 0;
+
         $item->check();
         $this->assertEquals(-2, $item->checkStatus, 'The ChangeItem should be checked with error');
     }
 
     /**
-     * @testdox  the fix() method runs the update query and sets the check status and rerun status right
+     * @testdox  the fix() method sets the rerun status to error when the update query fails with a RuntimeException
      *
      * @return  void
      *
      * @since   __DEPLOY_VERSION__
      */
-    /*public function testFixMethod()
+    public function testUpdateQueryRuntimeException()
     {
-    }*/
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('setQuery')->will($this->throwException(new \RuntimeException('Exception message')));
+
+        $app = $this->createStub(CMSApplicationInterface::class);
+
+        $item = new class ($db, '', '') extends ChangeItem
+        {
+            public function check()
+            {
+                // Return success
+                return 1;
+            }
+
+            public function fix()
+            {
+                return parent::fix();
+            }
+
+            public function buildCheckQuery()
+            {
+            }
+        };
+
+        $item->setApplication($app);
+
+        // Let the update query be not empty
+        $item->updateQuery = 'Something else';
+
+        // Set check status to error
+        $item->checkStatus = -2;
+
+        $item->fix();
+        $this->assertEquals(-2, $item->rerunStatus, 'The ChangeItem\'s rerunStatus should be set to error');
+    }
+
+    /**
+     * @testdox  the fix() method sets the rerun status to error when the update query fails with an ExecutionFailureException
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testUpdateQueryExecutionFailureException()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('execute')->will($this->throwException(new \ExecutionFailureException('Exception message')));
+
+        $app = $this->createStub(CMSApplicationInterface::class);
+
+        $item = new class ($db, '', '') extends ChangeItem
+        {
+            public function check()
+            {
+                // Return success
+                return 1;
+            }
+
+            public function fix()
+            {
+                return parent::fix();
+            }
+
+            public function buildCheckQuery()
+            {
+            }
+        };
+
+        $item->setApplication($app);
+
+        // Let the update query be not empty
+        $item->updateQuery = 'Something else';
+
+        // Set check status to error
+        $item->checkStatus = -2;
+
+        $item->fix();
+        $this->assertEquals(-2, $item->rerunStatus, 'The ChangeItem\'s rerunStatus should be set to error');
+    }
 }
