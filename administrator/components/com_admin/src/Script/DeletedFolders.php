@@ -1387,15 +1387,5 @@ class DeletedFolders
         // From 4.2.0-beta1 to 4.2.0-beta2
         '/layouts/plugins/user/profile/fields',
         '/layouts/plugins/user/profile',
-        // From 4.2.0-beta2 to 4.2.0-beta3
-        '/plugins/system/webauthn/src/Helper',
-        '/plugins/system/webauthn/src/Exception',
-        // From 4.2.0-rc1 to 4.2.0
-        '/plugins/fields/menuitem/tmpl',
-        '/plugins/fields/menuitem',
-        // From 4.2.0 to 4.2.1
-        '/media/vendor/hotkeys.js/js',
-        '/media/vendor/hotkeys.js',
-        '/libraries/vendor/symfony/string/Resources/bin',
     ];
 }
