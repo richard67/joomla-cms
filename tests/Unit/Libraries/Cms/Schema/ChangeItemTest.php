@@ -190,6 +190,40 @@ class ChangeItemTest extends UnitTestCase
 	}
 
 	/**
+	 * @testdox  the check() method sets the check status to error if the database driver raises a runtime exception
+	 *
+	 * @return  void
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public function testCheckQueryException()
+	{
+		$db = $this->createStub(DatabaseDriver::class);
+
+		// Let the loadRowList method of the driver return one result
+		$db->method('loadRowList')->will($this->throwException(new \RuntimeException('Some error message')));
+
+		$item = new class($db, '', '') extends ChangeItem
+		{
+			public function check()
+			{
+				return parent::check();
+			}
+
+			public function buildCheckQuery()
+			{}
+		};
+
+		// Let the check query be not empty
+		$item->checkQuery = 'Something';
+
+		// Check with error if the database driver raises a runtime exception
+		$item->checkQueryExpected = 0;
+		$item->check();
+		$this->assertEquals(-2, $item->checkStatus, 'The ChangeItem should be checked with error');
+	}
+
+	/**
 	 * @testdox  the fix() method runs the update query and sets the check status and rerun status right
 	 *
 	 * @return  void
