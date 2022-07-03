@@ -272,7 +272,7 @@ class ChangeItemTest extends UnitTestCase
         $item->setApplication($app);
 
         // Let the update query be not empty
-        $item->updateQuery = 'Something else';
+        $item->updateQuery = 'Something';
 
         // Set check status to error
         $item->checkStatus = -2;
@@ -316,7 +316,7 @@ class ChangeItemTest extends UnitTestCase
         $item->setApplication($app);
 
         // Let the update query be not empty
-        $item->updateQuery = 'Something else';
+        $item->updateQuery = 'Something';
 
         // Set check status to error
         $item->checkStatus = -2;
