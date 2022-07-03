@@ -27,6 +27,46 @@ use Joomla\Tests\Unit\UnitTestCase;
 class MysqlChangeItemTest extends UnitTestCase
 {
     /**
+     * @testdox  can build the right query for skipped statements
+     *
+     * @dataProvider  dataBuildCheckQuerySkipped
+     *
+     * @param   array  $query  update statement to be skipped
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testBuildCheckQuerySkipped($query)
+    {
+        $db = $this->createStub(MysqliDriver::class);
+
+        $item = new MysqlChangeItem($db, '', $query);
+
+        $this->assertEquals(null, $item->checkQuery);
+        $this->assertEquals(null, $item->queryType);
+        $this->assertEquals(1, $item->checkQueryExpected);
+        $this->assertEquals([], $item->msgElements);
+        $this->assertEquals(-1, $item->checkStatus);
+    }
+
+    /**
+     * Provides constructor data for the testBuildCheckQueryCreateTable method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataBuildCheckQuerySkipped(): array
+    {
+        return [
+            [null],
+            [''],
+            ['WHATEVER'],
+        ];
+    }
+
+    /**
      * @testdox  can build the right query for CREATE TABLE statements
      *
      * @dataProvider  dataBuildCheckQueryCreateTable

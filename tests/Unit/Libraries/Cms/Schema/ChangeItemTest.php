@@ -291,7 +291,7 @@ class ChangeItemTest extends UnitTestCase
     public function testUpdateQueryExecutionFailureException()
     {
         $db = $this->createStub(DatabaseDriver::class);
-        $db->method('execute')->will($this->throwException(new \ExecutionFailureException('Exception message')));
+        $db->method('execute')->will($this->throwException(new ExecutionFailureException('Exception message')));
 
         $app = $this->createStub(CMSApplicationInterface::class);
 
