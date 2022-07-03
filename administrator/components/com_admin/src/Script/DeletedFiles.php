@@ -5874,6 +5874,7 @@ class DeletedFiles
         '/plugins/system/webauthn/src/Helper/CredentialsCreation.php',
         '/plugins/system/webauthn/src/Helper/Joomla.php',
         '/plugins/system/webauthn/webauthn.php',
+        '/plugins/task/checkfiles/checkfiles.php',
         '/plugins/task/demotasks/demotasks.php',
     ];
 }
