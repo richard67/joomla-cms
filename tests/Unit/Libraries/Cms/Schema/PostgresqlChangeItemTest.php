@@ -27,11 +27,51 @@ use Joomla\Tests\Unit\UnitTestCase;
 class PostgresqlChangeItemTest extends UnitTestCase
 {
     /**
-     * @testdox  can build the right query for CREATE TABLE statements
+     * @testdox  can build the right query for skipped statements
+     *
+     * @dataProvider  dataBuildCheckQuerySkipped
+     *
+     * @param   array  $query  update statement to be skipped
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testBuildCheckQuerySkipped($query)
+    {
+        $db = $this->createStub(PgsqlDriver::class);
+
+        $item = new PostgresqlChangeItem($db, '', $query);
+
+        $this->assertEquals(null, $item->checkQuery);
+        $this->assertEquals(null, $item->queryType);
+        $this->assertEquals(1, $item->checkQueryExpected);
+        $this->assertEquals([], $item->msgElements);
+        $this->assertEquals(-1, $item->checkStatus);
+    }
+
+    /**
+     * Provides constructor data for the testBuildCheckQuerySkipped method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataBuildCheckQuerySkipped(): array
+    {
+        return [
+            [null],
+            [''],
+            ['WHATEVER'],
+        ];
+    }
+
+    /**
+     * @testdox  can build the right query for CREATE_TABLE statements
      *
      * @dataProvider  dataBuildCheckQueryCreateTable
      *
-     * @param   array  $query  CREATE TABLE statement
+     * @param   array  $query  CREATE_TABLE statement
      *
      * @return  void
      *
@@ -71,18 +111,23 @@ class PostgresqlChangeItemTest extends UnitTestCase
     public function dataBuildCheckQueryCreateTable(): array
     {
         return [
+            // The following 2 tests are failing due to a bug in MySQLChangeItem
+            //['CREATE TABLE "#__foo" ("bar" text)'],
+            //['CREATE TABLE #__foo ("bar" text)'],
+            // The following 2 tests are obsolete when the above bug has been fixed
             ['CREATE TABLE "#__foo" ("bar" text NOT NULL)'],
             ['CREATE TABLE #__foo ("bar" text NOT NULL)'],
             ['CREATE TABLE IF NOT EXISTS "#__foo" ("bar" text)'],
+            ['CREATE TABLE IF NOT EXISTS #__foo ("bar" text)'],
         ];
     }
 
     /**
-     * @testdox  can build the right query for RENAME TABLE statements
+     * @testdox  can build the right query for RENAME_TABLE statements
      *
      * @dataProvider  dataBuildCheckQueryRenameTable
      *
-     * @param   array  $query  RENAME TABLE statement
+     * @param   array  $query  RENAME_TABLE statement
      *
      * @return  void
      *
@@ -128,23 +173,19 @@ class PostgresqlChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  can build the right query
+     * @testdox  can build the right query for ADD_COLUMN statements
      *
-     * @dataProvider  constructData
+     * @dataProvider  dataBuildCheckQueryAddColumn
      *
-     * @param   array  $options  Options array to inject
-     * @param   array  $expects  Expected data values
+     * @param   array  $query  ADD_COLUMN statement
      *
      * @return  void
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testBuildCheckQuery($options, $expects)
+    public function testBuildCheckQueryAddColumn($query)
     {
-        $message = "Test '%s' for query '" . $options['query'] . "' failed.";
-
         $db = $this->createStub(PgsqlDriver::class);
-        $db->method('getServerType')->willReturn('postgresql');
         $db->method('getPrefix')->willReturn('jos_');
         $db->method('quote')->will(
             $this->returnCallback(function ($arg) {
@@ -157,65 +198,81 @@ class PostgresqlChangeItemTest extends UnitTestCase
             })
         );
 
-        $item = new PostgresqlChangeItem($db, '', $options['query']);
+        $item = new PostgresqlChangeItem($db, '', $query);
 
-        $this->assertEquals($expects['checkQuery'], $item->checkQuery, sprintf($message, 'checkQuery'));
-        $this->assertEquals($expects['queryType'], $item->queryType, sprintf($message, 'queryType'));
-        $this->assertEquals($expects['checkQueryExpected'], $item->checkQueryExpected, sprintf($message, 'checkQueryExpected'));
-        $this->assertEquals($expects['msgElements'], $item->msgElements, sprintf($message, 'msgElements'));
-        $this->assertEquals($expects['checkStatus'], $item->checkStatus, sprintf($message, 'checkStatus'));
+        $this->assertEquals("SELECT column_name FROM information_schema.columns WHERE table_name='jos_foo' AND column_name='bar'", $item->checkQuery);
+        $this->assertEquals('ADD_COLUMN', $item->queryType);
+        $this->assertEquals(1, $item->checkQueryExpected);
+        $this->assertEquals(["'jos_foo'", "'bar'"], $item->msgElements);
+        $this->assertEquals(0, $item->checkStatus);
     }
 
     /**
-     * Provides constructor data for test methods
+     * Provides constructor data for the testBuildCheckQueryAddColumn method
      *
      * @return  array
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function constructData(): array
+    public function dataBuildCheckQueryAddColumn(): array
     {
         return [
-            [
-                ['query' => 'WHATEVER'],
-                [
-                    'checkQuery' => null,
-                    'queryType' => null,
-                    'checkQueryExpected' => 1,
-                    'msgElements' => [],
-                    'checkStatus' => -1,
-                ],
-            ],
-            [
-                ['query' => 'ALTER TABLE "#__foo" ADD COLUMN "bar" text'],
-                [
-                    'checkQuery' => "SELECT column_name FROM information_schema.columns WHERE table_name='jos_foo' AND column_name='bar'",
-                    'queryType' => 'ADD_COLUMN',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                ['query' => 'ALTER TABLE "#__foo" DROP COLUMN "bar"'],
-                [
-                    'checkQuery' => "SELECT column_name FROM information_schema.columns WHERE table_name='jos_foo' AND column_name='bar'",
-                    'queryType' => 'DROP_COLUMN',
-                    'checkQueryExpected' => 0,
-                    'msgElements' => ["'jos_foo'", "'bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                ['query' => 'ALTER TABLE "#__foo" RENAME TO "#__bar"'],
-                [
-                    'checkQuery' => "SELECT table_name FROM information_schema.tables WHERE table_name='jos_bar'",
-                    'queryType' => 'RENAME_TABLE',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
+            ['ALTER TABLE "#__foo" ADD COLUMN "bar" text'],
+            ['ALTER TABLE #__foo ADD COLUMN "bar" text'],
+            ['ALTER TABLE "#__foo" ADD COLUMN bar text'],
+            ['ALTER TABLE #__foo ADD COLUMN bar text'],
+        ];
+    }
+
+    /**
+     * @testdox  can build the right query for DROP_COLUMN statements
+     *
+     * @dataProvider  dataBuildCheckQueryDropColumn
+     *
+     * @param   array  $query  DROP_COLUMN statement
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testBuildCheckQueryDropColumn($query)
+    {
+        $db = $this->createStub(PgsqlDriver::class);
+        $db->method('getPrefix')->willReturn('jos_');
+        $db->method('quote')->will(
+            $this->returnCallback(function ($arg) {
+                return "'" . $arg . "'";
+            })
+        );
+        $db->method('quoteName')->will(
+            $this->returnCallback(function ($arg) {
+                return '"' . $arg . '"';
+            })
+        );
+
+        $item = new PostgresqlChangeItem($db, '', $query);
+
+        $this->assertEquals("SELECT column_name FROM information_schema.columns WHERE table_name='jos_foo' AND column_name='bar'", $item->checkQuery);
+        $this->assertEquals('DROP_COLUMN', $item->queryType);
+        $this->assertEquals(0, $item->checkQueryExpected);
+        $this->assertEquals(["'jos_foo'", "'bar'"], $item->msgElements);
+        $this->assertEquals(0, $item->checkStatus);
+    }
+
+    /**
+     * Provides constructor data for the testBuildCheckQueryDropColumn method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataBuildCheckQueryDropColumn(): array
+    {
+        return [
+            ['ALTER TABLE "#__foo" DROP COLUMN "bar"'],
+            ['ALTER TABLE #__foo DROP COLUMN "bar"'],
+            ['ALTER TABLE "#__foo" DROP COLUMN bar'],
+            ['ALTER TABLE #__foo DROP COLUMN bar'],
         ];
     }
 }
