@@ -33,28 +33,6 @@ use Joomla\Tests\Unit\UnitTestCase;
 class ChangeSetTest extends UnitTestCase
 {
     /**
-     * Setup
-     *
-     * @return  void
-     *
-     * @since   __DEPLOY_VERSION__
-     */
-    public function setUp(): void
-    {
-        if (!is_dir(__DIR__ . '/tmp')) {
-            mkdir(__DIR__ . '/tmp');
-        }
-
-        if (!is_dir(__DIR__ . '/tmp/mysql')) {
-            mkdir(__DIR__ . '/tmp/mysql');
-        }
-
-        if (!is_dir(__DIR__ . '/tmp/postgresql')) {
-            mkdir(__DIR__ . '/tmp/postgresql');
-        }
-    }
-
-    /**
      * Cleanup
      *
      * @return  void
@@ -83,6 +61,12 @@ class ChangeSetTest extends UnitTestCase
     public function testObjectIsInstantiatedCorrectly($serverType, $driverSubclass, $itemSubclass)
     {
         // Make sure that there will be two change items
+        if (!is_dir(__DIR__ . '/tmp')) {
+            mkdir(__DIR__ . '/tmp');
+        }
+        if (!is_dir(__DIR__ . '/tmp/' . $serverType)) {
+            mkdir(__DIR__ . '/tmp/' . $serverType);
+        }
         file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-01.sql', "DUMMYTEXT\n");
         file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-02.sql', "DUMMYTEXT\n");
 
@@ -124,17 +108,6 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the check method runs the check method of each check item and returns an array with unsuccessfully check items
-     *
-     * @return  void
-     *
-     * @since   __DEPLOY_VERSION__
-     */
-    /*public function testCheck()
-    {
-    }*/
-
-    /**
      * @testdox  the schema's status is correctly initialized
      *
      * @return  void
@@ -149,10 +122,10 @@ class ChangeSetTest extends UnitTestCase
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
         // Use reflection to test protected property
-        $reflectionClass = new \ReflectionClass($changeSet);
-        $changeItems     = $reflectionClass->getProperty('changeItems');
+        //$reflectionClass = new \ReflectionClass($changeSet);
+        //$changeItems     = $reflectionClass->getProperty('changeItems');
 
-        $changeItems->setAccessible(true);
+        //$changeItems->setAccessible(true);
 
         $status = $changeSet->getStatus();
 
@@ -179,6 +152,12 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
 
+        if (!is_dir(__DIR__ . '/tmp')) {
+            mkdir(__DIR__ . '/tmp');
+        }
+        if (!is_dir(__DIR__ . '/tmp/mysql')) {
+            mkdir(__DIR__ . '/tmp/mysql');
+        }
         touch(__DIR__ . '/tmp/mysql/4.0.6-2021-12-23.sql');
         touch(__DIR__ . '/tmp/mysql/4.1.0-2021-11-20.sql');
         touch(__DIR__ . '/tmp/mysql/4.1.0-2021-11-28.sql');
