@@ -198,17 +198,11 @@ class ChangeSetTest extends UnitTestCase
 
         // Create an array with 3 change items which will be checked with error
         for ($i = 0; $i < 3; $i++) {
-            $items[] = new class ($db, '', '') extends ChangeItem
-            {
-                public function check()
-                {
-                    // Return error
-                    return -2;
-                }
-                public function buildCheckQuery()
-                {
-                }
-            };
+            $item = $this->createStub(ChangeItem::class);
+
+            // Make sure the check method is called one time and returns success
+            $item->expects($this->once())->method('check')->willReturn(-2);
+            $items[] = $item;
         }
 
         // Set change set's change items to the previously created array
