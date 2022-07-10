@@ -156,19 +156,13 @@ class ChangeSetTest extends UnitTestCase
 
         $items = [];
 
-        // Create an array with 3 change items which will be checked with success
+        // Create an array with 3 change item stubs which will be checked with success
         for ($i = 0; $i < 3; $i++) {
-            $items[] = new class ($db, '', '') extends ChangeItem
-            {
-                public function check()
-                {
-                    // Return success
-                    return 1;
-                }
-                public function buildCheckQuery()
-                {
-                }
-            };
+            $item = $this->createStub(ChangeItem::class);
+
+            // Make sure the check method is called one time and returns success
+            $item->expects($this->once())->method('check')->willReturn(1);
+            $items[] = $item;
         }
 
         // Set change set's change items to the previously created array
@@ -223,6 +217,44 @@ class ChangeSetTest extends UnitTestCase
         $errors = $changeSet->check();
 
         $this->assertEquals($items, $errors);
+    }
+
+    /**
+     * @testdox  The fix method runs the change set's check method and each change item's fix method
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testFix()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        // Create a change set without any change items
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+        // Use reflection to set protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems     = $reflectionClass->getProperty('changeItems');
+
+        $changeItems->setAccessible(true);
+
+        $items = [];
+
+        // Create an array with 3 change item stubs which will be checked with success
+        for ($i = 0; $i < 3; $i++) {
+            $item = $this->createStub(ChangeItem::class);
+
+            // Make sure the fix method is called one time
+            $item->expects($this->once())->method('fix');
+            $items[] = $item;
+        }
+
+        // Set change set's change items to the previously created array
+        $changeItems->setValue($changeSet, $items);
+
+        $changeSet->fix();
     }
 
     /**
