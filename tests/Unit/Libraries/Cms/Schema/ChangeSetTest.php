@@ -11,6 +11,7 @@
 namespace Joomla\Tests\Unit\Libraries\Cms\Schema;
 
 use Joomla\CMS\Schema\ChangeSet;
+use Joomla\CMS\Schema\ChangeItem;
 use Joomla\CMS\Schema\ChangeItem\MysqlChangeItem;
 use Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem;
 use Joomla\Database\DatabaseDriver;
@@ -47,12 +48,13 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the object is instantiated correctly
+     * @testdox  is instantiated correctly
      *
      * @dataProvider  dataObjectIsInstantiatedCorrectly
      *
-     * @param   string  $driverSubclass  The subclass of DatabaseDriver that is expected
-     * @param   string  $itemSubclass    The subclass of ChangeItem that is expected
+     * @param   string  $serverType      The database server type as returned by the driver's getServerType method
+     * @param   string  $driverSubclass  The subclass of DatabaseDriver that is expected for the $serverType
+     * @param   string  $itemSubclass    The subclass of ChangeItem that is expected for the $serverType
      *
      * @return  void
      *
@@ -60,15 +62,15 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testObjectIsInstantiatedCorrectly($serverType, $driverSubclass, $itemSubclass)
     {
-        // Make sure that there will be two change items
+        // Make sure that there will be three change items in two files
         if (!is_dir(__DIR__ . '/tmp')) {
             mkdir(__DIR__ . '/tmp');
         }
         if (!is_dir(__DIR__ . '/tmp/' . $serverType)) {
             mkdir(__DIR__ . '/tmp/' . $serverType);
         }
-        file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-01.sql', "DUMMYTEXT\n");
-        file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-02.sql', "DUMMYTEXT\n");
+        file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-01.sql', 'UPDATE #__foo SET bar = 1;' . "\n" . 'UPDATE #__foo SET bar = 2;');
+        file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-02.sql', 'UPDATE #__foo SET bar = 3;');
 
         $db = $this->createStub($driverSubclass);
         $db->method('getServerType')->willReturn($serverType);
@@ -87,7 +89,7 @@ class ChangeSetTest extends UnitTestCase
 
         $this->assertContainsOnlyInstancesOf($itemSubclass, $changeItems->getValue($changeSet), 'The change items should have the right subclass');
 
-        $this->assertEquals(2, count($changeItems->getValue($changeSet)), 'There should be two change items');
+        $this->assertEquals(3, count($changeItems->getValue($changeSet)), 'There should be three change items');
     }
 
     /**
@@ -108,7 +110,123 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the schema's status is correctly initialized
+     * @testdox  uses the core com_admin folder as default
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testDefaultFolder()
+    {
+        $db = $this->createStub(MysqliDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        $changeSet = new ChangeSet($db);
+
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+
+        $changeSetFolder = $reflectionClass->getProperty('folder');
+
+        $changeSetFolder->setAccessible(true);
+
+        $this->assertEquals(JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/', $changeSetFolder->getValue($changeSet));
+    }
+
+    /**
+     * @testdox  calls the check method of each change item and returns an empty array if all items were checked with success
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testCheckAllItemsOk()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        // Create a change set without any change items
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+        // Use reflection to set protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems     = $reflectionClass->getProperty('changeItems');
+
+        $changeItems->setAccessible(true);
+
+        $items = [];
+
+        // Create an array with 3 change items which will be checked with success
+        for ($i = 0; $i < 3; $i++) {
+            $items[] = new class ($db, '', '') extends ChangeItem
+            {
+                public function check()
+                {
+                    // Return success
+                    return 1;
+                }
+                public function buildCheckQuery()
+                {
+                }
+            };
+        }
+
+        // Set change set's change items to the previously created array
+        $changeItems->setValue($changeSet, $items);
+
+        $errors = $changeSet->check();
+
+        $this->assertEquals([], $errors);
+    }
+
+    /**
+     * @testdox  calls the check method of each change item and returns an array of check items which have been checked with error
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testCheckAllItemsError()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        // Create a change set without any change items
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+        // Use reflection to set protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems     = $reflectionClass->getProperty('changeItems');
+
+        $changeItems->setAccessible(true);
+
+        $items = [];
+
+        // Create an array with 3 change items which will be checked with error
+        for ($i = 0; $i < 3; $i++) {
+            $items[] = new class ($db, '', '') extends ChangeItem
+            {
+                public function check()
+                {
+                    // Return error
+                    return -2;
+                }
+                public function buildCheckQuery()
+                {
+                }
+            };
+        }
+
+        // Set change set's change items to the previously created array
+        $changeItems->setValue($changeSet, $items);
+
+        $errors = $changeSet->check();
+
+        $this->assertEquals($items, $errors);
+    }
+
+    /**
+     * @testdox  returns an array of change items grouped by their check status
      *
      * @return  void
      *
@@ -119,25 +237,46 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
 
+        // Create a change set without any change items
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
-        // Use reflection to test protected property
-        //$reflectionClass = new \ReflectionClass($changeSet);
-        //$changeItems     = $reflectionClass->getProperty('changeItems');
+        // Use reflection to set protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems     = $reflectionClass->getProperty('changeItems');
 
-        //$changeItems->setAccessible(true);
+        $changeItems->setAccessible(true);
+
+        $items = [];
+
+        // Create an array with 8 change items
+        for ($i = 0; $i < 8; $i++) {
+            $items[] = new class ($db, '', '') extends ChangeItem
+            {
+                public function buildCheckQuery()
+                {
+                }
+            };
+        }
+
+        // Set check status
+        $items[0]->checkStatus = 0;  /* unchecked */
+        $items[1]->checkStatus = 1;  /* ok */
+        $items[2]->checkStatus = -2; /* error */
+        $items[3]->checkStatus = -1; /* skipped */
+        $items[4]->checkStatus = -1; /* skipped */
+        $items[5]->checkStatus = -2; /* error */
+        $items[6]->checkStatus = 1;  /* ok */
+        $items[7]->checkStatus = 0;  /* unchecked */
+
+        // Set change set's change items to the previously created array
+        $changeItems->setValue($changeSet, $items);
 
         $status = $changeSet->getStatus();
 
-        $this->assertArrayHasKey('unchecked', $status);
-        $this->assertArrayHasKey('ok', $status);
-        $this->assertArrayHasKey('error', $status);
-        $this->assertArrayHasKey('skipped', $status);
-
-        $this->assertEquals([], $status['unchecked'], 'There should not be any unchecked change items');
-        $this->assertEquals([], $status['ok'], 'There should not be any checked change items');
-        $this->assertEquals([], $status['error'], 'There should not be any change items with errors');
-        //$this->assertEquals($changeItems->getValue($changeSet), $status['skipped'], 'All change items should be skipped');
+        $this->assertEquals([$items[0], $items[7]], $status['unchecked'], 'The unchecked status should contain the right change items');
+        $this->assertEquals([$items[1], $items[6]], $status['ok'], 'The ok status should contain the right change items');
+        $this->assertEquals([$items[2], $items[5]], $status['error'], 'The error status should contain the right change items');
+        $this->assertEquals([$items[3], $items[4]], $status['skipped'], 'The skipped status should contain the right change items');
     }
 
     /**
