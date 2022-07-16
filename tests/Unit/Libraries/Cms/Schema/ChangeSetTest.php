@@ -48,7 +48,7 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
-     * @testdox  is instantiated correctly
+     * @testdox  object is instantiated correctly
      *
      * @dataProvider  dataObjectIsInstantiatedCorrectly
      *
@@ -79,9 +79,8 @@ class ChangeSetTest extends UnitTestCase
 
         // Use reflection to test protected properties
         $reflectionClass = new \ReflectionClass($changeSet);
-        $changeSetDb     = $reflectionClass->getProperty('db');
-        $changeItems     = $reflectionClass->getProperty('changeItems');
-
+        $changeSetDb = $reflectionClass->getProperty('db');
+        $changeItems = $reflectionClass->getProperty('changeItems');
         $changeSetDb->setAccessible(true);
         $changeItems->setAccessible(true);
 
@@ -116,7 +115,7 @@ class ChangeSetTest extends UnitTestCase
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testDefaultFolder()
+    public function testUseComAdminAsDefaultFolder()
     {
         $db = $this->createStub(MysqliDriver::class);
         $db->method('getServerType')->willReturn('mysql');
@@ -124,23 +123,20 @@ class ChangeSetTest extends UnitTestCase
         $changeSet = new ChangeSet($db);
 
         // Use reflection to test protected property
-        $reflectionClass = new \ReflectionClass($changeSet);
-
-        $changeSetFolder = $reflectionClass->getProperty('folder');
-
+        $changeSetFolder = (new \ReflectionClass($changeSet))->getProperty('folder');
         $changeSetFolder->setAccessible(true);
 
         $this->assertEquals(JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/', $changeSetFolder->getValue($changeSet));
     }
 
     /**
-     * @testdox  calls the check method of each change item and returns an empty array if all items were checked with success
+     * @testdox  can call the check method of each change item and return an empty array if all items were checked with success
      *
      * @return  void
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testCheckAllItemsOk()
+    public function testCheckAllItemsWithSuccess()
     {
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
@@ -149,9 +145,7 @@ class ChangeSetTest extends UnitTestCase
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
         // Use reflection to set protected property
-        $reflectionClass = new \ReflectionClass($changeSet);
-        $changeItems     = $reflectionClass->getProperty('changeItems');
-
+        $changeItems = (new \ReflectionClass($changeSet))->getProperty('changeItems');
         $changeItems->setAccessible(true);
 
         $items = [];
@@ -168,19 +162,17 @@ class ChangeSetTest extends UnitTestCase
         // Set change set's change items to the previously created array
         $changeItems->setValue($changeSet, $items);
 
-        $errors = $changeSet->check();
-
-        $this->assertEquals([], $errors);
+        $this->assertEquals([], $changeSet->check());
     }
 
     /**
-     * @testdox  calls the check method of each change item and returns an array of check items which have been checked with error
+     * @testdox  can call the check method of each change item and return an array of check items which have been checked with error
      *
      * @return  void
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testCheckAllItemsError()
+    public function testCheckAllItemsWithError()
     {
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
@@ -189,18 +181,16 @@ class ChangeSetTest extends UnitTestCase
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
         // Use reflection to set protected property
-        $reflectionClass = new \ReflectionClass($changeSet);
-        $changeItems     = $reflectionClass->getProperty('changeItems');
-
+        $changeItems = (new \ReflectionClass($changeSet))->getProperty('changeItems');
         $changeItems->setAccessible(true);
 
         $items = [];
 
-        // Create an array with 3 change items which will be checked with error
+        // Create an array with 3 change item stubs which will be checked with error
         for ($i = 0; $i < 3; $i++) {
             $item = $this->createStub(ChangeItem::class);
 
-            // Make sure the check method is called one time and returns success
+            // Make sure the check method is called one time and returns error
             $item->expects($this->once())->method('check')->willReturn(-2);
             $items[] = $item;
         }
@@ -208,13 +198,11 @@ class ChangeSetTest extends UnitTestCase
         // Set change set's change items to the previously created array
         $changeItems->setValue($changeSet, $items);
 
-        $errors = $changeSet->check();
-
-        $this->assertEquals($items, $errors);
+        $this->assertEquals($items, $changeSet->check());
     }
 
     /**
-     * @testdox  The fix method runs the change set's check method and each change item's fix method
+     * @testdox  can run each change item's fix method
      *
      * @return  void
      *
@@ -229,9 +217,7 @@ class ChangeSetTest extends UnitTestCase
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
         // Use reflection to set protected property
-        $reflectionClass = new \ReflectionClass($changeSet);
-        $changeItems     = $reflectionClass->getProperty('changeItems');
-
+        $changeItems = (new \ReflectionClass($changeSet))->getProperty('changeItems');
         $changeItems->setAccessible(true);
 
         $items = [];
@@ -252,7 +238,7 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
-     * @testdox  returns an array of change items grouped by their check status
+     * @testdox  can return an array of change items grouped by their check status
      *
      * @return  void
      *
@@ -267,9 +253,7 @@ class ChangeSetTest extends UnitTestCase
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
         // Use reflection to set protected property
-        $reflectionClass = new \ReflectionClass($changeSet);
-        $changeItems     = $reflectionClass->getProperty('changeItems');
-
+        $changeItems = (new \ReflectionClass($changeSet))->getProperty('changeItems');
         $changeItems->setAccessible(true);
 
         $items = [];
@@ -306,7 +290,7 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
-     * @testdox  returns the latest schema version
+     * @testdox  can return the latest schema version
      *
      * @return  void
      *
