@@ -148,7 +148,7 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
         {
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
@@ -187,7 +187,7 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
         {
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
@@ -226,7 +226,7 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
         {
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
@@ -265,7 +265,7 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
         {
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
