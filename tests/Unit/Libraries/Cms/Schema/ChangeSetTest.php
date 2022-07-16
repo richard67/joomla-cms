@@ -120,8 +120,10 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testUseComAdminAsDefaultFolder()
     {
-        $db = $this->createStub(MysqliDriver::class);
-        $db->method('getServerType')->willReturn('mysql');
+        $db = $this->createStub(DatabaseDriver::class);
+
+        // Use server type postgresql to not run special utf8mb4 checks for MySQL
+        $db->method('getServerType')->willReturn('postgresql');
 
         // Create a change set without the folder parameter
         $changeSet = new class ($db) extends ChangeSet
@@ -134,6 +136,28 @@ class ChangeSetTest extends UnitTestCase
         };
 
         $this->assertEquals(JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/', $changeSet->changeSetTestGetFolder());
+    }
+
+    /**
+     * @testdox  can return a reference to the ChangeSet object, only creating it if it doesn't already exist
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testGetInstance()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+
+        // Use server type postgresql to not run special utf8mb4 checks for MySQL
+        $db->method('getServerType')->willReturn('postgresql');
+
+        $changeSet1 = ChangeSet::getInstance($db, __DIR__ . '/tmp');
+        $changeSet2 = ChangeSet::getInstance($db, __DIR__ . '/tmp');
+        $changeSet3 = $changeSet2->getInstance($db, __DIR__ . '/tmp');
+
+        $this->assertSame($changeSet1, $changeSet2, 'The getInstance method should not create a new object on consecutive calls');
+        $this->assertSame($changeSet1, $changeSet3, 'The getInstance method should return the reference to the right object');
     }
 
     /**
