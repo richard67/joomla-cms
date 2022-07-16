@@ -112,6 +112,93 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
+     * @testdox  has no change items when the folder for update files doesn't exist
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testNoChangeItemsWhenFolderNotExists()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
+        {
+            // Add method to get protected changeItems property for testing
+            public function changeSetTestGetChangeItems()
+            {
+                return $this->changeItems;
+            }
+        };
+
+        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+    }
+
+    /**
+     * @testdox  has no change items when the folder for update files is empty
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testNoChangeItemsWhenEmptyFolder()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        if (!is_dir(__DIR__ . '/tmp')) {
+            mkdir(__DIR__ . '/tmp');
+        }
+        if (!is_dir(__DIR__ . '/tmp/mysql')) {
+            mkdir(__DIR__ . '/tmp/mysql');
+        }
+
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to get protected changeItems property for testing
+            public function changeSetTestGetChangeItems()
+            {
+                return $this->changeItems;
+            }
+        };
+
+        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+    }
+
+    /**
+     * @testdox  has no change items when there are no update queries
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testNoChangeItemsWhenNoUpdateQueries()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        if (!is_dir(__DIR__ . '/tmp')) {
+            mkdir(__DIR__ . '/tmp');
+        }
+        if (!is_dir(__DIR__ . '/tmp/mysql')) {
+            mkdir(__DIR__ . '/tmp/mysql');
+        }
+        touch(__DIR__ . '/tmp/mysql/4.1.0-2021-11-20.sql');
+
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to get protected changeItems property for testing
+            public function changeSetTestGetChangeItems()
+            {
+                return $this->changeItems;
+            }
+        };
+
+        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+    }
+
+    /**
      * @testdox  uses the core com_admin folder as default
      *
      * @return  void
@@ -128,6 +215,11 @@ class ChangeSetTest extends UnitTestCase
         // Create a change set without the folder parameter
         $changeSet = new class ($db) extends ChangeSet
         {
+            // Skip getting update files for this test
+            private function getUpdateFiles()
+            {
+                return false;
+            }
             // Add method to get protected folder property for testing
             public function changeSetTestGetFolder()
             {
@@ -136,31 +228,6 @@ class ChangeSetTest extends UnitTestCase
         };
 
         $this->assertEquals(JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/', $changeSet->changeSetTestGetFolder());
-    }
-
-    /**
-     * @testdox  has no change items when the database server type is not supported
-     *
-     * @return  void
-     *
-     * @since   __DEPLOY_VERSION__
-     */
-    public function testNoChangeItemsForUnsupportedDatabaseType()
-    {
-        $db = $this->createStub(DatabaseDriver::class);
-        $db->method('getServerType')->willReturn('sqlite');
-
-        // Create a change set for an unsupported database server type
-        $changeSet = new class ($db) extends ChangeSet
-        {
-            // Add method to get protected changeItems property for testing
-            public function changeSetTestGetChangeItems()
-            {
-                return $this->changeItems;
-            }
-        };
-
-        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
     }
 
     /**
