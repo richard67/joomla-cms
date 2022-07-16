@@ -139,6 +139,31 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
+     * @testdox  has no change items when the database server type is not supported
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testNoChangeItemsForUnsupportedDatabaseType()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('sqlite');
+
+        // Create a change set for an unsupported database server type
+        $changeSet = new class ($db) extends ChangeSet
+        {
+            // Add method to get protected changeItems property for testing
+            public function changeSetTestGetChangeItems()
+            {
+                return $this->changeItems;
+            }
+        };
+
+        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+    }
+
+    /**
      * @testdox  can return a reference to the ChangeSet object, only creating it if it doesn't already exist
      *
      * @return  void
