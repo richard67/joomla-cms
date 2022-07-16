@@ -75,20 +75,23 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub($driverSubclass);
         $db->method('getServerType')->willReturn($serverType);
 
-        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to get protected db property for testing
+            public function changeSetTestGetDatabase()
+            {
+                return $this->db;
+            }
+            // Add method to get protected changeItems property for testing
+            public function changeSetTestGetChangeItems()
+            {
+                return $this->changeItems;
+            }
+        };
 
-        // Use reflection to test protected properties
-        $reflectionClass = new \ReflectionClass($changeSet);
-        $changeSetDb = $reflectionClass->getProperty('db');
-        $changeItems = $reflectionClass->getProperty('changeItems');
-        $changeSetDb->setAccessible(true);
-        $changeItems->setAccessible(true);
-
-        $this->assertInstanceOf($driverSubclass, $changeSetDb->getValue($changeSet), 'The database driver should be correctly injected');
-
-        $this->assertContainsOnlyInstancesOf($itemSubclass, $changeItems->getValue($changeSet), 'The change items should have the right subclass');
-
-        $this->assertEquals(3, count($changeItems->getValue($changeSet)), 'There should be three change items');
+        $this->assertInstanceOf($driverSubclass, $changeSet->changeSetTestGetDatabase(), 'The database driver should be correctly injected');
+        $this->assertContainsOnlyInstancesOf($itemSubclass, $changeSet->changeSetTestGetChangeItems(), 'The change items should have the right subclass');
+        $this->assertEquals(3, count($changeSet->changeSetTestGetChangeItems()), 'There should be three change items');
     }
 
     /**
@@ -120,13 +123,16 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub(MysqliDriver::class);
         $db->method('getServerType')->willReturn('mysql');
 
-        $changeSet = new ChangeSet($db);
+        $changeSet = new class ($db) extends ChangeSet
+        {
+            // Add method to get protected folder property for testing
+            public function changeSetTestGetFolder()
+            {
+                return $this->folder;
+            }
+        };
 
-        // Use reflection to test protected property
-        $changeSetFolder = (new \ReflectionClass($changeSet))->getProperty('folder');
-        $changeSetFolder->setAccessible(true);
-
-        $this->assertEquals(JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/', $changeSetFolder->getValue($changeSet));
+        $this->assertEquals(JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/', $changeSet->changeSetTestGetFolder());
     }
 
     /**
@@ -142,11 +148,14 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
-
-        // Use reflection to set protected property
-        $changeItems = (new \ReflectionClass($changeSet))->getProperty('changeItems');
-        $changeItems->setAccessible(true);
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to set protected changeItems property for testing
+            public function changeSetTestSetChangeItems($items)
+            {
+                $this->changeItems = $items;
+            }
+        };
 
         $items = [];
 
@@ -160,7 +169,7 @@ class ChangeSetTest extends UnitTestCase
         }
 
         // Set change set's change items to the previously created array
-        $changeItems->setValue($changeSet, $items);
+        $changeSet->changeSetTestSetChangeItems($items);
 
         $this->assertEquals([], $changeSet->check());
     }
@@ -178,11 +187,14 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
-
-        // Use reflection to set protected property
-        $changeItems = (new \ReflectionClass($changeSet))->getProperty('changeItems');
-        $changeItems->setAccessible(true);
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to set protected changeItems property for testing
+            public function changeSetTestSetChangeItems($items)
+            {
+                $this->changeItems = $items;
+            }
+        };
 
         $items = [];
 
@@ -196,7 +208,7 @@ class ChangeSetTest extends UnitTestCase
         }
 
         // Set change set's change items to the previously created array
-        $changeItems->setValue($changeSet, $items);
+        $changeSet->changeSetTestSetChangeItems($items);
 
         $this->assertEquals($items, $changeSet->check());
     }
@@ -214,11 +226,14 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
-
-        // Use reflection to set protected property
-        $changeItems = (new \ReflectionClass($changeSet))->getProperty('changeItems');
-        $changeItems->setAccessible(true);
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to set protected changeItems property for testing
+            public function changeSetTestSetChangeItems($items)
+            {
+                $this->changeItems = $items;
+            }
+        };
 
         $items = [];
 
@@ -232,7 +247,7 @@ class ChangeSetTest extends UnitTestCase
         }
 
         // Set change set's change items to the previously created array
-        $changeItems->setValue($changeSet, $items);
+        $changeSet->changeSetTestSetChangeItems($items);
 
         $changeSet->fix();
     }
@@ -250,11 +265,14 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
-
-        // Use reflection to set protected property
-        $changeItems = (new \ReflectionClass($changeSet))->getProperty('changeItems');
-        $changeItems->setAccessible(true);
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to set protected changeItems property for testing
+            public function changeSetTestSetChangeItems($items)
+            {
+                $this->changeItems = $items;
+            }
+        };
 
         $items = [];
 
@@ -279,7 +297,7 @@ class ChangeSetTest extends UnitTestCase
         $items[7]->checkStatus = 0;  /* unchecked */
 
         // Set change set's change items to the previously created array
-        $changeItems->setValue($changeSet, $items);
+        $changeSet->changeSetTestSetChangeItems($items);
 
         $status = $changeSet->getStatus();
 
