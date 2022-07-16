@@ -123,6 +123,7 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub(MysqliDriver::class);
         $db->method('getServerType')->willReturn('mysql');
 
+        // Create a change set without the folder parameter
         $changeSet = new class ($db) extends ChangeSet
         {
             // Add method to get protected folder property for testing
@@ -144,12 +145,12 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testCheckAllItemsWithSuccess()
     {
-        $db = $this->createStub(DatabaseDriver::class);
-        $db->method('getServerType')->willReturn('mysql');
-
         // Create a change set without any change items
-        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
+        $changeSet = new class ($this->createStub(DatabaseDriver::class)) extends ChangeSet
         {
+            public function __construct($db, $folder = null)
+            {
+            }
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
             {
@@ -157,12 +158,10 @@ class ChangeSetTest extends UnitTestCase
             }
         };
 
-        $items = [];
-
         // Create an array with 3 change item stubs which will be checked with success
+        $items = [];
         for ($i = 0; $i < 3; $i++) {
             $item = $this->createStub(ChangeItem::class);
-
             // Make sure the check method is called one time and returns success
             $item->expects($this->once())->method('check')->willReturn(1);
             $items[] = $item;
@@ -183,12 +182,12 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testCheckAllItemsWithError()
     {
-        $db = $this->createStub(DatabaseDriver::class);
-        $db->method('getServerType')->willReturn('mysql');
-
         // Create a change set without any change items
-        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
+        $changeSet = new class ($this->createStub(DatabaseDriver::class)) extends ChangeSet
         {
+            public function __construct($db, $folder = null)
+            {
+            }
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
             {
@@ -196,25 +195,25 @@ class ChangeSetTest extends UnitTestCase
             }
         };
 
+        // Create an array with 3 change item stubs
         $items = [];
-
-        // Create an array with 3 change item stubs which will be checked with error
         for ($i = 0; $i < 3; $i++) {
-            $item = $this->createStub(ChangeItem::class);
-
-            // Make sure the check method is called one time and returns error
-            $item->expects($this->once())->method('check')->willReturn(-2);
-            $items[] = $item;
+            $items[] = $this->createStub(ChangeItem::class);
         }
+
+        // Each check item's check method shall be called one time and return the desired value
+        $items[0]->expects($this->once())->method('check')->willReturn(-2); // return error
+        $items[1]->expects($this->once())->method('check')->willReturn(1); // return success
+        $items[2]->expects($this->once())->method('check')->willReturn(-2); // return error
 
         // Set change set's change items to the previously created array
         $changeSet->changeSetTestSetChangeItems($items);
 
-        $this->assertEquals($items, $changeSet->check());
+        $this->assertEquals([$items[0], $items[2]], $changeSet->check());
     }
 
     /**
-     * @testdox  can run each change item's fix method
+     * @testdox  can run its check method and each change item's fix method
      *
      * @return  void
      *
@@ -222,12 +221,20 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testFix()
     {
-        $db = $this->createStub(DatabaseDriver::class);
-        $db->method('getServerType')->willReturn('mysql');
-
         // Create a change set without any change items
-        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
+        $changeSet = new class ($this->createStub(DatabaseDriver::class)) extends ChangeSet
         {
+            // Add counter for calls to the check method for testing
+            public $changeSetTestCount = 0;
+            public function __construct($db, $folder = null)
+            {
+            }
+            // Count calls to the check method for testing
+            public function check()
+            {
+                $this->changeSetTestCount += 1;
+                return 1;
+            }
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
             {
@@ -250,6 +257,8 @@ class ChangeSetTest extends UnitTestCase
         $changeSet->changeSetTestSetChangeItems($items);
 
         $changeSet->fix();
+
+        $this->assertEquals(1, $changeSet->changeSetTestCount);
     }
 
     /**
@@ -262,11 +271,13 @@ class ChangeSetTest extends UnitTestCase
     public function testGetStatus()
     {
         $db = $this->createStub(DatabaseDriver::class);
-        $db->method('getServerType')->willReturn('mysql');
 
         // Create a change set without any change items
-        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
+        $changeSet = new class ($db) extends ChangeSet
         {
+            public function __construct($db, $folder = null)
+            {
+            }
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
             {
@@ -274,9 +285,8 @@ class ChangeSetTest extends UnitTestCase
             }
         };
 
-        $items = [];
-
         // Create an array with 8 change items
+        $items = [];
         for ($i = 0; $i < 8; $i++) {
             $items[] = new class ($db, '', '') extends ChangeItem
             {
@@ -325,9 +335,9 @@ class ChangeSetTest extends UnitTestCase
         if (!is_dir(__DIR__ . '/tmp/mysql')) {
             mkdir(__DIR__ . '/tmp/mysql');
         }
-        touch(__DIR__ . '/tmp/mysql/4.0.6-2021-12-23.sql');
         touch(__DIR__ . '/tmp/mysql/4.1.0-2021-11-20.sql');
         touch(__DIR__ . '/tmp/mysql/4.1.0-2021-11-28.sql');
+        touch(__DIR__ . '/tmp/mysql/4.0.6-2021-12-23.sql');
 
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
