@@ -246,10 +246,8 @@ class ChangeSetTest extends UnitTestCase
 
         $changeSet1 = ChangeSet::getInstance($db, __DIR__ . '/tmp');
         $changeSet2 = ChangeSet::getInstance($db, __DIR__ . '/tmp');
-        $changeSet3 = $changeSet2->getInstance($db, __DIR__ . '/tmp');
 
-        $this->assertSame($changeSet1, $changeSet2, 'The getInstance method should not create a new object on consecutive calls');
-        $this->assertSame($changeSet1, $changeSet3, 'The getInstance method should return the reference to the right object');
+        $this->assertSame($changeSet1, $changeSet2, 'The getInstance method should not create a new object on consecutive static calls');
     }
 
     /**
@@ -329,7 +327,7 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
-     * @testdox  can run its check method and each change item's fix method
+     * @testdox  can run each change item's fix method
      *
      * @return  void
      *
@@ -340,16 +338,8 @@ class ChangeSetTest extends UnitTestCase
         // Create a change set without any change items
         $changeSet = new class ($this->createStub(DatabaseDriver::class)) extends ChangeSet
         {
-            // Add counter for calls to the check method for testing
-            public $changeSetTestCount = 0;
             public function __construct($db, $folder = null)
             {
-            }
-            // Count calls to the check method for testing
-            public function check()
-            {
-                $this->changeSetTestCount += 1;
-                return 1;
             }
             // Add method to set protected changeItems property for testing
             public function changeSetTestSetChangeItems($items)
@@ -373,8 +363,6 @@ class ChangeSetTest extends UnitTestCase
         $changeSet->changeSetTestSetChangeItems($items);
 
         $changeSet->fix();
-
-        $this->assertEquals(1, $changeSet->changeSetTestCount);
     }
 
     /**
