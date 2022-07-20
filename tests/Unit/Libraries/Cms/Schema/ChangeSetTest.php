@@ -414,7 +414,6 @@ class ChangeSetTest extends UnitTestCase
         $changeSet->changeSetTestSetChangeItems($items);
 
         $status = $changeSet->getStatus();
-
         $this->assertEquals([$items[0], $items[7]], $status['unchecked'], 'The unchecked status should contain the right change items');
         $this->assertEquals([$items[1], $items[6]], $status['ok'], 'The ok status should contain the right change items');
         $this->assertEquals([$items[2], $items[5]], $status['error'], 'The error status should contain the right change items');
@@ -444,7 +443,6 @@ class ChangeSetTest extends UnitTestCase
         touch(__DIR__ . '/tmp/mysql/4.0.6-2021-12-23.sql');
 
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
-
         $this->assertSame('4.1.0-2021-11-28', $changeSet->getSchema());
     }
 }
