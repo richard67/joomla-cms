@@ -92,7 +92,7 @@ class ChangeItemTest extends UnitTestCase
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testEmptyCheckQuery()
+    public function testCheckQueryEmpty()
     {
         $item = new class ($this->createStub(DatabaseDriver::class), '', '') extends ChangeItem
         {
@@ -244,7 +244,7 @@ class ChangeItemTest extends UnitTestCase
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testUpdateQueryRuntimeException()
+    public function testFixUpdateQueryRuntimeException()
     {
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('setQuery')->will($this->throwException(new \RuntimeException('Exception message')));
@@ -288,7 +288,7 @@ class ChangeItemTest extends UnitTestCase
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testUpdateQueryExecutionFailureException()
+    public function testFixUpdateQueryExecutionFailureException()
     {
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('execute')->will($this->throwException(new ExecutionFailureException('Exception message')));
