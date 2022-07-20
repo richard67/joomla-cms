@@ -274,10 +274,11 @@ class ChangeItemTest extends UnitTestCase
         // Let the update query be not empty
         $item->updateQuery = 'Something';
 
-        // Set check status to error
+        // Set previous check status to error
         $item->checkStatus = -2;
 
         $item->fix();
+        $this->assertEquals(1, $item->checkStatus, 'The ChangeItem should have been checked again');
         $this->assertEquals(-2, $item->rerunStatus, 'The ChangeItem\'s rerunStatus should be set to error');
     }
 
@@ -318,10 +319,11 @@ class ChangeItemTest extends UnitTestCase
         // Let the update query be not empty
         $item->updateQuery = 'Something';
 
-        // Set check status to error
+        // Set previous check status to error
         $item->checkStatus = -2;
 
         $item->fix();
+        $this->assertEquals(1, $item->checkStatus, 'The ChangeItem should have been checked again');
         $this->assertEquals(-2, $item->rerunStatus, 'The ChangeItem\'s rerunStatus should be set to error');
     }
 }
