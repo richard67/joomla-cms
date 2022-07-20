@@ -69,7 +69,7 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  throws a runtime exception with an unsupported database server type
+     * @testdox  throws a runtime exception if the database server type is not supported
      *
      * @return  void
      *
@@ -86,7 +86,7 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the check() method sets the ChangeItem to be skipped if there is no check query
+     * @testdox  is skipped if it has no check query
      *
      * @return  void
      *
@@ -116,7 +116,7 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the check() method sets the right check status if the check query returns no result
+     * @testdox  sets the right check status if the check query returns no result
      *
      * @return  void
      *
@@ -156,7 +156,7 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the check() method sets the right check status if the check query returns one result
+     * @testdox  sets the right check status if the check query returns a result
      *
      * @return  void
      *
@@ -196,7 +196,7 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the check() method sets the check status to error when the check query fails with a RuntimeException
+     * @testdox  sets the check status to error if the check query fails with a RuntimeException
      *
      * @return  void
      *
@@ -238,7 +238,7 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the fix() method sets the rerun status to error when the update query fails with a RuntimeException
+     * @testdox  sets the rerun status to error if the update query fails with a RuntimeException
      *
      * @return  void
      *
@@ -282,7 +282,7 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
-     * @testdox  the fix() method sets the rerun status to error when the update query fails with an ExecutionFailureException
+     * @testdox  sets the rerun status to error if the update query fails with an ExecutionFailureException
      *
      * @return  void
      *
