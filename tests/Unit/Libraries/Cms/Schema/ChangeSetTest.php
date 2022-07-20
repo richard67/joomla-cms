@@ -294,7 +294,7 @@ class ChangeSetTest extends UnitTestCase
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testCheckAllItemsWithError()
+    public function testCheckItemsWithError()
     {
         // Create a change set without any change items
         $changeSet = new class ($this->createStub(DatabaseDriver::class)) extends ChangeSet
