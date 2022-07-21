@@ -75,6 +75,9 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub($driverSubclass);
         $db->method('getServerType')->willReturn($serverType);
 
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
+
         $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
         {
             // Add method to get protected db property for testing
