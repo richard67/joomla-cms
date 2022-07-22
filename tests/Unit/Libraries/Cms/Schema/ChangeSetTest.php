@@ -75,7 +75,7 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub($driverSubclass);
         $db->method('getServerType')->willReturn($serverType);
 
-        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion when database server type is mysql
         $db->method('loadRowList')->willReturn([]);
 
         $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
@@ -126,6 +126,9 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
 
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
+
         $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
         {
             // Add method to get protected changeItems property for testing
@@ -149,6 +152,9 @@ class ChangeSetTest extends UnitTestCase
     {
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
+
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
 
         if (!is_dir(__DIR__ . '/tmp')) {
             mkdir(__DIR__ . '/tmp');
@@ -180,6 +186,9 @@ class ChangeSetTest extends UnitTestCase
     {
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
+
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
 
         if (!is_dir(__DIR__ . '/tmp')) {
             mkdir(__DIR__ . '/tmp');
@@ -435,6 +444,9 @@ class ChangeSetTest extends UnitTestCase
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
 
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
+
         if (!is_dir(__DIR__ . '/tmp')) {
             mkdir(__DIR__ . '/tmp');
         }
@@ -460,6 +472,9 @@ class ChangeSetTest extends UnitTestCase
     {
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
+
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
 
         if (!is_dir(__DIR__ . '/tmp')) {
             mkdir(__DIR__ . '/tmp');
