@@ -448,4 +448,27 @@ class ChangeSetTest extends UnitTestCase
         $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
         $this->assertSame('4.1.0-2021-11-28', $changeSet->getSchema());
     }
+
+    /**
+     * @testdox  can return an empty string as schema version if there are no update files
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testGetSchemaNoUpdateFiles()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        if (!is_dir(__DIR__ . '/tmp')) {
+            mkdir(__DIR__ . '/tmp');
+        }
+        if (!is_dir(__DIR__ . '/tmp/mysql')) {
+            mkdir(__DIR__ . '/tmp/mysql');
+        }
+
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+        $this->assertSame('', $changeSet->getSchema());
+    }
 }
