@@ -14,6 +14,7 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Schema\ChangeItem;
 use Joomla\CMS\Schema\ChangeItem\MysqlChangeItem;
 use Joomla\CMS\Schema\ChangeItem\PostgresqlChangeItem;
+use Joomla\CMS\Schema\ChangeItem\SqlsrvChangeItem;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\Exception\ExecutionFailureException;
 use Joomla\Tests\Unit\UnitTestCase;
@@ -35,7 +36,7 @@ class ChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataGetInstanceSubclass
      *
-     * @param   string  $servertype    The value returned by the getServerType method of the database driver
+     * @param   string  $serverType    The value returned by the getServerType method of the database driver
      * @param   string  $itemSubclass  The subclass of ChangeItem that is expected
      *
      * @return  void
@@ -65,24 +66,46 @@ class ChangeItemTest extends UnitTestCase
             // ['database server type', 'ChangeItem subclass']
             ['mysql', MysqlChangeItem::class],
             ['postgresql', PostgresqlChangeItem::class],
+            // The following test case is deprecated and shall be removed with 5.0
+            ['mssql', SqlsrvChangeItem::class],
         ];
     }
 
     /**
      * @testdox  throws a runtime exception if the database server type is not supported
      *
+     * @dataProvider  dataGetInstanceUnsupportedDatabaseType
+     *
+     * @param   string  $serverType    The value returned by the getServerType method of the database driver
+     *
      * @return  void
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function testGetInstanceUnsupportedDatabaseType()
+    public function testGetInstanceUnsupportedDatabaseType($serverType)
     {
         $db = $this->createStub(DatabaseDriver::class);
-        $db->method('getServerType')->willReturn('sqlite');
+        $db->method('getServerType')->willReturn($serverType);
 
         $this->expectException(\RuntimeException::class);
 
         $item = ChangeItem::getInstance($db, '', '');
+    }
+
+    /**
+     * Provides data for the testGetInstanceUnsupportedDatabaseType method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataGetInstanceUnsupportedDatabaseType(): array
+    {
+        return [
+            // ['database server type']
+            ['oracle'],
+            ['sqlite'],
+        ];
     }
 
     /**
