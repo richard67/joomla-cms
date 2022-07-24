@@ -238,6 +238,90 @@ class ChangeItemTest extends UnitTestCase
     }
 
     /**
+     * @testdox  executes the update query and then the check method and sets the check status and rerun status if the check succeeds
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testFixWithSuccess()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->expects($this->once())->method('setQuery'); // Make sure the setQuery method is called one time
+        $db->expects($this->once())->method('execute'); // Make sure the execute method is called one time
+
+        $item = new class ($db, '', '') extends ChangeItem
+        {
+            public function check()
+            {
+                // Return success
+                return 1;
+            }
+
+            public function fix()
+            {
+                return parent::fix();
+            }
+
+            public function buildCheckQuery()
+            {
+            }
+        };
+
+        // Let the update query be not empty
+        $item->updateQuery = 'Something';
+
+        // Set previous check status to error
+        $item->checkStatus = -2;
+
+        $item->fix();
+        $this->assertEquals(1, $item->checkStatus, 'The ChangeItem should have the right check status');
+        $this->assertEquals(1, $item->rerunStatus, 'The ChangeItem should have the right rerun status');
+    }
+
+    /**
+     * @testdox  executes the update query and then the check method and sets the rerun status if the check fails
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testFixWithError()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->expects($this->once())->method('setQuery'); // Make sure the setQuery method is called one time
+        $db->expects($this->once())->method('execute'); // Make sure the execute method is called one time
+
+        $item = new class ($db, '', '') extends ChangeItem
+        {
+            public function check()
+            {
+                // Return error
+                return -2;
+            }
+
+            public function fix()
+            {
+                return parent::fix();
+            }
+
+            public function buildCheckQuery()
+            {
+            }
+        };
+
+        // Let the update query be not empty
+        $item->updateQuery = 'Something';
+
+        // Set previous check status to error
+        $item->checkStatus = -2;
+
+        $item->fix();
+        $this->assertEquals(-2, $item->checkStatus, 'The ChangeItem\'s check status should not have changed');
+        $this->assertEquals(-2, $item->rerunStatus, 'The ChangeItem should have the right rerun status');
+    }
+
+    /**
      * @testdox  sets the rerun status to error if the update query fails with a RuntimeException
      *
      * @return  void
