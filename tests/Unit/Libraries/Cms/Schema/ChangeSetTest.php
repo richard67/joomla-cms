@@ -62,6 +62,12 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testObjectIsInstantiatedCorrectly($serverType, $driverSubclass, $itemSubclass)
     {
+        $db = $this->createStub($driverSubclass);
+        $db->method('getServerType')->willReturn($serverType);
+
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion when database server type is mysql
+        $db->method('loadRowList')->willReturn([]);
+
         // Make sure that there will be three change items in two files
         if (!is_dir(__DIR__ . '/tmp')) {
             mkdir(__DIR__ . '/tmp');
@@ -71,12 +77,6 @@ class ChangeSetTest extends UnitTestCase
         }
         file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-01.sql', 'UPDATE #__foo SET bar = 1;' . "\n" . 'UPDATE #__foo SET bar = 2;');
         file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-02.sql', 'UPDATE #__foo SET bar = 3;');
-
-        $db = $this->createStub($driverSubclass);
-        $db->method('getServerType')->willReturn($serverType);
-
-        // Make sure that there will not be added an extra change item for utf8mb4 conversion when database server type is mysql
-        $db->method('loadRowList')->willReturn([]);
 
         $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
         {
