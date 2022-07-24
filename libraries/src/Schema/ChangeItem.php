@@ -241,7 +241,7 @@ abstract class ChangeItem
                 $this->db->setQuery($query);
                 $this->db->execute();
 
-                if ($this->check()) {
+                if ($this->check() === 1) {
                     $this->checkStatus = 1;
                     $this->rerunStatus = 1;
                 } else {
