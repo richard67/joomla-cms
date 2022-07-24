@@ -70,7 +70,7 @@ class ChangeSet
         $updateFiles = $this->getUpdateFiles();
 
         // If no files were found nothing more we can do - continue
-        if ($updateFiles === false) {
+        if (empty($updateFiles)) {
             return;
         }
 
