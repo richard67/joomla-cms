@@ -302,9 +302,23 @@ class ChangeSetTest extends UnitTestCase
     {
         $db = $this->createStub(DatabaseDriver::class);
         $db->method('getServerType')->willReturn('mysql');
+        $db->method('quoteName')->will(
+            $this->returnCallback(function ($arg) {
+                return '`' . $arg . '`';
+            })
+        );
 
         // Make sure that the check for the #__utf8_conversion table raises a runtime exception
         $db->method('loadRowList')->will($this->throwException(new \RuntimeException('Exception message')));
+
+        // Make sure that there will a change item
+        if (!is_dir(__DIR__ . '/tmp')) {
+            mkdir(__DIR__ . '/tmp');
+        }
+        if (!is_dir(__DIR__ . '/tmp/mysql')) {
+            mkdir(__DIR__ . '/tmp/mysql');
+        }
+        file_put_contents(__DIR__ . '/tmp/mysql/4.2.0-2022-06-01.sql', 'UPDATE #__foo SET bar = 1;');
 
         $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
         {
@@ -315,7 +329,8 @@ class ChangeSetTest extends UnitTestCase
             }
         };
 
-        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+        $this->assertEquals(1, count($changeSet->changeSetTestGetChangeItems()), 'There should be one change item');
+        $this->assertNotEquals('UTF8_CONVERSION_UTF8MB4', $changeSet->changeSetTestGetChangeItems()[0], 'There should not be a utf8mb4 conversion check');
     }
 
     /**
