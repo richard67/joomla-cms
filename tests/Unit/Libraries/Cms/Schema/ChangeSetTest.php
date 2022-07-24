@@ -243,6 +243,82 @@ class ChangeSetTest extends UnitTestCase
     }
 
     /**
+     * @testdox  adds a change item to check utf8mb4 conversion status on mysql servers if the #__utf8_conversion table exists
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testAddChangeItemForUtf8mb4Check()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+        $db->method('quoteName')->will(
+            $this->returnCallback(function ($arg) {
+                return '`' . $arg . '`';
+            })
+        );
+
+        // Make sure that there will be a #__utf8_conversion table found
+        $db->method('loadRowList')->willReturn([0 => [0 => 'jos_utf8_conversion']]);
+
+        // Make sure that there will be two change items
+        if (!is_dir(__DIR__ . '/tmp')) {
+            mkdir(__DIR__ . '/tmp');
+        }
+        if (!is_dir(__DIR__ . '/tmp/mysql')) {
+            mkdir(__DIR__ . '/tmp/mysql');
+        }
+        file_put_contents(__DIR__ . '/tmp/mysql/4.2.0-2022-06-01.sql', 'UPDATE #__foo SET bar = 1;' . "\n" . 'UPDATE #__foo SET bar = 2;');
+
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to get protected changeItems property for testing
+            public function changeSetTestGetChangeItems()
+            {
+                return $this->changeItems;
+            }
+        };
+
+        $itemExpected = new MysqlChangeItem($db, 'database.php', 'UPDATE `#__utf8_conversion` SET `converted` = `converted`;');
+        $itemExpected->checkStatus = 0;
+        $itemExpected->queryType = 'UTF8_CONVERSION_UTF8MB4';
+        $itemExpected->checkQuery = 'SELECT `converted` FROM `#__utf8_conversion` WHERE `converted` = 5';
+        $itemExpected->checkQueryExpected = 1;
+        $itemExpected->msgElements = [];
+
+        $this->assertEquals(3, count($changeSet->changeSetTestGetChangeItems()), 'There should be three change items');
+        $this->assertEquals($itemExpected, $changeSet->changeSetTestGetChangeItems()[2], 'The last change item should be the utf8mb4 conversion check');
+    }
+
+    /**
+     * @testdox  doesn't add a change item to check utf8mb4 conversion status if the check for the #__utf8_conversion table fails with a runtime exception
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testDoNotAddChangeItemForUtf8mb4CheckIfRuntimeException()
+    {
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        // Make sure that the check for the #__utf8_conversion table raises a runtime exception
+        $db->method('loadRowList')->will($this->throwException(new \RuntimeException('Exception message')));
+
+        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
+        {
+            // Add method to get protected changeItems property for testing
+            public function changeSetTestGetChangeItems()
+            {
+                return $this->changeItems;
+            }
+        };
+
+        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+    }
+
+    /**
      * @testdox  can return a reference to the ChangeSet object, only creating it if it doesn't already exist
      *
      * @return  void
