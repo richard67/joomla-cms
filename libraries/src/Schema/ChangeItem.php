@@ -155,6 +155,11 @@ abstract class ChangeItem
         // Get the class name
         $serverType = $db->getServerType();
 
+        // For `mssql` server types, convert the type to `sqlsrv`
+        if ($serverType === 'mssql') {
+            $serverType = 'sqlsrv';
+        }
+
         $class = '\\Joomla\\CMS\\Schema\\ChangeItem\\' . ucfirst($serverType) . 'ChangeItem';
 
         // If the class exists, return it.
