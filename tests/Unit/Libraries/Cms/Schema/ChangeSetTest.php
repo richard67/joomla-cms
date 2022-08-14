@@ -78,23 +78,18 @@ class ChangeSetTest extends UnitTestCase
         file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-01.sql', 'UPDATE #__foo SET bar = 1;' . "\n" . 'UPDATE #__foo SET bar = 2;');
         file_put_contents(__DIR__ . '/tmp/' . $serverType . '/4.2.0-2022-06-02.sql', 'UPDATE #__foo SET bar = 3;');
 
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
-        {
-            // Add method to get protected db property for testing
-            public function changeSetTestGetDatabase()
-            {
-                return $this->db;
-            }
-            // Add method to get protected changeItems property for testing
-            public function changeSetTestGetChangeItems()
-            {
-                return $this->changeItems;
-            }
-        };
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
-        $this->assertInstanceOf($driverSubclass, $changeSet->changeSetTestGetDatabase(), 'The database driver should be correctly injected');
-        $this->assertContainsOnlyInstancesOf($itemSubclass, $changeSet->changeSetTestGetChangeItems(), 'The change items should have the right subclass');
-        $this->assertEquals(3, count($changeSet->changeSetTestGetChangeItems()), 'There should be three change items');
+        // Use reflection to test protected properties
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeSetDb = $reflectionClass->getProperty('db');
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeSetDb->setAccessible(true);
+        $changeItems->setAccessible(true);
+
+        $this->assertInstanceOf($driverSubclass, $changeSetDb->getValue($changeSet), 'The database driver should be correctly injected');
+        $this->assertContainsOnlyInstancesOf($itemSubclass, $changeItems->getValue($changeSet), 'The change items should have the right subclass');
+        $this->assertEquals(3, count($changeItems->getValue($changeSet)), 'There should be three change items');
     }
 
     /**
@@ -129,16 +124,14 @@ class ChangeSetTest extends UnitTestCase
         // Make sure that there will not be added an extra change item for utf8mb4 conversion
         $db->method('loadRowList')->willReturn([]);
 
-        $changeSet = new class ($db, __DIR__ . '/notExistingFolder') extends ChangeSet
-        {
-            // Add method to get protected changeItems property for testing
-            public function changeSetTestGetChangeItems()
-            {
-                return $this->changeItems;
-            }
-        };
+        $changeSet = new ChangeSet($db, __DIR__ . '/notExistingFolder');
 
-        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
+
+        $this->assertEquals([], $changeItems->getValue($changeSet), 'There should be no change items');
     }
 
     /**
@@ -163,16 +156,14 @@ class ChangeSetTest extends UnitTestCase
             mkdir(__DIR__ . '/tmp/mysql');
         }
 
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
-        {
-            // Add method to get protected changeItems property for testing
-            public function changeSetTestGetChangeItems()
-            {
-                return $this->changeItems;
-            }
-        };
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
-        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
+
+        $this->assertEquals([], $changeItems->getValue($changeSet), 'There should be no change items');
     }
 
     /**
@@ -198,16 +189,14 @@ class ChangeSetTest extends UnitTestCase
         }
         touch(__DIR__ . '/tmp/mysql/4.1.0-2021-11-20.sql');
 
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
-        {
-            // Add method to get protected changeItems property for testing
-            public function changeSetTestGetChangeItems()
-            {
-                return $this->changeItems;
-            }
-        };
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
-        $this->assertEquals([], $changeSet->changeSetTestGetChangeItems(), 'There should be no change items');
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
+
+        $this->assertEquals([], $changeItems->getValue($changeSet), 'There should be no change items');
     }
 
     /**
@@ -225,21 +214,14 @@ class ChangeSetTest extends UnitTestCase
         $db->method('getServerType')->willReturn('postgresql');
 
         // Create a change set without the folder parameter
-        $changeSet = new class ($db) extends ChangeSet
-        {
-            // Skip getting update files for this test
-            private function getUpdateFiles()
-            {
-                return false;
-            }
-            // Add method to get protected folder property for testing
-            public function changeSetTestGetFolder()
-            {
-                return $this->folder;
-            }
-        };
+        $changeSet = new ChangeSet($db);
 
-        $this->assertEquals(JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/', $changeSet->changeSetTestGetFolder());
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $folder = $reflectionClass->getProperty('folder');
+        $folder->setAccessible(true);
+
+        $this->assertEquals(JPATH_ADMINISTRATOR . '/components/com_admin/sql/updates/', $folder->getValue($changeSet));
     }
 
     /**
@@ -271,14 +253,12 @@ class ChangeSetTest extends UnitTestCase
         }
         file_put_contents(__DIR__ . '/tmp/mysql/4.2.0-2022-06-01.sql', 'UPDATE #__foo SET bar = 1;' . "\n" . 'UPDATE #__foo SET bar = 2;');
 
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
-        {
-            // Add method to get protected changeItems property for testing
-            public function changeSetTestGetChangeItems()
-            {
-                return $this->changeItems;
-            }
-        };
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
 
         $itemExpected = new MysqlChangeItem($db, 'database.php', 'UPDATE `#__utf8_conversion` SET `converted` = `converted`;');
         $itemExpected->checkStatus = 0;
@@ -287,8 +267,8 @@ class ChangeSetTest extends UnitTestCase
         $itemExpected->checkQueryExpected = 1;
         $itemExpected->msgElements = [];
 
-        $this->assertEquals(3, count($changeSet->changeSetTestGetChangeItems()), 'There should be three change items');
-        $this->assertEquals($itemExpected, $changeSet->changeSetTestGetChangeItems()[2], 'The last change item should be the utf8mb4 conversion check');
+        $this->assertEquals(3, count($changeItems->getValue($changeSet)), 'There should be three change items');
+        $this->assertEquals($itemExpected, $changeItems->getValue($changeSet)[2], 'The last change item should be the utf8mb4 conversion check');
     }
 
     /**
@@ -320,17 +300,15 @@ class ChangeSetTest extends UnitTestCase
         }
         file_put_contents(__DIR__ . '/tmp/mysql/4.2.0-2022-06-01.sql', 'UPDATE #__foo SET bar = 1;');
 
-        $changeSet = new class ($db, __DIR__ . '/tmp') extends ChangeSet
-        {
-            // Add method to get protected changeItems property for testing
-            public function changeSetTestGetChangeItems()
-            {
-                return $this->changeItems;
-            }
-        };
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
 
-        $this->assertEquals(1, count($changeSet->changeSetTestGetChangeItems()), 'There should be one change item');
-        $this->assertNotEquals('UTF8_CONVERSION_UTF8MB4', $changeSet->changeSetTestGetChangeItems()[0]->queryType, 'There should not be a utf8mb4 conversion check');
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
+
+        $this->assertEquals(1, count($changeItems->getValue($changeSet)), 'There should be one change item');
+        $this->assertNotEquals('UTF8_CONVERSION_UTF8MB4', $changeItems->getValue($changeSet)[0]->queryType, 'There should not be a utf8mb4 conversion check');
     }
 
     /**
@@ -362,18 +340,18 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testCheckAllItemsWithSuccess()
     {
-        // Create a change set without any change items
-        $changeSet = new class ($this->createStub(DatabaseDriver::class)) extends ChangeSet
-        {
-            public function __construct($db, $folder = null)
-            {
-            }
-            // Add method to set protected changeItems property for testing
-            public function changeSetTestSetChangeItems($items)
-            {
-                $this->changeItems = $items;
-            }
-        };
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
+
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
 
         // Create an array with 3 change item stubs which will be checked with success
         $items = [];
@@ -385,7 +363,7 @@ class ChangeSetTest extends UnitTestCase
         }
 
         // Set change set's change items to the previously created array
-        $changeSet->changeSetTestSetChangeItems($items);
+        $changeItems->setValue($changeSet, $items);
 
         $this->assertEquals([], $changeSet->check());
     }
@@ -399,18 +377,18 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testCheckItemsWithError()
     {
-        // Create a change set without any change items
-        $changeSet = new class ($this->createStub(DatabaseDriver::class)) extends ChangeSet
-        {
-            public function __construct($db, $folder = null)
-            {
-            }
-            // Add method to set protected changeItems property for testing
-            public function changeSetTestSetChangeItems($items)
-            {
-                $this->changeItems = $items;
-            }
-        };
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
+
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
 
         // Create an array with 3 change item stubs
         $items = [];
@@ -424,7 +402,7 @@ class ChangeSetTest extends UnitTestCase
         $items[2]->expects($this->once())->method('check')->willReturn(-2); // return error
 
         // Set change set's change items to the previously created array
-        $changeSet->changeSetTestSetChangeItems($items);
+        $changeItems->setValue($changeSet, $items);
 
         $this->assertEquals([$items[0], $items[2]], $changeSet->check());
     }
@@ -438,18 +416,18 @@ class ChangeSetTest extends UnitTestCase
      */
     public function testFix()
     {
-        // Create a change set without any change items
-        $changeSet = new class ($this->createStub(DatabaseDriver::class)) extends ChangeSet
-        {
-            public function __construct($db, $folder = null)
-            {
-            }
-            // Add method to set protected changeItems property for testing
-            public function changeSetTestSetChangeItems($items)
-            {
-                $this->changeItems = $items;
-            }
-        };
+        $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
+
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
+
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
 
         $items = [];
 
@@ -463,7 +441,7 @@ class ChangeSetTest extends UnitTestCase
         }
 
         // Set change set's change items to the previously created array
-        $changeSet->changeSetTestSetChangeItems($items);
+        $changeItems->setValue($changeSet, $items);
 
         $changeSet->fix();
     }
@@ -478,19 +456,17 @@ class ChangeSetTest extends UnitTestCase
     public function testGetStatus()
     {
         $db = $this->createStub(DatabaseDriver::class);
+        $db->method('getServerType')->willReturn('mysql');
 
-        // Create a change set without any change items
-        $changeSet = new class ($db) extends ChangeSet
-        {
-            public function __construct($db, $folder = null)
-            {
-            }
-            // Add method to set protected changeItems property for testing
-            public function changeSetTestSetChangeItems($items)
-            {
-                $this->changeItems = $items;
-            }
-        };
+        // Make sure that there will not be added an extra change item for utf8mb4 conversion
+        $db->method('loadRowList')->willReturn([]);
+
+        $changeSet = new ChangeSet($db, __DIR__ . '/tmp');
+
+        // Use reflection to test protected property
+        $reflectionClass = new \ReflectionClass($changeSet);
+        $changeItems = $reflectionClass->getProperty('changeItems');
+        $changeItems->setAccessible(true);
 
         // Create an array with 8 change items
         $items = [];
@@ -514,7 +490,7 @@ class ChangeSetTest extends UnitTestCase
         $items[7]->checkStatus = 0;  /* unchecked */
 
         // Set change set's change items to the previously created array
-        $changeSet->changeSetTestSetChangeItems($items);
+        $changeItems->setValue($changeSet, $items);
 
         $status = $changeSet->getStatus();
         $this->assertEquals([$items[0], $items[7]], $status['unchecked'], 'The unchecked status should contain the right change items');
