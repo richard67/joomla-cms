@@ -213,6 +213,8 @@ class ChangeSetTest extends UnitTestCase
         // Use server type postgresql to not run special utf8mb4 checks for MySQL
         $db->method('getServerType')->willReturn('postgresql');
 
+        $db->method('getPrefix')->willReturn('jos_');
+
         // Create a change set without the folder parameter
         $changeSet = new ChangeSet($db);
 
