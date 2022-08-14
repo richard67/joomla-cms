@@ -60,7 +60,6 @@ class MysqlChangeItemTest extends UnitTestCase
     public function dataBuildCheckQuerySkipped(): array
     {
         return [
-            [null],
             [''],
             ['WHATEVER'],
         ];

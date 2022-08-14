@@ -129,10 +129,6 @@ class ChangeItemTest extends UnitTestCase
             }
         };
 
-        $item->checkQuery = null;
-        $item->check();
-        $this->assertEquals(-1, $item->checkStatus, 'The ChangeItem should be skipped if the check query is null');
-
         $item->checkQuery = '';
         $item->check();
         $this->assertEquals(-1, $item->checkStatus, 'The ChangeItem should be skipped if the check query is empty');

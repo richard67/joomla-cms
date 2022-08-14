@@ -60,7 +60,6 @@ class PostgresqlChangeItemTest extends UnitTestCase
     public function dataBuildCheckQuerySkipped(): array
     {
         return [
-            [null],
             [''],
             ['WHATEVER'],
         ];
