@@ -330,7 +330,7 @@ class ChangeSetTest extends UnitTestCase
         };
 
         $this->assertEquals(1, count($changeSet->changeSetTestGetChangeItems()), 'There should be one change item');
-        $this->assertNotEquals('UTF8_CONVERSION_UTF8MB4', $changeSet->changeSetTestGetChangeItems()[0], 'There should not be a utf8mb4 conversion check');
+        $this->assertNotEquals('UTF8_CONVERSION_UTF8MB4', $changeSet->changeSetTestGetChangeItems()[0]->queryType, 'There should not be a utf8mb4 conversion check');
     }
 
     /**
