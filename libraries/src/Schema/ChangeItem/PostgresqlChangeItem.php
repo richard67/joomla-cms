@@ -282,7 +282,11 @@ class PostgresqlChangeItem extends ChangeItem
                 return;
             }
 
-            $table = $this->fixQuote($wordArray[$idxTable]);
+            if ($pos = strpos($wordArray[$idxTable], '(')) {
+                $table = $this->fixQuote(substr($wordArray[$idxTable], 0, $pos));
+            } else {
+                $table = $this->fixQuote($wordArray[$idxTable]);
+            }
 
             $result = 'SELECT table_name FROM information_schema.tables WHERE table_name=' . $table;
             $this->queryType = 'CREATE_TABLE';
