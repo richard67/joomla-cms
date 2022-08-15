@@ -110,12 +110,8 @@ class PostgresqlChangeItemTest extends UnitTestCase
     public function dataBuildCheckQueryCreateTable(): array
     {
         return [
-            // The following 2 tests are failing due to a bug in MySQLChangeItem
-            //['CREATE TABLE "#__foo" ("bar" text)'],
-            //['CREATE TABLE #__foo ("bar" text)'],
-            // The following 2 tests are obsolete when the above bug has been fixed
-            ['CREATE TABLE "#__foo" ("bar" text NOT NULL)'],
-            ['CREATE TABLE #__foo ("bar" text NOT NULL)'],
+            ['CREATE TABLE "#__foo" ("bar" text)'],
+            ['CREATE TABLE #__foo ("bar" text)'],
             ['CREATE TABLE IF NOT EXISTS "#__foo" ("bar" text)'],
             ['CREATE TABLE IF NOT EXISTS #__foo ("bar" text)'],
         ];
@@ -321,9 +317,7 @@ class PostgresqlChangeItemTest extends UnitTestCase
     {
         return [
             ['CREATE INDEX "#__foo_idx_bar" ON "#__foo" ("bar")'],
-            ['CREATE INDEX "#__foo_idx_bar" ON "#__foo"("bar")'],
             ['CREATE UNIQUE INDEX "#__foo_idx_bar" ON "#__foo" ("bar")'],
-            ['CREATE UNIQUE INDEX "#__foo_idx_bar" ON "#__foo"("bar")'],
         ];
     }
 

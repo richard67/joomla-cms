@@ -60,9 +60,9 @@ class PostgresqlChangeItem extends ChangeItem
 
         $totalWords = \count($wordArray);
 
-        // First, make sure we have an array of at least 6 elements
+        // First, make sure we have an array of at least 3 elements
         // if not, we can't make a check query for this one
-        if ($totalWords < 6) {
+        if ($totalWords < 3) {
             // Done with method
             return;
         }
@@ -71,6 +71,11 @@ class PostgresqlChangeItem extends ChangeItem
         $command = strtoupper($wordArray[0] . ' ' . $wordArray[1]);
 
         if ($command === 'ALTER TABLE') {
+            if ($totalWords < 6) {
+                // Done with method
+                return;
+            }
+
             // Check only the last action
             $actions = ltrim(substr($updateQuery, strpos($updateQuery, $wordArray[2]) + \strlen($wordArray[2])));
             $actions = preg_split($splitIntoActions, $actions);
@@ -222,23 +227,36 @@ class PostgresqlChangeItem extends ChangeItem
             }
         } elseif ($command === 'DROP INDEX') {
             if (strtoupper($wordArray[2] . $wordArray[3]) === 'IFEXISTS') {
-                $idx = $this->fixQuote($wordArray[4]);
+                $idxIndex = 4;
             } else {
-                $idx = $this->fixQuote($wordArray[2]);
+                $idxIndex = 2;
             }
 
+            if ($totalWords < $idxIndex + 1) {
+                // Done with method
+                return;
+            }
+
+            $idx = $this->fixQuote($wordArray[$idxIndex]);
             $result = 'SELECT * FROM pg_indexes WHERE indexname=' . $idx;
             $this->queryType = 'DROP_INDEX';
             $this->checkQueryExpected = 0;
-            $this->msgElements = array($this->fixQuote($idx));
+            $this->msgElements = array($idx);
         } elseif ($command === 'CREATE INDEX' || (strtoupper($command . ' ' . $wordArray[2]) === 'CREATE UNIQUE INDEX')) {
             if ($wordArray[1] === 'UNIQUE') {
-                $idx = $this->fixQuote($wordArray[3]);
+                $idxIndex = 3;
                 $idxTable = 5;
             } else {
-                $idx = $this->fixQuote($wordArray[2]);
+                $idxIndex = 2;
                 $idxTable = 4;
             }
+
+            if ($totalWords < $idxTable + 1) {
+                // Done with method
+                return;
+            }
+
+            $idx = $this->fixQuote($wordArray[$idxIndex]);
 
             if ($pos = strpos($wordArray[$idxTable], '(')) {
                 $table = $this->fixQuote(substr($wordArray[$idxTable], 0, $pos));
@@ -254,10 +272,17 @@ class PostgresqlChangeItem extends ChangeItem
 
         if ($command === 'CREATE TABLE') {
             if (strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS') {
-                $table = $this->fixQuote($wordArray[5]);
+                $idxTable = 5;
             } else {
-                $table = $this->fixQuote($wordArray[2]);
+                $idxTable = 2;
             }
+
+            if ($totalWords < $idxTable + 1) {
+                // Done with method
+                return;
+            }
+
+            $table = $this->fixQuote($wordArray[$idxTable]);
 
             $result = 'SELECT table_name FROM information_schema.tables WHERE table_name=' . $table;
             $this->queryType = 'CREATE_TABLE';
