@@ -280,6 +280,114 @@ class MysqlChangeItemTest extends UnitTestCase
     }
 
     /**
+     * @testdox  can build the right query for ADD_INDEX statements
+     *
+     * @dataProvider  dataBuildCheckQueryAddIndex
+     *
+     * @param   array  $query  ADD_INDEX statement
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testBuildCheckQueryAddIndex($query)
+    {
+        $db = $this->createStub(MysqliDriver::class);
+        $db->method('getPrefix')->willReturn('jos_');
+        $db->method('quote')->will(
+            $this->returnCallback(function ($arg) {
+                return "'" . $arg . "'";
+            })
+        );
+        $db->method('quoteName')->will(
+            $this->returnCallback(function ($arg) {
+                return '`' . $arg . '`';
+            })
+        );
+
+        $item = new MysqlChangeItem($db, '', $query);
+
+        $this->assertEquals("SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'", $item->checkQuery);
+        $this->assertEquals('ADD_INDEX', $item->queryType);
+        $this->assertEquals(1, $item->checkQueryExpected);
+        $this->assertEquals(["'jos_foo'", "'idx_bar'"], $item->msgElements);
+        $this->assertEquals(0, $item->checkStatus);
+    }
+
+    /**
+     * Provides constructor data for the testBuildCheckQueryAddIndex method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataBuildCheckQueryAddIndex(): array
+    {
+        return [
+            ['ALTER TABLE `#__foo` ADD INDEX `idx_bar` (`bar`)'],
+            ['ALTER TABLE `#__foo` ADD INDEX `idx_bar`(`bar`)'],
+            ['ALTER TABLE `#__foo` ADD KEY `idx_bar` (`bar`)'],
+            ['ALTER TABLE `#__foo` ADD KEY `idx_bar`(`bar`)'],
+            ['ALTER TABLE `#__foo` ADD UNIQUE `idx_bar` (`bar`)'],
+            ['ALTER TABLE `#__foo` ADD UNIQUE `idx_bar`(`bar`)'],
+            ['ALTER TABLE `#__foo` ADD UNIQUE INDEX `idx_bar` (`bar`)'],
+            ['ALTER TABLE `#__foo` ADD UNIQUE INDEX `idx_bar`(`bar`)'],
+            ['ALTER TABLE `#__foo` ADD UNIQUE KEY `idx_bar` (`bar`)'],
+            ['ALTER TABLE `#__foo` ADD UNIQUE KEY `idx_bar`(`bar`)'],
+        ];
+    }
+
+    /**
+     * @testdox  can build the right query for DROP_INDEX statements
+     *
+     * @dataProvider  dataBuildCheckQueryDropIndex
+     *
+     * @param   array  $query  DROP_INDEX statement
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testBuildCheckQueryDropIndex($query)
+    {
+        $db = $this->createStub(MysqliDriver::class);
+        $db->method('getPrefix')->willReturn('jos_');
+        $db->method('quote')->will(
+            $this->returnCallback(function ($arg) {
+                return "'" . $arg . "'";
+            })
+        );
+        $db->method('quoteName')->will(
+            $this->returnCallback(function ($arg) {
+                return '`' . $arg . '`';
+            })
+        );
+
+        $item = new MysqlChangeItem($db, '', $query);
+
+        $this->assertEquals("SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'", $item->checkQuery);
+        $this->assertEquals('DROP_INDEX', $item->queryType);
+        $this->assertEquals(0, $item->checkQueryExpected);
+        $this->assertEquals(["'jos_foo'", "'idx_bar'"], $item->msgElements);
+        $this->assertEquals(0, $item->checkStatus);
+    }
+
+    /**
+     * Provides constructor data for the testBuildCheckQueryDropIndex method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataBuildCheckQueryDropIndex(): array
+    {
+        return [
+            ['ALTER TABLE `#__foo` DROP INDEX `idx_bar`'],
+            ['ALTER TABLE `#__foo` DROP KEY `idx_bar`'],
+        ];
+    }
+
+    /**
      * @testdox  can build the right query
      *
      * @dataProvider  constructData
@@ -336,136 +444,6 @@ class MysqlChangeItemTest extends UnitTestCase
     public function constructData(): array
     {
         return [
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD INDEX `idx_bar` (`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD INDEX `idx_bar`(`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD KEY `idx_bar` (`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD KEY `idx_bar`(`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD UNIQUE `idx_bar` (`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD UNIQUE `idx_bar`(`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD UNIQUE INDEX `idx_bar` (`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD UNIQUE INDEX `idx_bar`(`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD UNIQUE KEY `idx_bar` (`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` ADD UNIQUE KEY `idx_bar`(`bar`)',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'ADD_INDEX',
-                    'checkQueryExpected' => 1,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
             [
                 [
                     'query' => "ALTER TABLE `#__foo` CHANGE `bar` `bar_new` mediumtext",
@@ -541,32 +519,6 @@ class MysqlChangeItemTest extends UnitTestCase
                     'queryType' => 'CHANGE_COLUMN_TYPE',
                     'checkQueryExpected' => 1,
                     'msgElements' => ["'jos_foo'", "'bar_new'", "tinytext"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` DROP INDEX `idx_bar`',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'DROP_INDEX',
-                    'checkQueryExpected' => 0,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
-                    'checkStatus' => 0,
-                ],
-            ],
-            [
-                [
-                    'query' => 'ALTER TABLE `#__foo` DROP KEY `idx_bar`',
-                    'utf8mb4' => null,
-                ],
-                [
-                    'checkQuery' => "SHOW INDEXES IN `#__foo` WHERE Key_name = 'idx_bar'",
-                    'queryType' => 'DROP_INDEX',
-                    'checkQueryExpected' => 0,
-                    'msgElements' => ["'jos_foo'", "'idx_bar'"],
                     'checkStatus' => 0,
                 ],
             ],
