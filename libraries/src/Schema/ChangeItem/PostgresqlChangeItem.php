@@ -231,13 +231,19 @@ class PostgresqlChangeItem extends ChangeItem
             $this->queryType = 'DROP_INDEX';
             $this->checkQueryExpected = 0;
             $this->msgElements = array($this->fixQuote($idx));
-        } elseif ($command === 'CREATE INDEX' || (strtoupper($command . $wordArray[2]) === 'CREATE UNIQUE INDEX')) {
+        } elseif ($command === 'CREATE INDEX' || (strtoupper($command . ' ' . $wordArray[2]) === 'CREATE UNIQUE INDEX')) {
             if ($wordArray[1] === 'UNIQUE') {
                 $idx = $this->fixQuote($wordArray[3]);
-                $table = $this->fixQuote($wordArray[5]);
+                $idxTable = 5;
             } else {
                 $idx = $this->fixQuote($wordArray[2]);
-                $table = $this->fixQuote($wordArray[4]);
+                $idxTable = 4;
+            }
+
+            if ($pos = strpos($wordArray[$idxTable], '(')) {
+                $table = $this->fixQuote(substr($wordArray[$idxTable], 0, $pos));
+            } else {
+                $table = $this->fixQuote($wordArray[$idxTable]);
             }
 
             $result = 'SELECT * FROM pg_indexes WHERE indexname=' . $idx . ' AND tablename=' . $table;
