@@ -31,7 +31,7 @@ class MysqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQuerySkipped
      *
-     * @param   array  $query  update statement to be skipped
+     * @param   string  $query  update statement to be skipped
      *
      * @return  void
      *
@@ -70,7 +70,7 @@ class MysqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryCreateTable
      *
-     * @param   array  $query  CREATE_TABLE statement
+     * @param   string  $query  CREATE_TABLE statement
      *
      * @return  void
      *
@@ -126,7 +126,7 @@ class MysqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryRenameTable
      *
-     * @param   array  $query  RENAME_TABLE statement
+     * @param   string  $query  RENAME_TABLE statement
      *
      * @return  void
      *
@@ -176,7 +176,7 @@ class MysqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryAddColumn
      *
-     * @param   array  $query  ADD_COLUMN statement
+     * @param   string  $query  ADD_COLUMN statement
      *
      * @return  void
      *
@@ -230,7 +230,7 @@ class MysqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryDropColumn
      *
-     * @param   array  $query  DROP_COLUMN statement
+     * @param   string  $query  DROP_COLUMN statement
      *
      * @return  void
      *
@@ -284,7 +284,7 @@ class MysqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryAddIndex
      *
-     * @param   array  $query  ADD_INDEX statement
+     * @param   string  $query  ADD_INDEX statement
      *
      * @return  void
      *
@@ -342,7 +342,7 @@ class MysqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryDropIndex
      *
-     * @param   array  $query  DROP_INDEX statement
+     * @param   string  $query  DROP_INDEX statement
      *
      * @return  void
      *
@@ -384,6 +384,57 @@ class MysqlChangeItemTest extends UnitTestCase
         return [
             ['ALTER TABLE `#__foo` DROP INDEX `idx_bar`'],
             ['ALTER TABLE `#__foo` DROP KEY `idx_bar`'],
+        ];
+    }
+
+    /**
+     * @testdox  can build the right query for CHANGE_COLUMN_TYPE statements
+     *
+     * @dataProvider  dataBuildCheckQueryChangeColumnType
+     *
+     * @param   string  $query        CHANGE_COLUMN_TYPE statement
+     * @param   string  $checkQuery   The expected check query for the CHANGE_COLUMN_TYPE statement
+     * @param   array   $msgElements  The expected message elements for the CHANGE_COLUMN_TYPE statement
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testBuildCheckQueryChangeColumnType($query, $checkQuery, $msgElements)
+    {
+        $db = $this->createStub(MysqliDriver::class);
+        $db->method('getPrefix')->willReturn('jos_');
+        $db->method('quote')->will(
+            $this->returnCallback(function ($arg) {
+                return "'" . $arg . "'";
+            })
+        );
+        $db->method('quoteName')->will(
+            $this->returnCallback(function ($arg) {
+                return '`' . $arg . '`';
+            })
+        );
+
+        $item = new MysqlChangeItem($db, '', $query);
+
+        $this->assertEquals($checkQuery, $item->checkQuery);
+        $this->assertEquals('CHANGE_COLUMN_TYPE', $item->queryType);
+        $this->assertEquals(1, $item->checkQueryExpected);
+        $this->assertEquals($msgElements, $item->msgElements);
+        $this->assertEquals(0, $item->checkStatus);
+    }
+
+    /**
+     * Provides constructor data for the testBuildCheckQueryChangeColumnType method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataBuildCheckQueryChangeColumnType(): array
+    {
+        return [
+            ['ALTER TABLE `#__foo` CHANGE `bar` `bar_new` mediumtext', "SHOW COLUMNS IN `#__foo` WHERE field = 'bar_new' AND UPPER(type) = 'MEDIUMTEXT'", ["'jos_foo'", "'bar_new'", "mediumtext"]],
         ];
     }
 
