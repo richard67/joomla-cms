@@ -302,7 +302,7 @@ class PostgresqlChangeItemTest extends UnitTestCase
         $this->assertEquals("SELECT * FROM pg_indexes WHERE indexname='jos_foo_idx_bar' AND tablename='jos_foo'", $item->checkQuery);
         $this->assertEquals('ADD_INDEX', $item->queryType);
         $this->assertEquals(1, $item->checkQueryExpected);
-        $this->assertEquals(["'jos_foo'", "'#__foo_idx_bar'"], $item->msgElements);
+        $this->assertEquals(["'jos_foo'", "'jos_foo_idx_bar'"], $item->msgElements);
         $this->assertEquals(0, $item->checkStatus);
     }
 
@@ -352,7 +352,7 @@ class PostgresqlChangeItemTest extends UnitTestCase
         $this->assertEquals("SELECT * FROM pg_indexes WHERE indexname='jos_foo_idx_bar'", $item->checkQuery);
         $this->assertEquals('DROP_INDEX', $item->queryType);
         $this->assertEquals(0, $item->checkQueryExpected);
-        $this->assertEquals(["'#__foo_idx_bar'"], $item->msgElements);
+        $this->assertEquals(["'jos_foo_idx_bar'"], $item->msgElements);
         $this->assertEquals(0, $item->checkStatus);
     }
 
