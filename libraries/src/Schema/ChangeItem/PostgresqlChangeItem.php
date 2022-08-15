@@ -226,7 +226,7 @@ class PostgresqlChangeItem extends ChangeItem
                 }
             }
         } elseif ($command === 'DROP INDEX') {
-            if (strtoupper($wordArray[2] . $wordArray[3]) === 'IFEXISTS') {
+            if ($totalWords > 3 && strtoupper($wordArray[2] . $wordArray[3]) === 'IFEXISTS') {
                 $idxIndex = 4;
             } else {
                 $idxIndex = 2;
@@ -271,7 +271,7 @@ class PostgresqlChangeItem extends ChangeItem
         }
 
         if ($command === 'CREATE TABLE') {
-            if (strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS') {
+            if ($totalWords > 4 && strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS') {
                 $idxTable = 5;
             } else {
                 $idxTable = 2;
