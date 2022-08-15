@@ -31,7 +31,7 @@ class PostgresqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQuerySkipped
      *
-     * @param   array  $query  update statement to be skipped
+     * @param   string  $query  update statement to be skipped
      *
      * @return  void
      *
@@ -70,7 +70,7 @@ class PostgresqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryCreateTable
      *
-     * @param   array  $query  CREATE_TABLE statement
+     * @param   string  $query  CREATE_TABLE statement
      *
      * @return  void
      *
@@ -126,7 +126,7 @@ class PostgresqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryRenameTable
      *
-     * @param   array  $query  RENAME_TABLE statement
+     * @param   string  $query  RENAME_TABLE statement
      *
      * @return  void
      *
@@ -176,7 +176,7 @@ class PostgresqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryAddColumn
      *
-     * @param   array  $query  ADD_COLUMN statement
+     * @param   string  $query  ADD_COLUMN statement
      *
      * @return  void
      *
@@ -228,7 +228,7 @@ class PostgresqlChangeItemTest extends UnitTestCase
      *
      * @dataProvider  dataBuildCheckQueryDropColumn
      *
-     * @param   array  $query  DROP_COLUMN statement
+     * @param   string  $query  DROP_COLUMN statement
      *
      * @return  void
      *
@@ -272,6 +272,108 @@ class PostgresqlChangeItemTest extends UnitTestCase
             ['ALTER TABLE #__foo DROP COLUMN "bar"'],
             ['ALTER TABLE "#__foo" DROP COLUMN bar'],
             ['ALTER TABLE #__foo DROP COLUMN bar'],
+        ];
+    }
+
+    /**
+     * @testdox  can build the right query for ADD_INDEX statements
+     *
+     * @dataProvider  dataBuildCheckQueryAddIndex
+     *
+     * @param   string  $query  ADD_INDEX statement
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testBuildCheckQueryAddIndex($query)
+    {
+        $db = $this->createStub(PgsqlDriver::class);
+        $db->method('getPrefix')->willReturn('jos_');
+        $db->method('quote')->will(
+            $this->returnCallback(function ($arg) {
+                return "'" . $arg . "'";
+            })
+        );
+        $db->method('quoteName')->will(
+            $this->returnCallback(function ($arg) {
+                return '"' . $arg . '"';
+            })
+        );
+
+        $item = new PostgresqlChangeItem($db, '', $query);
+
+        $this->assertEquals("SELECT * FROM pg_indexes WHERE indexname='#__foo_idx_bar' AND tablename='#__foo'", $item->checkQuery);
+        $this->assertEquals('ADD_INDEX', $item->queryType);
+        $this->assertEquals(1, $item->checkQueryExpected);
+        $this->assertEquals(["'jos_foo'", "'#__foo_idx_bar'"], $item->msgElements);
+        $this->assertEquals(0, $item->checkStatus);
+    }
+
+    /**
+     * Provides constructor data for the testBuildCheckQueryAddIndex method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataBuildCheckQueryAddIndex(): array
+    {
+        return [
+            ['CREATE INDEX "#__foo_idx_bar" ON "#__foo" ("bar")'],
+            ['CREATE INDEX "#__foo_idx_bar" ON "#__foo"("bar")'],
+            ['CREATE UNIQUE INDEX "#__foo_idx_bar" ON "#__foo" ("bar")'],
+            ['CREATE UNIQUE INDEX "#__foo_idx_bar" ON "#__foo"("bar")'],
+        ];
+    }
+
+    /**
+     * @testdox  can build the right query for DROP_INDEX statements
+     *
+     * @dataProvider  dataBuildCheckQueryDropIndex
+     *
+     * @param   string  $query  DROP_INDEX statement
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function testBuildCheckQueryDropIndex($query)
+    {
+        $db = $this->createStub(PgsqlDriver::class);
+        $db->method('getPrefix')->willReturn('jos_');
+        $db->method('quote')->will(
+            $this->returnCallback(function ($arg) {
+                return "'" . $arg . "'";
+            })
+        );
+        $db->method('quoteName')->will(
+            $this->returnCallback(function ($arg) {
+                return '"' . $arg . '"';
+            })
+        );
+
+        $item = new PostgresqlChangeItem($db, '', $query);
+
+        $this->assertEquals("SELECT * FROM pg_indexes WHERE indexname='#__foo_idx_bar'", $item->checkQuery);
+        $this->assertEquals('DROP_INDEX', $item->queryType);
+        $this->assertEquals(0, $item->checkQueryExpected);
+        $this->assertEquals(["'#__foo_idx_bar'"], $item->msgElements);
+        $this->assertEquals(0, $item->checkStatus);
+    }
+
+    /**
+     * Provides constructor data for the testBuildCheckQueryDropIndex method
+     *
+     * @return  array
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function dataBuildCheckQueryDropIndex(): array
+    {
+        return [
+            ['DROP INDEX "#__foo_idx_bar"'],
+            ['DROP INDEX IF EXISTS "#__foo_idx_bar"'],
         ];
     }
 }
