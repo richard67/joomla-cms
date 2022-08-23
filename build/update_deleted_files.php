@@ -403,7 +403,7 @@ foreach ($addedFiles as $addedFile) {
     $addedFile = trim(rtrim($addedFile, ','), "'");
 
     if (($key = array_search($addedFile, $deletedFilesInfo->files)) !== false) {
-        $deletedFilesRowsRemove[] = str_pad($addedFile, 8, ' ', STR_PAD_LEFT)  . "',\n";
+        $deletedFilesRowsRemove[] = "        '" . $addedFile . "',\n";
 
         $hasChanges = true;
 
@@ -415,7 +415,7 @@ foreach ($addedFiles as $addedFile) {
 
     if ($matches !== false) {
         foreach ($matches as $key => $value) {
-            $renamedFilesRowsRemove[] = str_pad($key, 8, ' ', STR_PAD_LEFT) . "' => '" . $value . "',\n";
+            $renamedFilesRowsRemove[] = "        '" . $key . "' => '" . $value . "',\n";
 
             $hasChanges = true;
         }
@@ -427,7 +427,7 @@ foreach ($addedFolders as $addedFolder) {
     $addedFolder = trim(rtrim($addedFolder, ','), "'");
 
     if (($key = array_search($addedFolder, $deletedFoldersInfo->folders)) !== false) {
-        $deletedFoldersRowsRemove[] = str_pad($addedFolder, 8, ' ', STR_PAD_LEFT) . "',\n";
+        $deletedFoldersRowsRemove[] = "        '" . $addedFolder . "',\n";
 
         $hasChanges = true;
     }
@@ -438,7 +438,7 @@ foreach ($deletedFiles as $deletedFile) {
     $deletedFile = trim(rtrim($deletedFile, ','), "'");
 
     if (($key = array_search($deletedFile, $deletedFilesInfo->files)) === false) {
-        $deletedFilesRowsAdd[] = str_pad($deletedFile, 8, ' ', STR_PAD_LEFT) . "',\n";
+        $deletedFilesRowsAdd[] = "        '" . $deletedFile . "',\n";
 
         $hasChanges = true;
     }
@@ -448,7 +448,7 @@ foreach ($deletedFolders as $deletedFolder) {
     $deletedFolder = trim(rtrim($deletedFolder, ','), "'");
 
     if (($key = array_search($deletedFolder, $deletedFoldersInfo->folders)) === false) {
-        $deletedFoldersRowsAdd[] = str_pad($deletedFolder, 8, ' ', STR_PAD_LEFT) . "',\n";
+        $deletedFoldersRowsAdd[] = "        '" . $deletedFolder . "',\n";
 
         $hasChanges = true;
     }
@@ -460,7 +460,7 @@ foreach ($renamedFilesRows as $renamedFilesRow) {
         $renamedFileNew = trim(rtrim(substr($renamedFilesRow, $pos + 4), ','), "'");
 
         if (!array_key_exists($renamedFileOld, $renamedFilesInfo->files)) {
-            $renamedFilesRowsAdd[] = str_pad($renamedFileOld, 8, ' ', STR_PAD_LEFT) . "' => '" . $renamedFileNew . "',\n";
+            $renamedFilesRowsAdd[] = "        '" . $renamedFileOld . "' => '" . $renamedFileNew . "',\n";
 
             $hasChanges = true;
         }
@@ -584,7 +584,7 @@ function safeRegistryFile($rowsRemove, $rowsAdd, $filePath, $version, $doInit, $
         exit(1);
     }
 
-    $lineCloseArray = str_pad("];\n", 4, ' ', STR_PAD_LEFT);
+    $lineCloseArray = "    ];\n";
 
     if ($doInit) {
         $line = $lineCloseArray;
@@ -613,7 +613,7 @@ function safeRegistryFile($rowsRemove, $rowsAdd, $filePath, $version, $doInit, $
 
     fclose($inFilePtr);
 
-    $output .= str_pad('// ', 8, ' ', STR_PAD_LEFT) . $version . "\n";
+    $output .= '        // ' . $version . "\n";
 
     foreach ($rowsAdd as $row) {
         $output .= $row;
