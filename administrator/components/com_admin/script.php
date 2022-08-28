@@ -24,6 +24,10 @@ use Joomla\Component\Admin\Administrator\Script\RenamedFiles;
 use Joomla\Component\Fields\Administrator\Model\FieldModel;
 use Joomla\Database\ParameterType;
 
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
+
 /**
  * Script file of Joomla CMS
  *
