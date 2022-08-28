@@ -118,6 +118,7 @@ class MysqlChangeItemTest extends UnitTestCase
             ['CREATE TABLE #__foo (`bar` text) ENGINE=InnoDB'],
             ['CREATE TABLE IF NOT EXISTS `#__foo` (`bar` text)'],
             ['CREATE TABLE IF NOT EXISTS #__foo (`bar` text)'],
+            ['CREATE TABLE `#__foo`' . "\n" . '(`bar` text) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci'],
         ];
     }
 
