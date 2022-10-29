@@ -5887,5 +5887,7 @@ class DeletedFiles
         '/media/vendor/hotkeys.js/js/hotkeys.min.js',
         '/media/vendor/hotkeys.js/js/hotkeys.min.js.gz',
         '/media/vendor/hotkeys.js/LICENSE',
+        // From 4.2.1 to 4.2.2
+        '/administrator/cache/fido.jwt',
     ];
 }
