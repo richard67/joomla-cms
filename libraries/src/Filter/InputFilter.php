@@ -168,7 +168,7 @@ class InputFilter extends BaseInputFilter
      *
      * @since   __DEPLOY_VERSION__
      */
-    public function mailtoToPunycode($text)
+    public function mailtoToPunycode(string $text)
     {
         $pattern = '/("mailto:)+([\w\.\-\+]+\@[^"?]+\.+[^."?]+)("|\?)/';
 
@@ -187,7 +187,7 @@ class InputFilter extends BaseInputFilter
                 $addresses[$key] = PunycodeHelper::emailToPunycode($address);
             }
 
-            $text = (string) str_replace('mailto:' . $match, 'mailto:' . implode(',', $addresses), $text);
+            $text = str_replace('mailto:' . $match, 'mailto:' . implode(',', $addresses), $text);
         }
 
         return $text;
