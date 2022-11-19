@@ -125,8 +125,8 @@ class ComponentHelper
      */
     public static function filterText($text)
     {
-        // Punyencoding utf8 email addresses
-        $text = InputFilter::getInstance()->emailToPunycode($text);
+        // Punyencoding utf8 email addresses in mailto links
+        $text = InputFilter::getInstance()->mailtoToPunycode($text);
 
         // Filter settings
         $config     = static::getParams('com_config');

@@ -160,6 +160,40 @@ class InputFilter extends BaseInputFilter
     }
 
     /**
+     * Function to punyencode email addresses in mailto links when saving content
+     *
+     * @param   string  $text  The text which contains mailto links to be encoded
+     *
+     * @return  string  The text with encoded mailto links
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public function mailtoToPunycode($text)
+    {
+        $pattern = '/("mailto:)+([\w\.\-\+]+\@[^"?]+\.+[^."?]+)("|\?)/';
+
+        if (!preg_match_all($pattern, $text, $matches)) {
+            return $text;
+        }
+
+        if (count($matches) < 3) {
+            return $text;
+        }
+
+        foreach ($matches[2] as $match) {
+            $addresses = explode(',', $match);
+
+            foreach ($addresses as $key => $address) {
+                $addresses[$key] = PunycodeHelper::emailToPunycode($address);
+            }
+
+            $text = (string) str_replace('mailto:' . $match, 'mailto:' . implode(',', $addresses), $text);
+        }
+
+        return $text;
+    }
+
+    /**
      * Checks an uploaded for suspicious naming and potential PHP contents which could indicate a hacking attempt.
      *
      * The options you can define are:
