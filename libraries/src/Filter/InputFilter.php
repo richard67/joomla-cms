@@ -178,17 +178,16 @@ class InputFilter extends BaseInputFilter
             $replacement  = '"mailto:';
 
             foreach (['toAddr', 'cc1Addr', 'cc1Addr'] as $addressListKey) {
-                $separator = strpos($matchesMailto[$addressListKey][$keyMatchMailto], ',') === false ? ';' : ',';
+                if (preg_match_all('/([\w\.\-\+]+\@[^"?,;]+\.+[^."?,;]+)(\s*[,;]\s*)?/', $matchesMailto[$addressListKey][$keyMatchMailto], $matchesAddresses)) {
+                    $addresses = '';
 
-                $addresses  = explode($separator, $matchesMailto[$addressListKey][$keyMatchMailto]);
-
-                foreach ($addresses as $keyAddr => $address) {
-                    if (preg_match('/[\w\.\-\+]+\@[^"?,;]+\.+[^."?,;]+/', $address)) {
-                        $addresses[$keyAddr] = PunycodeHelper::emailToPunycode($address);
+                    foreach (array_keys($matchesAddresses[0]) as $keyMatchAddress) {
+                        $addresses .= PunycodeHelper::emailToPunycode($matchesAddresses[1][$keyMatchAddress]);
+                        $addresses .= $matchesAddresses[2][$keyMatchAddress];
                     }
-                }
 
-                $matchesMailto[$addressListKey][$keyMatchMailto] = implode($separator, array_filter($addresses));
+                    $matchesMailto[$addressListKey][$keyMatchMailto] = $addresses;
+                }
             }
 
             $replacement .= $matchesMailto['toAddr'][$keyMatchMailto];
