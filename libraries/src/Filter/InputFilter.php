@@ -147,11 +147,11 @@ class InputFilter extends BaseInputFilter
      */
     public function emailToPunycode($text)
     {
-        $pattern = '/(("mailto:)+[\w\.\-\+]+\@[^"?]+\.+[^."?]+("|\?))/';
+        $pattern = '/(("mailto:)+[\w\.\-\+]+\@[^"?,;]+\.+[^."?,;]+(["?,;]))/';
 
         if (preg_match_all($pattern, $text, $matches)) {
             foreach ($matches[0] as $match) {
-                $match  = (string) str_replace(array('?', '"'), '', $match);
+                $match  = (string) str_replace(array('?', '"', ',', ';'), '', $match);
                 $text   = (string) str_replace($match, PunycodeHelper::emailToPunycode($match), $text);
             }
         }
@@ -170,24 +170,32 @@ class InputFilter extends BaseInputFilter
      */
     public function mailtoToPunycode(string $text)
     {
-        $pattern = '/("mailto:)+([\w\.\-\+]+\@[^"?]+\.+[^."?]+)("|\?)/';
-
-        if (!preg_match_all($pattern, $text, $matches)) {
+        if (!preg_match_all('/"mailto:(?<toAddr>[^"?]*)((?<cc1Opt>\?b?cc=)(?<cc1Addr>[^"&]+))?((?<cc2Opt>&(amp;)?b?cc=)(?<cc2Addr>[^"]+))?"/', $text, $matchesMailto)) {
             return $text;
         }
 
-        if (count($matches) < 3) {
-            return $text;
-        }
+        foreach ($matchesMailto[0] as $keyMatchMailto => $matchMailto) {
+            $replacement  = 'mailto:';
 
-        foreach ($matches[2] as $match) {
-            $addresses = explode(',', $match);
+            foreach (['toAddr', 'cc1Addr', 'cc1Addr'] as $addressListKey) {
+                $separator = strpos($matchesMailto[$addressListKey][$keyMatchMailto], ',') === false ? ';' : ',';
 
-            foreach ($addresses as $key => $address) {
-                $addresses[$key] = PunycodeHelper::emailToPunycode($address);
+                $addresses  = explode($separator, $matchesMailto[$addressListKey][$keyMatchMailto]);
+
+                foreach ($addresses as $keyAddr => $address) {
+                    if (preg_match('/[\w\.\-\+]+\@[\w\.\-\+]+\.+[^.]+/', $address)) {
+                        $addresses[$keyAddr] = PunycodeHelper::emailToPunycode($address);
+                    }
+                }
+
+                $matchesMailto[$addressListKey][$keyMatchMailto] = implode($separator, array_filter($addresses));
             }
 
-            $text = str_replace('mailto:' . $match, 'mailto:' . implode(',', $addresses), $text);
+            $replacement .= $matchesMailto['toAddr'][$keyMatchMailto];
+            $replacement .= $matchesMailto['cc1Opt'][$keyMatchMailto] . $matchesMailto['cc1Addr'][$keyMatchMailto];
+            $replacement .= $matchesMailto['cc2Opt'][$keyMatchMailto] . $matchesMailto['cc1Addr'][$keyMatchMailto];
+
+            $text = str_replace('mailto:' . $matchMailto, $replacement, $text);
         }
 
         return $text;
