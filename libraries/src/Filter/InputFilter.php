@@ -170,32 +170,18 @@ class InputFilter extends BaseInputFilter
      */
     public function mailtoToPunycode(string $text)
     {
-        if (!preg_match_all('/"mailto:(?<toAddr>[^"?]*)((?<cc1Opt>\?b?cc=)(?<cc1Addr>[^"&]+))?((?<cc2Opt>&(amp;)?b?cc=)(?<cc2Addr>[^"]+))?"/', $text, $matchesMailto)) {
+        if (!preg_match_all('/(?:"mailto:)([^\s"]+)(?:")/', $text, $matchesMailto, PREG_OFFSET_CAPTURE)) {
             return $text;
         }
 
-        foreach ($matchesMailto[0] as $keyMatchMailto => $matchMailto) {
-            $replacement  = '"mailto:';
+        foreach ($matchesMailto[1] as $matchMailto) {
+            $addresses = preg_split('/([,;])|((\?|&(amp;)?)b?cc=)/', $matchMailto[0], -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_OFFSET_CAPTURE);
 
-            foreach (['toAddr', 'cc1Addr', 'cc1Addr'] as $addressListKey) {
-                if (preg_match_all('/([\w\.\-\+]+\@[^"?,;]+\.+[^."?,;]+)(\s*[,;]\s*)?/', $matchesMailto[$addressListKey][$keyMatchMailto], $matchesAddresses)) {
-                    $addresses = '';
-
-                    foreach (array_keys($matchesAddresses[0]) as $keyMatchAddress) {
-                        $addresses .= PunycodeHelper::emailToPunycode($matchesAddresses[1][$keyMatchAddress]);
-                        $addresses .= $matchesAddresses[2][$keyMatchAddress];
-                    }
-
-                    $matchesMailto[$addressListKey][$keyMatchMailto] = $addresses;
+            foreach ($addresses as $address) {
+                if (preg_match('/[\w\.\-\+]+\@[^\s]+\.+[^\s.]+/', $address[0])) {
+                    $text = substr_replace($text, PunycodeHelper::emailToPunycode($address[0]), $matchMailto[1] + $address[1], strlen($address[0]));
                 }
             }
-
-            $replacement .= $matchesMailto['toAddr'][$keyMatchMailto];
-            $replacement .= $matchesMailto['cc1Opt'][$keyMatchMailto] . $matchesMailto['cc1Addr'][$keyMatchMailto];
-            $replacement .= $matchesMailto['cc2Opt'][$keyMatchMailto] . $matchesMailto['cc1Addr'][$keyMatchMailto];
-            $replacement .= '"';
-
-            $text = str_replace($matchMailto, $replacement, $text);
         }
 
         return $text;
