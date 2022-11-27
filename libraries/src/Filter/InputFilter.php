@@ -192,7 +192,7 @@ class InputFilter extends BaseInputFilter
 
             $replacement .= $matchesMailto['toAddr'][$keyMatchMailto];
             $replacement .= $matchesMailto['cc1Opt'][$keyMatchMailto] . $matchesMailto['cc1Addr'][$keyMatchMailto];
-            $replacement .= $matchesMailto['cc2Opt'][$keyMatchMailto] . $matchesMailto['cc1Addr'][$keyMatchMailto];
+            $replacement .= $matchesMailto['cc2Opt'][$keyMatchMailto] . $matchesMailto['cc2Addr'][$keyMatchMailto];
             $replacement .= '"';
 
             $text = str_replace($matchMailto, $replacement, $text);
