@@ -219,6 +219,11 @@ class HtmlView extends BaseHtmlView
             $this->setLayout('readonly');
         }
 
+        // Check if there is an updated overridden file for the currently displayed layout
+        if (!empty($this->updatedList) && in_array(base64_encode($this->fileName), array_column($this->updatedList, 'hash_id'))) {
+            $app->enqueueMessage(Text::_('COM_TEMPLATES_OVERRIDE_WARNING_SELF_NOT_UPTODATE'), 'warning');
+        }
+
         parent::display($tpl);
     }
 
