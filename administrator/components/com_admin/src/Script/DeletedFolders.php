@@ -26,7 +26,7 @@ class DeletedFolders
      * @since  __DEPLOY_VERSION__
      */
     public $folders = [
-        // From 3.10 to 4.1
+        // From 3.10 to 4.3
         '/templates/system/images',
         '/templates/system/html',
         '/templates/protostar/less',
@@ -1397,5 +1397,7 @@ class DeletedFolders
         '/media/vendor/hotkeys.js/js',
         '/media/vendor/hotkeys.js',
         '/libraries/vendor/symfony/string/Resources/bin',
+        // From 4.2.5 to 4.3.0-alpha1
+        '/libraries/vendor/paragonie/sodium_compat/dist',
     ];
 }
