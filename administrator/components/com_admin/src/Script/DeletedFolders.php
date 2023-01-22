@@ -1397,7 +1397,7 @@ class DeletedFolders
         '/media/vendor/hotkeys.js/js',
         '/media/vendor/hotkeys.js',
         '/libraries/vendor/symfony/string/Resources/bin',
-        // From 4.2.5 to 4.3.0-alpha1
+        // From 4.2.x to 4.3.0-alpha1
         '/libraries/vendor/paragonie/sodium_compat/dist',
     ];
 }
