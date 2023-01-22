@@ -5889,5 +5889,7 @@ class DeletedFiles
         '/media/vendor/hotkeys.js/LICENSE',
         // From 4.2.1 to 4.2.2
         '/administrator/cache/fido.jwt',
+        // From 4.2.6 to 4.2.7
+        '/libraries/vendor/maximebf/debugbar/src/DebugBar/DataFormatter/VarDumper/SeekingData.php',
     ];
 }
