@@ -5891,5 +5891,9 @@ class DeletedFiles
         '/administrator/cache/fido.jwt',
         // From 4.2.6 to 4.2.7
         '/libraries/vendor/maximebf/debugbar/src/DebugBar/DataFormatter/VarDumper/SeekingData.php',
+        // From 4.2.8 to 4.2.9
+        '/administrator/components/com_scheduler/tmpl/select/modal.php',
+        '/components/com_contact/layouts/field/render.php',
+        '/components/com_contact/layouts/fields/render.php',
     ];
 }
