@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @package     Joomla.Administrator
+ * @subpackage  com_admin
+ *
+ * @copyright   (C) 2021 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+namespace Joomla\Component\Admin\Administrator\Script;
+
+\defined('_JEXEC') or die;
+
+/**
+ * Renamed files registry for the script file of Joomla CMS
+ *
+ * @since  __DEPLOY_VERSION__
+ */
+class RenamedFiles
+{
+    /**
+     * The list of files to be renamed on CMS update
+     *
+     * @var    array
+     * @since  __DEPLOY_VERSION__
+     */
+    public $files = [
+        // From 4.4 to 5.0
+        '/libraries/vendor/web-auth/cose-lib/src/Algorithm/Signature/EdDSA/ED256.php' => '/libraries/vendor/web-auth/cose-lib/src/Algorithm/Signature/EdDSA/Ed256.php',
+        '/libraries/vendor/web-auth/cose-lib/src/Algorithm/Signature/EdDSA/ED512.php' => '/libraries/vendor/web-auth/cose-lib/src/Algorithm/Signature/EdDSA/Ed512.php',
+    ];
+}
