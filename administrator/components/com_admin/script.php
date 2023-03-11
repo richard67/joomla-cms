@@ -2727,7 +2727,7 @@ class JoomlaInstallerScript
      *
      * @return  boolean  True on success
      *
-     * @since   5.0.0
+     * @since   __DEPLOY_VERSION__
      */
     private function migrateTinymceConfiguration(): bool
     {
@@ -2939,9 +2939,7 @@ class JoomlaInstallerScript
                     }
                 } else {
                     // On Unix with both files: Delete the incorrectly cased file.
-                    if (is_file(JPATH_ROOT . $old)) {
-                        File::delete(JPATH_ROOT . $old);
-                    }
+                    File::delete(JPATH_ROOT . $old);
                 }
             }
         }
