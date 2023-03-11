@@ -88,7 +88,7 @@ class JoomlaInstallerScript
         $options['format']    = '{DATE}\t{TIME}\t{LEVEL}\t{CODE}\t{MESSAGE}';
         $options['text_file'] = 'joomla_update.php';
 
-        Log::addLogger($options, Log::INFO, array('Update', 'databasequery', 'jerror'));
+        Log::addLogger($options, Log::INFO, ['Update', 'databasequery', 'jerror']);
 
         try {
             Log::add(Text::_('COM_JOOMLAUPDATE_UPDATE_LOG_DELETE_FILES'), Log::INFO, 'Update');
@@ -542,7 +542,7 @@ class JoomlaInstallerScript
 
         // If we have the search package around, it may not have a manifest cache entry after upgrades from 3.x, so add it to the list
         if (File::exists(JPATH_ROOT . '/administrator/manifests/packages/pkg_search.xml')) {
-            $extensions[] = array('package', 'pkg_search', '', 0);
+            $extensions[] = ['package', 'pkg_search', '', 0];
         }
 
         // Attempt to refresh manifest caches
@@ -676,9 +676,9 @@ class JoomlaInstallerScript
     public function updateAssets($installer)
     {
         // List all components added since 4.0
-        $newComponents = array(
+        $newComponents = [
             // Components to be added here
-        );
+        ];
 
         foreach ($newComponents as $component) {
             /** @var \Joomla\CMS\Table\Asset $asset */
