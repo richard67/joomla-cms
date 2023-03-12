@@ -1403,5 +1403,9 @@ class DeletedFolders
         '/components/com_contact/layouts',
         // From 4.2.x to 4.3.0-alpha1
         '/libraries/vendor/paragonie/sodium_compat/dist',
+        // From 4.3.0-beta4 to 4.3.0-rc1
+        '/libraries/vendor/voku/portable-ascii/build/docs',
+        '/libraries/vendor/voku/portable-ascii/build',
+        '/administrator/components/com_guidedtours/src/Helper',
     ];
 }
