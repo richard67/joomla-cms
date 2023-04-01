@@ -38,6 +38,9 @@ $rulesetFile = $options['file'] ?? dirname(__DIR__) . '/ruleset.xml';
 // Exclude patterns to be skipped from the check because the file or folder might not exist
 $ignoreList = [
     '^configuration.php',
+    '^libraries/vendor/*',
+    '^media/*',
+    '^node_modules/*',
 ];
 
 echo "Checking file '" . $rulesetFile . "' ..." . PHP_EOL;
