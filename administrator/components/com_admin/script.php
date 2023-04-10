@@ -97,7 +97,6 @@ class JoomlaInstallerScript
         $this->deleteUnexistingFiles();
         $this->updateManifestCaches();
         $this->updateDatabase();
-        $this->updateAssets($installer);
         $this->clearStatsCache();
         $this->cleanJoomlaCache();
     }
@@ -806,47 +805,6 @@ class JoomlaInstallerScript
         }
 
         return $status;
-    }
-
-    /**
-     * Method to create assets for newly installed components
-     *
-     * @param   Installer  $installer  The class calling this method
-     *
-     * @return  boolean
-     *
-     * @since   3.2
-     */
-    public function updateAssets($installer)
-    {
-        // List all components added since 4.0
-        $newComponents = [
-            // Components to be added here
-        ];
-
-        foreach ($newComponents as $component) {
-            /** @var \Joomla\CMS\Table\Asset $asset */
-            $asset = Table::getInstance('Asset');
-
-            if ($asset->loadByName($component)) {
-                continue;
-            }
-
-            $asset->name      = $component;
-            $asset->parent_id = 1;
-            $asset->rules     = '{}';
-            $asset->title     = $component;
-            $asset->setLocation(1, 'last-child');
-
-            if (!$asset->store()) {
-                // Install failed, roll back changes
-                $installer->abort(Text::sprintf('JLIB_INSTALLER_ABORT_COMP_INSTALL_ROLLBACK', $asset->getError(true)));
-
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
