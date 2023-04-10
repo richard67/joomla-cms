@@ -8006,7 +8006,13 @@ class JoomlaInstallerScript
     {
         // List all components added since 4.0
         $newComponents = [
-            // Components to be added here
+            'com_mails',
+            'com_scheduler',
+            'com_associations',
+            'com_categories',
+            'com_fields',
+            'com_workflow',
+            'com_guidedtours',
         ];
 
         foreach ($newComponents as $component) {
