@@ -56,6 +56,7 @@ class DeletedFolders
         '/libraries/vendor/symfony/polyfill-php73/Resources/stubs',
         '/libraries/vendor/symfony/polyfill-php73/Resources',
         '/libraries/vendor/symfony/polyfill-php73',
+        '/libraries/vendor/symfony/polyfill-php72',
         '/libraries/vendor/spomky-labs/base64url/src',
         '/libraries/vendor/spomky-labs/base64url',
         '/libraries/vendor/ramsey/uuid/src/Provider/Time',
