@@ -286,8 +286,7 @@ class JoomlaInstallerScript
     /**
      * This method is just for testing.
      *
-     * @param   integer  $extensionId  Extension ID
-     * @param   string   $params       Params of extension with ID $extensionId
+     * @param   \stdClass  $data  Object with `extension_id` and `params` of the extension
      *
      * @return  void
      *
