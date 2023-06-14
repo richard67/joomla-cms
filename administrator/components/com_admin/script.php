@@ -288,7 +288,7 @@ class JoomlaInstallerScript
      * @param   integer  $extensionId  Extension ID
      * @param   string   $params       Params of extension with ID $extensionId
      *
-     * @return  boolean  True on success
+     * @return  void
      *
      * @since   __DEPLOY_VERSION__
      */
