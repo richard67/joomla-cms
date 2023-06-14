@@ -292,7 +292,7 @@ class JoomlaInstallerScript
      *
      * @since   __DEPLOY_VERSION__
      */
-    private function testPreFunction($extensionId, $params)
+    private function testPreFunction($data)
     {
         echo 'Hello from testPreFunction.<br>';
     }
