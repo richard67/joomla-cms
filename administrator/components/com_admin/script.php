@@ -230,7 +230,7 @@ class JoomlaInstallerScript
              * 'pre_function' => Name of an optional migration function to be called before
              *                   uninstalling, `null` if not used.
              */
-             ['type' => 'plugin', 'element' => 'demotasks', 'folder' => 'task', 'client_id' => 0, 'pre_function' => null],
+             ['type' => 'plugin', 'element' => 'demotasks', 'folder' => 'task', 'client_id' => 0, 'pre_function' => 'testPreFunction'],
         ];
 
         $db = Factory::getDbo();
@@ -281,6 +281,21 @@ class JoomlaInstallerScript
                 throw $e;
             }
         }
+    }
+
+    /**
+     * This method is just for testing.
+     *
+     * @param   integer  $extensionId  Extension ID
+     * @param   string   $params       Params of extension with ID $extensionId
+     *
+     * @return  boolean  True on success
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    private function testPreFunction($extensionId, $params)
+    {
+        echo 'Hello from testPreFunction.<br>';
     }
 
     /**
