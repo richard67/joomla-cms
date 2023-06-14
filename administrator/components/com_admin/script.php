@@ -295,7 +295,7 @@ class JoomlaInstallerScript
      */
     private function testPreFunction($data)
     {
-        echo 'Hello from testPreFunction.<br>';
+        error_log('Hello from testPreFunction.');
     }
 
     /**
