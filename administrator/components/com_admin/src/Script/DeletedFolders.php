@@ -75,7 +75,6 @@ class DeletedFolders
         '/libraries/vendor/ramsey',
         '/libraries/vendor/psr/log/Psr/Log',
         '/libraries/vendor/psr/log/Psr',
-        '/libraries/vendor/psr/http-message/docs',
         '/libraries/vendor/nyholm/psr7/src/Factory',
         '/libraries/vendor/nyholm/psr7/src',
         '/libraries/vendor/nyholm/psr7',

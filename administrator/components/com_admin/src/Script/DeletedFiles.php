@@ -208,8 +208,6 @@ class DeletedFiles
         '/libraries/vendor/nyholm/psr7/src/StreamTrait.php',
         '/libraries/vendor/nyholm/psr7/src/UploadedFile.php',
         '/libraries/vendor/nyholm/psr7/src/Uri.php',
-        '/libraries/vendor/psr/http-message/docs/PSR7-Interfaces.md',
-        '/libraries/vendor/psr/http-message/docs/PSR7-Usage.md',
         '/libraries/vendor/psr/log/Psr/Log/AbstractLogger.php',
         '/libraries/vendor/psr/log/Psr/Log/InvalidArgumentException.php',
         '/libraries/vendor/psr/log/Psr/Log/LoggerAwareInterface.php',
