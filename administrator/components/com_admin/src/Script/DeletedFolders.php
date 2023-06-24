@@ -93,5 +93,11 @@ class DeletedFolders
         '/libraries/vendor/beberlei',
         '/administrator/components/com_admin/sql/others/mysql',
         '/administrator/components/com_admin/sql/others',
+        // From 5.0.0-alpha1 to 5.0.0-alpha2
+        '/plugins/task/demotasks/src/Extension',
+        '/plugins/task/demotasks/src',
+        '/plugins/task/demotasks/services',
+        '/plugins/task/demotasks/forms',
+        '/plugins/task/demotasks',
     ];
 }
