@@ -99,7 +99,7 @@ if (!is_dir($options['to']) && !(is_file($options['to']) && substr(strtolower($o
     exit(1);
 }
 
-// Directories and files to skip for the check
+// Directories to skip for the check
 $excludedFolders = [
     'administrator/components/com_search',
     'components/com_search',
