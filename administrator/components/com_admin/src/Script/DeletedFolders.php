@@ -237,5 +237,8 @@ class DeletedFolders
         '/media/vendor/codemirror/addon/dialog',
         '/media/vendor/codemirror/addon/comment',
         '/media/vendor/codemirror/addon',
+        // From 5.0.0-alpha3 to 5.0.0-alpha4
+        '/templates/system/incompatible.html,/includes',
+        '/templates/system/incompatible.html,',
     ];
 }
