@@ -106,6 +106,7 @@ $excludedFolders = [
     'images/sampledata',
     'installation',
     'media/plg_quickicon_eos310',
+    'media/plg_system_compat',
     'media/system/images',
     'modules/mod_search',
     'plugins/captcha/recaptcha',
