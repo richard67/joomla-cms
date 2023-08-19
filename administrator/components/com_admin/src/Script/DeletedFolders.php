@@ -240,5 +240,6 @@ class DeletedFolders
         // From 5.0.0-alpha3 to 5.0.0-alpha4
         '/templates/system/incompatible.html,/includes',
         '/templates/system/incompatible.html,',
+        '/media/plg_editors_tinymce/js/plugins/highlighter',
     ];
 }
