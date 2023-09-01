@@ -1547,5 +1547,6 @@ class DeletedFiles
         '/media/plg_editors_tinymce/js/plugins/highlighter/source.min.css.gz',
         '/media/plg_editors_tinymce/js/plugins/highlighter/source.min.js',
         '/media/plg_editors_tinymce/js/plugins/highlighter/source.min.js.gz',
+        '/media/plg_system_compat/es5.asset.json',
     ];
 }
