@@ -294,6 +294,7 @@ class DeletedFiles
         '/libraries/vendor/symfony/polyfill-php81/bootstrap.php',
         '/libraries/vendor/symfony/polyfill-php81/LICENSE',
         '/libraries/vendor/symfony/polyfill-php81/Php81.php',
+        '/libraries/vendor/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
         '/libraries/vendor/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
         '/libraries/vendor/web-auth/cose-lib/src/Verifier.php',
         '/libraries/vendor/web-auth/metadata-service/src/AuthenticatorStatus.php',
@@ -1548,5 +1549,18 @@ class DeletedFiles
         '/media/plg_editors_tinymce/js/plugins/highlighter/source.min.js',
         '/media/plg_editors_tinymce/js/plugins/highlighter/source.min.js.gz',
         '/media/plg_system_compat/es5.asset.json',
+        // From 5.0.0-alpha4 to 5.0.0-beta1
+        '/administrator/components/com_categories/tmpl/categories/default_batch_footer.php',
+        '/administrator/components/com_content/tmpl/articles/default_batch_footer.php',
+        '/administrator/language/en-GB/plg_twofactorauth_totp.ini',
+        '/administrator/language/en-GB/plg_twofactorauth_totp.sys.ini',
+        '/administrator/language/en-GB/plg_twofactorauth_yubikey.ini',
+        '/administrator/language/en-GB/plg_twofactorauth_yubikey.sys.ini',
+        '/media/com_contenthistory/js/admin-history-versions.js',
+        '/media/com_contenthistory/js/admin-history-versions.min.js',
+        '/media/com_contenthistory/js/admin-history-versions.min.js.gz',
+        // From 5.0.0-beta1 to 5.0.0-beta2
+        '/language/en-GB/lib_simplepie.sys.ini',
+        '/libraries/src/Cache/Storage/WincacheStorage.php',
     ];
 }
