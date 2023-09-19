@@ -9,6 +9,9 @@
 	<version>4.4.0-beta2-dev</version>
 	<creationDate>2023-09</creationDate>
 	<description>FILES_JOOMLA_XML_DESCRIPTION</description>
+	<supported_databases mysql="5.6" mariadb="10.1" postgresql="11.0" />
+	<php_minimum>7.2.5</php_minimum>
+	<targetplatform name="joomla" version="(4\.0\.[456])|(4\.[1234])|(5\.0)"/>
 
 	<scriptfile>administrator/components/com_admin/script.php</scriptfile>
 
