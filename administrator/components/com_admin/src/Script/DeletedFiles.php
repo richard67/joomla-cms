@@ -92,6 +92,7 @@ class DeletedFiles
         '/administrator/components/com_admin/sql/updates/mysql/4.3.2-2023-05-03.sql',
         '/administrator/components/com_admin/sql/updates/mysql/4.3.2-2023-05-20.sql',
         '/administrator/components/com_admin/sql/updates/mysql/4.4.0-2023-05-08.sql',
+        '/administrator/components/com_admin/sql/updates/mysql/4.4.0-2023-09-13.sql',
         '/administrator/components/com_admin/sql/updates/postgresql/4.0.0-2018-03-05.sql',
         '/administrator/components/com_admin/sql/updates/postgresql/4.0.0-2018-05-15.sql',
         '/administrator/components/com_admin/sql/updates/postgresql/4.0.0-2018-07-19.sql',
@@ -155,6 +156,7 @@ class DeletedFiles
         '/administrator/components/com_admin/sql/updates/postgresql/4.3.2-2023-05-03.sql',
         '/administrator/components/com_admin/sql/updates/postgresql/4.3.2-2023-05-20.sql',
         '/administrator/components/com_admin/sql/updates/postgresql/4.4.0-2023-05-08.sql',
+        '/administrator/components/com_admin/sql/updates/postgresql/4.4.0-2023-09-13.sql',
         '/libraries/src/Schema/ChangeItem/SqlsrvChangeItem.php',
         '/libraries/vendor/beberlei/assert/lib/Assert/Assert.php',
         '/libraries/vendor/beberlei/assert/lib/Assert/Assertion.php',
@@ -1562,5 +1564,18 @@ class DeletedFiles
         // From 5.0.0-beta1 to 5.0.0-beta2
         '/language/en-GB/lib_simplepie.sys.ini',
         '/libraries/src/Cache/Storage/WincacheStorage.php',
+        // From 5.0.0-beta2 to 5.0.0-beta3
+        '/media/system/css/calendar-jos.css',
+        '/media/system/css/calendar-jos.min.css',
+        '/media/system/css/debug.css',
+        '/media/system/css/debug.min.css',
+        '/media/system/css/frontediting.css',
+        '/media/system/css/frontediting.min.css',
+        '/media/system/css/mootree.css',
+        '/media/system/css/mootree.min.css',
+        '/media/system/css/mootree_rtl.css',
+        '/media/system/css/mootree_rtl,min.css',
+        '/media/system/css/sortablelist.css',
+        '/media/system/css/sortablelist.min.css',
     ];
 }
