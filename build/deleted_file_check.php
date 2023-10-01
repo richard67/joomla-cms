@@ -65,8 +65,8 @@ if (empty($options['from'])) {
 // If the "to" parameter is not specified, use the default
 if (empty($options['to'])) {
     // Import the version class to get the version information
-    define('JPATH_PLATFORM', 1);
-    require_once dirname(__DIR__) . '/libraries/src/Version.php';
+    \define('JPATH_PLATFORM', 1);
+    require_once \dirname(__DIR__) . '/libraries/src/Version.php';
 
     $fullVersion      = (new Version())->getShortVersion();
     $packageStability = str_replace(' ', '_', Version::DEV_STATUS);
@@ -147,7 +147,7 @@ function readFolder($folderPath, $excludeFolders): stdClass
      * @return  bool  True if you need to recurse or if the item is acceptable
      */
     $releaseFilter = function ($file, $key, $iterator) use ($skipFolders) {
-        if ($iterator->hasChildren() && !in_array($file->getPathname(), $skipFolders)) {
+        if ($iterator->hasChildren() && !\in_array($file->getPathname(), $skipFolders)) {
             return true;
         }
 
@@ -155,7 +155,7 @@ function readFolder($folderPath, $excludeFolders): stdClass
     };
 
     $releaseDirIterator = new RecursiveDirectoryIterator($folderPath, RecursiveDirectoryIterator::SKIP_DOTS);
-    $releaseIterator = new RecursiveIteratorIterator(
+    $releaseIterator    = new RecursiveIteratorIterator(
         new RecursiveCallbackFilterIterator($releaseDirIterator, $releaseFilter),
         RecursiveIteratorIterator::SELF_FIRST
     );
@@ -313,7 +313,7 @@ foreach ($filesDifferenceDelete as $file) {
 
     if ($matches !== false) {
         foreach ($matches as $match) {
-            if (dirname($match) === dirname($file) && strtolower(basename($match)) === strtolower(basename($file))) {
+            if (\dirname($match) === \dirname($file) && strtolower(basename($match)) === strtolower(basename($file))) {
                 // File has been renamed only: Add to renamed files list
                 $renamedFiles[] = substr($file, 0, -1) . ' => ' . $match;
 
@@ -340,33 +340,33 @@ $renamedFilesFile   = __DIR__ . '/renamed_files.txt';
 @unlink($deletedFoldersFile);
 @unlink($renamedFilesFile);
 
-if (count($filesDifferenceAdd) > 0) {
+if (\count($filesDifferenceAdd) > 0) {
     file_put_contents($addedFilesFile, implode("\n", $filesDifferenceAdd));
 }
 
-if (count($foldersDifferenceAdd) > 0) {
+if (\count($foldersDifferenceAdd) > 0) {
     file_put_contents($addedFoldersFile, implode("\n", $foldersDifferenceAdd));
 }
 
-if (count($deletedFiles) > 0) {
+if (\count($deletedFiles) > 0) {
     file_put_contents($deletedFilesFile, implode("\n", $deletedFiles));
 }
 
-if (count($foldersDifferenceDelete) > 0) {
+if (\count($foldersDifferenceDelete) > 0) {
     file_put_contents($deletedFoldersFile, implode("\n", $foldersDifferenceDelete));
 }
 
-if (count($renamedFiles) > 0) {
+if (\count($renamedFiles) > 0) {
     file_put_contents($renamedFilesFile, implode("\n", $renamedFiles));
 }
 
 echo PHP_EOL;
 echo 'There are ' . PHP_EOL;
-echo ' - ' . count($filesDifferenceAdd) . ' added files, ' . PHP_EOL;
-echo ' - ' . count($foldersDifferenceAdd) . ' added folders, ' . PHP_EOL;
-echo ' - ' . count($deletedFiles) . ' deleted files, ' . PHP_EOL;
-echo ' - ' . count($foldersDifferenceDelete) .  ' deleted folders and ' . PHP_EOL;
-echo ' - ' . count($renamedFiles) .  ' renamed files' . PHP_EOL;
+echo ' - ' . \count($filesDifferenceAdd) . ' added files, ' . PHP_EOL;
+echo ' - ' . \count($foldersDifferenceAdd) . ' added folders, ' . PHP_EOL;
+echo ' - ' . \count($deletedFiles) . ' deleted files, ' . PHP_EOL;
+echo ' - ' . \count($foldersDifferenceDelete) .  ' deleted folders and ' . PHP_EOL;
+echo ' - ' . \count($renamedFiles) .  ' renamed files' . PHP_EOL;
 echo PHP_EOL;
 echo 'in comparison' . PHP_EOL;
 echo ' from "' . $options['from'] . '"' . PHP_EOL;

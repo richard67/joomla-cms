@@ -17,7 +17,7 @@ use Joomla\Component\Admin\Administrator\Script\DeletedFiles;
 use Joomla\Component\Admin\Administrator\Script\DeletedFolders;
 use Joomla\Component\Admin\Administrator\Script\RenamedFiles;
 
-define('JPATH_BASE', dirname(__DIR__));
+\define('JPATH_BASE', \dirname(__DIR__));
 
 // Configure error reporting to maximum for CLI output.
 error_reporting(E_ALL);
@@ -80,13 +80,13 @@ $packagesPath = __DIR__ . '/tmp/update_deleted_files/packages';
 
 // Build current major version if there is no result present from a previous build or download from URL
 $currentVersionPackage = '';
-$currentMajorDownload = $options['currZipUrl'] ?? '';
+$currentMajorDownload  = $options['currZipUrl'] ?? '';
 
 if (empty($currentMajorDownload)) {
     // No download URL: Check if there is a saved package from a previous build.
     $files = isset($options['reuse']) ? glob(__DIR__ . '/tmp/packages/*Full_Package.zip') : false;
 
-    if ($files !== false && count($files) === 1) {
+    if ($files !== false && \count($files) === 1) {
         $currentVersionPackage = $files[0];
     } else {
         echo PHP_EOL;
@@ -97,7 +97,7 @@ if (empty($currentMajorDownload)) {
 
         $files = glob(__DIR__ . '/tmp/packages/*Full_Package.zip');
 
-        if ($files !== false && count($files) === 1) {
+        if ($files !== false && \count($files) === 1) {
             $currentVersionPackage = $files[0];
         }
 
@@ -176,7 +176,7 @@ if (PREVIOUS_CHECK) {
         // No download URL: Check if there is a saved package from a previous build.
         $files = isset($options['reuse']) ? glob($previousBuildPackagePath . '/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip') : false;
 
-        if ($files !== false && count($files) > 0) {
+        if ($files !== false && \count($files) > 0) {
             // There is one matching saved package from a previous build.
             $previousMajorPackage = $files[0];
         }
@@ -208,7 +208,7 @@ if (PREVIOUS_CHECK) {
 
             $files = glob($previousBuildPath . '/build/tmp/packages/Joomla_' . PREVIOUS_VERSION . '.*Full_Package.zip');
 
-            if ($files !== false && count($files) === 1) {
+            if ($files !== false && \count($files) === 1) {
                 $previousMajorPackage = $previousBuildPackagePath . '/' . basename($files[0]);
 
                 copy($files[0], $previousMajorPackage);
@@ -271,7 +271,7 @@ if (isset($options['relZipUrl'])) {
         }
 
         if (
-            version_compare(substr($gitHubRelease->tag_name, 0, strlen($currentMinorVersion)), $currentMinorVersion, '=')
+            version_compare(substr($gitHubRelease->tag_name, 0, \strlen($currentMinorVersion)), $currentMinorVersion, '=')
             && version_compare($gitHubRelease->tag_name, $currentVersionBuild, '<')
         ) {
             foreach ($gitHubRelease->assets as $asset) {
@@ -317,8 +317,8 @@ $renamedFilesFile   = __DIR__ . '/renamed_files.txt';
 
 if (PREVIOUS_CHECK) {
     echo PHP_EOL;
-    echo 'Comparing from ".' . substr($previousMajorPackage, strlen(__DIR__)) . '"' . PHP_EOL;
-    echo '            to ".' . substr($currentVersionPackage, strlen(__DIR__)) . '".' . PHP_EOL;
+    echo 'Comparing from ".' . substr($previousMajorPackage, \strlen(__DIR__)) . '"' . PHP_EOL;
+    echo '            to ".' . substr($currentVersionPackage, \strlen(__DIR__)) . '".' . PHP_EOL;
 
     system('php ./deleted_file_check.php --from=' . $previousMajorPackage . ' --to=' . $currentVersionPackage . ' > /dev/null');
 
@@ -336,8 +336,8 @@ if (PREVIOUS_CHECK) {
 }
 
 echo PHP_EOL;
-echo 'Comparing from ".' . substr($previousVersionPackage, strlen(__DIR__)) . '"' . PHP_EOL;
-echo '            to ".' . substr($currentVersionPackage, strlen(__DIR__)) . '".' . PHP_EOL;
+echo 'Comparing from ".' . substr($previousVersionPackage, \strlen(__DIR__)) . '"' . PHP_EOL;
+echo '            to ".' . substr($currentVersionPackage, \strlen(__DIR__)) . '".' . PHP_EOL;
 
 system('php ./deleted_file_check.php --from=' . $previousVersionPackage . ' --to=' . $currentVersionPackage . ' > /dev/null');
 
@@ -459,7 +459,7 @@ foreach ($renamedFilesRows as $renamedFilesRow) {
         $renamedFileOld = trim(substr($renamedFilesRow, 0, $pos), "'");
         $renamedFileNew = trim(rtrim(substr($renamedFilesRow, $pos + 4), ','), "'");
 
-        if (!array_key_exists($renamedFileOld, $renamedFilesInfo->files)) {
+        if (!\array_key_exists($renamedFileOld, $renamedFilesInfo->files)) {
             $renamedFilesRowsAdd[] = "        '" . $renamedFileOld . "' => '" . $renamedFileNew . "',\n";
 
             $hasChanges = true;
@@ -478,7 +478,7 @@ $deletedFilesChanged   = false;
 $deletedFoldersChanged = false;
 $renamedFilesChanged   = false;
 
-if (count($deletedFilesRowsRemove) > 0) {
+if (\count($deletedFilesRowsRemove) > 0) {
     $deletedFilesChanged = true;
 
     echo PHP_EOL;
@@ -489,7 +489,7 @@ if (count($deletedFilesRowsRemove) > 0) {
     }
 }
 
-if (count($deletedFoldersRowsRemove) > 0) {
+if (\count($deletedFoldersRowsRemove) > 0) {
     $deletedFoldersChanged = true;
 
     echo PHP_EOL;
@@ -500,7 +500,7 @@ if (count($deletedFoldersRowsRemove) > 0) {
     }
 }
 
-if (count($renamedFilesRowsRemove) > 0) {
+if (\count($renamedFilesRowsRemove) > 0) {
     $renamedFilesChanged = true;
 
     echo PHP_EOL;
@@ -511,7 +511,7 @@ if (count($renamedFilesRowsRemove) > 0) {
     }
 }
 
-if (count($deletedFilesRowsAdd) > 0) {
+if (\count($deletedFilesRowsAdd) > 0) {
     $deletedFilesChanged = true;
 
     echo PHP_EOL;
@@ -522,7 +522,7 @@ if (count($deletedFilesRowsAdd) > 0) {
     }
 }
 
-if (count($deletedFoldersRowsAdd) > 0) {
+if (\count($deletedFoldersRowsAdd) > 0) {
     $deletedFoldersChanged = true;
 
     echo PHP_EOL;
@@ -533,7 +533,7 @@ if (count($deletedFoldersRowsAdd) > 0) {
     }
 }
 
-if (count($renamedFilesRowsAdd) > 0) {
+if (\count($renamedFilesRowsAdd) > 0) {
     $renamedFilesChanged = true;
 
     echo PHP_EOL;
@@ -597,7 +597,7 @@ function safeRegistryFile($rowsRemove, $rowsAdd, $filePath, $version, $doInit, $
             break;
         }
 
-        if (!in_array($line, $rowsRemove)) {
+        if (!\in_array($line, $rowsRemove)) {
             $output .= $line;
         }
     }
