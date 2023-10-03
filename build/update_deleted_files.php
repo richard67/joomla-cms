@@ -161,7 +161,28 @@ if (!preg_match('/^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)/i', $currentVe
 }
 
 $currentVersionBuild = str_replace('-dev', '', $currentVersionBuild);
-$currentMinorVersion = $currentVersionBuildParts['major'] . '.' . $currentVersionBuildParts['minor'];
+
+if ($currentVersionBuildParts['minor'] > 0) {
+    if (version_compare($currentVersionBuild, $currentVersionBuildParts['major'] . '.' . $currentVersionBuildParts['minor'] . '.0-alpha1', '>')) {
+        // There should be a previous release for that minor version.
+        $previousPackageVersion = $currentVersionBuildParts['major'] . '.' . $currentVersionBuildParts['minor'];
+    } else {
+        // There is no previous release for that minor version: Check for previous minor version.
+        $previousPackageVersion = $currentVersionBuildParts['major'] . '.' . ($currentVersionBuildParts['minor'] - 1);
+    }
+} elseif (version_compare($currentVersionBuild, $currentVersionBuildParts['major'] . '.0.0-alpha1', '>')) {
+    // There should be a previous release for minor version zero.
+    $previousPackageVersion = $currentVersionBuildParts['major'] . '.' . $currentVersionBuildParts['minor'];
+} else {
+    // There is no previous release package for this major version.
+    $previousPackageVersion = false;
+}
+
+if (!$previousPackageVersion && isset($options['relZipUrl'])) {
+    echo PHP_EOL;
+    echo 'There cannot be a previous release package for the build version"' . $currentVersionBuild . '". The "relZipUrl" parameter will be ignored.' . PHP_EOL;
+    unset($options['relZipUrl']);
+}
 
 // Clone and build previous major version or download from URL
 if (PREVIOUS_CHECK) {
@@ -244,7 +265,7 @@ $previousVersionPackageUrl = '';
 
 if (isset($options['relZipUrl'])) {
     $previousVersionPackageUrl = $options['relZipUrl'];
-} else {
+} elseif ($previousPackageVersion) {
     // Fetch release information from GitHub
     echo PHP_EOL;
     echo 'Fetching releases information from GitHub.' . PHP_EOL;
@@ -269,7 +290,7 @@ if (isset($options['relZipUrl'])) {
         }
 
         if (
-            version_compare(substr($gitHubRelease->tag_name, 0, \strlen($currentMinorVersion)), $currentMinorVersion, '=')
+            version_compare(substr($gitHubRelease->tag_name, 0, \strlen($previousPackageVersion)), $previousPackageVersion, '=')
             && version_compare($gitHubRelease->tag_name, $currentVersionBuild, '<')
         ) {
             foreach ($gitHubRelease->assets as $asset) {
@@ -290,21 +311,23 @@ if (isset($options['relZipUrl'])) {
     }
 }
 
-$previousVersionPackage = $packagesPath . '/' . basename($previousVersionPackageUrl);
+if ($previousPackageVersion) {
+    $previousVersionPackage = $packagesPath . '/' . basename($previousVersionPackageUrl);
 
-// Download full zip package of latest release before current version if not done before
-if (!is_file($previousVersionPackage)) {
-    echo PHP_EOL;
-    echo 'Downloading package "' . $previousVersionPackageUrl . '".' . PHP_EOL;
+    // Download full zip package of latest release before current version if not done before
+    if (!is_file($previousVersionPackage)) {
+        echo PHP_EOL;
+        echo 'Downloading package "' . $previousVersionPackageUrl . '".' . PHP_EOL;
 
-    system('curl -L -o ' . $previousVersionPackage . ' ' . $previousVersionPackageUrl);
-}
+        system('curl -L -o ' . $previousVersionPackage . ' ' . $previousVersionPackageUrl);
+    }
 
-if (!is_file($previousVersionPackage)) {
-    echo PHP_EOL;
-    echo 'Error: Could not download package.' . PHP_EOL;
+    if (!is_file($previousVersionPackage)) {
+        echo PHP_EOL;
+        echo 'Error: Could not download package.' . PHP_EOL;
 
-    exit(1);
+        exit(1);
+    }
 }
 
 $addedFilesFile     = __DIR__ . '/added_files.txt';
@@ -333,17 +356,19 @@ if (PREVIOUS_CHECK) {
     $renamedFilesRows = [];
 }
 
-echo PHP_EOL;
-echo 'Comparing from ".' . substr($previousVersionPackage, \strlen(__DIR__)) . '"' . PHP_EOL;
-echo '            to ".' . substr($currentVersionPackage, \strlen(__DIR__)) . '".' . PHP_EOL;
+if ($previousPackageVersion) {
+    echo PHP_EOL;
+    echo 'Comparing from ".' . substr($previousVersionPackage, \strlen(__DIR__)) . '"' . PHP_EOL;
+    echo '            to ".' . substr($currentVersionPackage, \strlen(__DIR__)) . '".' . PHP_EOL;
 
-system('php ./deleted_file_check.php --from=' . $previousVersionPackage . ' --to=' . $currentVersionPackage . ' > /dev/null');
+    system('php ./deleted_file_check.php --from=' . $previousVersionPackage . ' --to=' . $currentVersionPackage . ' > /dev/null');
 
-$addedFiles       = array_unique(array_merge($addedFiles, file_exists($addedFilesFile) ? explode("\n", file_get_contents($addedFilesFile)) : []));
-$addedFolders     = array_unique(array_merge($addedFolders, file_exists($addedFoldersFile) ? explode("\n", file_get_contents($addedFoldersFile)) : []));
-$deletedFiles     = array_unique(array_merge($deletedFiles, file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : []));
-$deletedFolders   = array_unique(array_merge($deletedFolders, file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : []));
-$renamedFilesRows = array_unique(array_merge($renamedFilesRows, file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : []));
+    $addedFiles       = array_unique(array_merge($addedFiles, file_exists($addedFilesFile) ? explode("\n", file_get_contents($addedFilesFile)) : []));
+    $addedFolders     = array_unique(array_merge($addedFolders, file_exists($addedFoldersFile) ? explode("\n", file_get_contents($addedFoldersFile)) : []));
+    $deletedFiles     = array_unique(array_merge($deletedFiles, file_exists($deletedFilesFile) ? explode("\n", file_get_contents($deletedFilesFile)) : []));
+    $deletedFolders   = array_unique(array_merge($deletedFolders, file_exists($deletedFoldersFile) ? explode("\n", file_get_contents($deletedFoldersFile)) : []));
+    $renamedFilesRows = array_unique(array_merge($renamedFilesRows, file_exists($renamedFilesFile) ? explode("\n", file_get_contents($renamedFilesFile)) : []));
+}
 
 asort($deletedFiles);
 rsort($deletedFolders);
