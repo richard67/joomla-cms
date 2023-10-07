@@ -2007,12 +2007,11 @@ ENDDATA;
             throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_MANIFEST_FILE', $packageName), 500);
         }
 
-        $this->checkManifestXML($fileContentXml, $packageName);
-
         if ($fileContentPhp === false) {
             throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_INDEX_PHP_FILE', $packageName), 500);
         }
 
+        $this->checkManifestXML($fileContentXml, $packageName);
         $this->checkIndexPhp($fileContentPhp, $packageName);
     }
 
