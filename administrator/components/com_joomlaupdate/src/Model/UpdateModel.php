@@ -1834,13 +1834,21 @@ ENDDATA;
             throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_INSTALL_PACKAGE', $packageName), 500);
         }
 
-        $manifestFile = $zipArchive->getFromName('administrator/manifests/files/joomla.xml');
+        $fileContent = $zipArchive->getFromName('administrator/manifests/files/joomla.xml');
 
-        if ($manifestFile === false) {
+        if ($fileContent === false) {
             throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_MANIFEST_FILE', $packageName), 500);
         }
 
-        $this->checkManifestXML($manifestFile, $packageName);
+        $this->checkManifestXML($fileContent, $packageName);
+
+        $fileContent = $zipArchive->getFromName('administrator/index.php');
+
+        if ($fileContent === false) {
+            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_INDEX_PHP_FILE', $packageName), 500);
+        }
+
+        $this->checkIndexPhp($fileContent, $packageName);
     }
 
     /**
@@ -1888,8 +1896,12 @@ ENDDATA;
         // File name size signature of the 'administrator/manifests/files/joomla.xml' file
         $sizeSignatureJoomlaXml = pack('v', 0x0028);
 
-        $headerFound = false;
-        $headerInfo  = false;
+        // File name size signature of the 'administrator/index.php' file
+        $sizeSignatureAdminPhp = pack('v', 0x0017);
+
+        $headerFound            = false;
+        $headerInfoManifestXml  = false;
+        $headerInfoAdminPhp     = false;
 
         // Read chunks from the end to the start of the file
         $readStart = $filesize - $readsize;
@@ -1928,15 +1940,29 @@ ENDDATA;
             $offset = 0;
 
             // Look for administrator/manifests/files/joomla.xml if not found yet
-            while ($headerInfo === false && ($pos = strpos($fileChunk, 'administrator/manifests/files/joomla.xml', $offset)) !== false) {
+            while ($headerInfoManifestXml === false && ($pos = strpos($fileChunk, 'administrator/manifests/files/joomla.xml', $offset)) !== false) {
                 // Check if entry is inside a ZIP central directory header and the file name is exactly 40 bytes long
                 if (substr($fileChunk, $pos - 46, 4) == $headerSignature && substr($fileChunk, $pos - 18, 2) == $sizeSignatureJoomlaXml) {
-                    $headerInfo = unpack('VOffset', substr($fileChunk, $pos - 4, 4));
+                    $headerInfoManifestXml = unpack('VOffset', substr($fileChunk, $pos - 4, 4));
 
                     break;
                 }
 
                 $offset = $pos + 40;
+            }
+
+            $offset = 0;
+
+            // Look for administrator/index.php if not found yet
+            while ($headerInfoAdminPhp === false && ($pos = strpos($fileChunk, 'administrator/index.php', $offset)) !== false) {
+                // Check if entry is inside a ZIP central directory header and the file name is exactly 40 bytes long
+                if (substr($fileChunk, $pos - 46, 4) == $headerSignature && substr($fileChunk, $pos - 18, 2) == $sizeSignatureAdminPhp) {
+                    $headerInfoAdminPhp = unpack('VOffset', substr($fileChunk, $pos - 4, 4));
+
+                    break;
+                }
+
+                $offset = $pos + 23;
             }
 
             // Done as all file content has been read
@@ -1958,56 +1984,36 @@ ENDDATA;
         }
 
         // If no central directory file header found for the manifest XML file it's not a valid Joomla package
-        if (!$headerInfo) {
+        if (!$headerInfoManifestXml) {
             @fclose($fp);
 
             throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_MANIFEST_FILE', $packageName), 500);
         }
 
-        // Read the local file header of the manifest XML file
-        fseek($fp, $headerInfo['Offset']);
-        $localHeader = fread($fp, 30);
-
-        $localHeaderInfo = unpack('VSig/vVersion/vBitFlag/vMethod/VTime/VCRC32/VCompressed/VUncompressed/vNameLength/vExtraLength', $localHeader);
-
-        // Check for empty manifest file
-        if (!$localHeaderInfo['Compressed']) {
+        // If no central directory file header found for the administrator/index.php file it's not a valid Joomla package
+        if (!$headerInfoAdminPhp) {
             @fclose($fp);
 
-            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_MANIFEST_FILE', $packageName), 500);
+            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_INDEX_PHP_FILE', $packageName), 500);
         }
 
-        // Read the compressed manifest XML file content
-        fseek($fp, $localHeaderInfo['NameLength'] + $localHeaderInfo['ExtraLength'], SEEK_CUR);
-        $manifestFileCompressed = fread($fp, $localHeaderInfo['Compressed']);
+        $fileContentXml = $this->getFileFromZip($fp, $headerInfoManifestXml['Offset']);
+        $fileContentPhp = $this->getFileFromZip($fp, $headerInfoAdminPhp['Offset']);
 
         // Close package file
         @fclose($fp);
 
-        // Uncompress the manifest XML file content
-        $manifestFile = '';
-
-        switch ($localHeaderInfo['Method']) {
-            case 0:
-                // Uncompressed
-                $manifestFile = $manifestFileCompressed;
-                break;
-
-            case 8:
-                // Deflated
-                $manifestFile = gzinflate($manifestFileCompressed);
-                break;
-
-            default:
-                // Unsupported
-                break;
-        }
-
-        if (!$manifestFile) {
+        if ($fileContentXml === false) {
             throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_MANIFEST_FILE', $packageName), 500);
         }
 
-        $this->checkManifestXML($manifestFile, $packageName);
+        $this->checkManifestXML($fileContentXml, $packageName);
+
+        if ($fileContentPhp === false) {
+            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_INDEX_PHP_FILE', $packageName), 500);
+        }
+
+        $this->checkIndexPhp($fileContentPhp, $packageName);
     }
 
     /**
@@ -2045,5 +2051,95 @@ ENDDATA;
         if (version_compare($versionPackage, $currentVersion, 'lt')) {
             throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_DOWNGRADE', $packageName, $versionPackage, $currentVersion), 500);
         }
+    }
+
+    /**
+     * Check content of administrator/index.php file in update package
+     *
+     * @param   string  $fileContent  Content of the administrator/index.php file
+     * @param   string  $packageName  Name of the selected update package
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     * @throws  \RuntimeException
+     */
+    private function checkIndexPhp(string $fileContent, $packageName)
+    {
+        // Get position of "define('JOOMLA_MINIMUM_PHP', '"
+        if (($pos1 = strpos($fileContent, "define('JOOMLA_MINIMUM_PHP', '")) === false) {
+            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_PHP_MIN_FOUND', $packageName), 500);
+        }
+
+        // Get position after "define('JOOMLA_MINIMUM_PHP', '"
+        $pos1 += 30;
+
+        // Get position of next "');"
+        if (($pos2 = strpos($fileContent, "');", $pos1)) === false) {
+            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_NO_PHP_MIN_FOUND', $packageName), 500);
+        }
+
+        $minPhpVersion = substr($fileContent, $pos1, $pos2 - $pos1);
+
+        if (version_compare(PHP_VERSION, $minPhpVersion, 'lt')) {
+            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_PHP_VERSION', $packageName, $minPhpVersion, PHP_VERSION), 500);
+        }
+    }
+
+    /**
+     * Unpack one file from one ZIP file into a string without using the zip PHP extension
+     *
+     * @param   \resource  $stream  File pointer to open ZIP file
+     * @param   integer    $pos     Local file header position in ZIP file
+     *
+     * @return  string|boolean  Unpacked file content or false on error
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    private function getFileFromZip($stream, int $pos)
+    {
+        // Read the local file header
+        fseek($stream, $pos);
+        $localHeader = fread($stream, 30);
+
+        if ($localHeader === false || strlen($localHeader) !== 30) {
+            return false;
+        }
+
+        $localHeaderInfo = unpack('VSig/vVersion/vBitFlag/vMethod/VTime/VCRC32/VCompressed/VUncompressed/vNameLength/vExtraLength', $localHeader);
+
+        // Check for empty file
+        if (!$localHeaderInfo['Compressed']) {
+            return '';
+        }
+
+        // Read the compressed file content
+        fseek($stream, $localHeaderInfo['NameLength'] + $localHeaderInfo['ExtraLength'], SEEK_CUR);
+        $fileContentCompressed = fread($stream, $localHeaderInfo['Compressed']);
+
+        if ($fileContentCompressed === false || strlen($fileContentCompressed) !== $localHeaderInfo['Compressed']) {
+            return false;
+        }
+
+        // Uncompress the manifest XML file content
+        $fileContent = false;
+
+        switch ($localHeaderInfo['Method']) {
+            case 0:
+                // Uncompressed
+                $fileContent = $fileContentCompressed;
+                break;
+
+            case 8:
+                // Deflated
+                $fileContent = gzinflate($fileContentCompressed);
+                break;
+
+            default:
+                // Unsupported
+                break;
+        }
+
+        return $fileContent;
     }
 }
