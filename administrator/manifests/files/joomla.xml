@@ -9,6 +9,8 @@
 	<version>5.0.0-rc2-dev</version>
 	<creationDate>2023-10</creationDate>
 	<description>FILES_JOOMLA_XML_DESCRIPTION</description>
+	<php_minimum>8.1.0</php_minimum>
+	<supported_databases mysql="8.0.13" mariadb="10.4.0" postgresql="12.0"/>
 
 	<scriptfile>administrator/components/com_admin/script.php</scriptfile>
 
