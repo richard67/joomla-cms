@@ -2045,5 +2045,31 @@ ENDDATA;
         if (version_compare($versionPackage, $currentVersion, 'lt')) {
             throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_DOWNGRADE', $packageName, $versionPackage, $currentVersion), 500);
         }
+
+        $phpMinimum = (string) $manifestXml->php_minimum ?: '';
+
+        if ($phpMinimum && version_compare(PHP_VERSION, $phpMinimum, 'lt')) {
+            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_PHP_VERSION', $packageName, $phpMinimum, PHP_VERSION), 500);
+        }
+
+        if (!isset($manifestXml->supported_databases)) {
+            return;
+        }
+
+        $db = version_compare(JVERSION, '4.2.0', 'lt') ? $this->getDbo() : $this->getDatabase();
+
+        $dbType       = strtolower($db->getServerType());
+        $supportedDbs = $this->currentUpdate->supported_databases;
+
+        // MySQL and MariaDB use the same database driver but not the same version numbers
+        if ($dbType === 'mysql' && $db->isMariaDb()) {
+            $dbType = 'mariadb';
+        }
+
+        $dbMinimum = (string) $manifestXml->supported_databases->$dbType ?: '';
+
+        if ($dbMinimum && version_compare($db->getVersion(), $dbMinimum, 'lt')) {
+            throw new \RuntimeException(Text::sprintf('COM_JOOMLAUPDATE_VIEW_UPLOAD_ERROR_DB_VERSION', $packageName, $dbMinimum, $db->getVersion()), 500);
+        }
     }
 }
