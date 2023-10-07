@@ -2056,10 +2056,9 @@ ENDDATA;
             return;
         }
 
-        $db = version_compare(JVERSION, '4.2.0', 'lt') ? $this->getDbo() : $this->getDatabase();
+        $db = $this->getDatabase();
 
-        $dbType       = strtolower($db->getServerType());
-        $supportedDbs = $this->currentUpdate->supported_databases;
+        $dbType = strtolower($db->getServerType());
 
         // MySQL and MariaDB use the same database driver but not the same version numbers
         if ($dbType === 'mysql' && $db->isMariaDb()) {
