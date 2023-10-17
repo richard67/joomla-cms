@@ -251,10 +251,16 @@ class PostgresqlChangeItem extends ChangeItem
         }
 
         if ($command === 'CREATE TABLE') {
-            if (strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS') {
-                $table = $this->fixQuote($wordArray[5]);
+            if ($totalWords > 4 && strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS') {
+                $idxTable = 5;
             } else {
-                $table = $this->fixQuote($wordArray[2]);
+                $idxTable = 2;
+            }
+
+            if ($pos = strpos($wordArray[$idxTable], '(')) {
+                $table = $this->fixQuote(substr($wordArray[$idxTable], 0, $pos));
+            } else {
+                $table = $this->fixQuote($wordArray[$idxTable]);
             }
 
             $result                   = 'SELECT table_name FROM information_schema.tables WHERE table_name=' . $table;

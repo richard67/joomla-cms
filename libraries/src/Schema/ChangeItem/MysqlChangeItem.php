@@ -56,9 +56,11 @@ class MysqlChangeItem extends ChangeItem
         $updateQuery = preg_replace($find, $replace, $this->updateQuery);
         $wordArray   = preg_split("~'[^']*'(*SKIP)(*F)|\s+~u", trim($updateQuery, "; \t\n\r\0\x0B"));
 
+        $totalWords = \count($wordArray);
+
         // First, make sure we have an array of at least 5 elements
         // if not, we can't make a check query for this one
-        if (\count($wordArray) < 5) {
+        if ($totalWords < 5) {
             // Done with method
             return;
         }
@@ -79,7 +81,7 @@ class MysqlChangeItem extends ChangeItem
         }
 
         // For the remaining query types make sure we have an array of at least 6 elements
-        if (\count($wordArray) < 6) {
+        if ($totalWords < 6) {
             // Done with method
             return;
         }
@@ -187,15 +189,21 @@ class MysqlChangeItem extends ChangeItem
         }
 
         if ($command === 'CREATE TABLE') {
-            if (strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS') {
-                $table = $wordArray[5];
+            if ($totalWords > 4 && strtoupper($wordArray[2] . $wordArray[3] . $wordArray[4]) === 'IFNOTEXISTS') {
+                $idxTable = 5;
             } else {
-                $table = $wordArray[2];
+                $idxTable = 2;
             }
 
-            $result            = 'SHOW TABLES LIKE ' . $this->fixQuote($table);
+            if ($pos = strpos($wordArray[$idxTable], '(')) {
+                $table = $this->fixQuote(substr($wordArray[$idxTable], 0, $pos));
+            } else {
+                $table = $this->fixQuote($wordArray[$idxTable]);
+            }
+
+            $result            = 'SHOW TABLES LIKE ' . $table;
             $this->queryType   = 'CREATE_TABLE';
-            $this->msgElements = [$this->fixQuote($table)];
+            $this->msgElements = [$table];
         }
 
         // Set fields based on results
