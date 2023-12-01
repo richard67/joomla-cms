@@ -317,6 +317,8 @@ class SysinfoModel extends BaseDatabaseModel
             'dbconnectioncollation'  => $db->getConnectionCollation(),
             'dbconnectionencryption' => $db->getConnectionEncryption(),
             'dbconnencryptsupported' => $db->isConnectionEncryptionSupported(),
+            'dbsqlbigselects'        => $db->getSqlBigSelects(),
+            'dbmaxjoinsize'          => $db->getMaxJoinSize(),
             'phpversion'             => PHP_VERSION,
             'server'                 => $_SERVER['SERVER_SOFTWARE'] ?? getenv('SERVER_SOFTWARE'),
             'sapi_name'              => PHP_SAPI,

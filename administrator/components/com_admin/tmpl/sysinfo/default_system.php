@@ -90,6 +90,22 @@ use Joomla\CMS\Language\Text;
             </tr>
             <tr>
                 <th scope="row">
+                    <?php echo Text::_('COM_ADMIN_DATABASE_SQL_BIG_SELECTS'); ?>
+                </th>
+                <td>
+                    <?php echo $this->info['dbsqlbigselects'] ? Text::_('JON') : Text::_('JOFF'); ?>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    <?php echo Text::_('COM_ADMIN_DATABASE_MAX_JOIN_SIZE'); ?>
+                </th>
+                <td>
+                    <?php echo $this->info['dbmaxjoinsize']; ?>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">
                     <?php echo Text::_('COM_ADMIN_PHP_VERSION'); ?>
                 </th>
                 <td>
