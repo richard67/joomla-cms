@@ -309,6 +309,12 @@ class SysinfoModel extends BaseDatabaseModel
 
         $db = $this->getDatabase();
 
+        if (in_array($db->getServerType(), ['mysql', 'mysqli'])) {
+            $dbsqlbigselects = $db->setQuery('SELECT @@sql_big_selects;')->loadResult() == 1;
+        } else {
+            $dbsqlbigselects = null;
+        }
+
         $this->info = [
             'php'                    => php_uname(),
             'dbserver'               => $db->getServerType(),
@@ -317,6 +323,7 @@ class SysinfoModel extends BaseDatabaseModel
             'dbconnectioncollation'  => $db->getConnectionCollation(),
             'dbconnectionencryption' => $db->getConnectionEncryption(),
             'dbconnencryptsupported' => $db->isConnectionEncryptionSupported(),
+            'dbsqlbigselects'        => $dbsqlbigselects,
             'phpversion'             => PHP_VERSION,
             'server'                 => $_SERVER['SERVER_SOFTWARE'] ?? getenv('SERVER_SOFTWARE'),
             'sapi_name'              => PHP_SAPI,
