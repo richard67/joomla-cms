@@ -106,15 +106,23 @@ class Database implements ServiceProviderInterface
                         }
                     }
 
-                    // Enable utf8mb4 connections and big selects for mysql adapters
+                    // Enable utf8mb4 connections for mysql adapters
                     if (strtolower($dbtype) === 'mysqli') {
-                        $options['utf8mb4']       = true;
-                        $options['sqlBigSelects'] = true;
+                        $options['utf8mb4'] = true;
                     }
 
                     if (strtolower($dbtype) === 'mysql') {
-                        $options['charset']       = 'utf8mb4';
-                        $options['sqlBigSelects'] = true;
+                        $options['charset'] = 'utf8mb4';
+                    }
+
+                    // Set sql_big_selects variable for mysql adapters
+                    if (in_array(strtolower($dbtype),['mysql', 'mysqli'])) {
+                        $sqlbigselects = (int) $conf->get('dbsqlbigselects');
+
+                        // Only set option if enforced by configuration
+                        if ($sqlbigselects !== 0) {
+                            $options['sqlBigSelects'] = $sqlbigselects === 2;
+                        }
                     }
 
                     if (JDEBUG) {
