@@ -192,8 +192,19 @@ class BannersModel extends ListModel
                     $query->join('LEFT', $db->quoteName('#__categories', 'cat'), $db->quoteName('a.catid') . ' = ' . $db->quoteName('cat.id'));
                 }
 
+                // Get word boundary regular expression patterns depending on database type and version
+                if ($db->getServerType() === 'mysql' && ($db->isMariaDb() || version_compare($db->getVersion(), '8.0.4', '>='))) {
+                    // MariaDB (any supported version) or MySQL 8.0.4 and newer
+                    $wordStart = '\\b';
+                    $wordEnd   = '\\b';
+                } else {
+                    // MySQL before 8.0.4 or any PostgreSQL version
+                    $wordStart = '[[:<:]]';
+                    $wordEnd   = '[[:>:]]';
+                }
+
                 foreach ($keywords as $key => $keyword) {
-                    $regexp       = '[[:<:]]' . $keyword . '[[:>:]]';
+                    $regexp       = $wordStart . $keyword . $wordEnd;
                     $valuesToBind = [$keyword, $keyword, $regexp];
 
                     if ($cid) {
