@@ -29,9 +29,9 @@ const PHP_TAB = "\t";
 // Change the following value to false when the previous major release has reached end of development.
 const PREVIOUS_CHECK = true;
 
-const PREVIOUS_VERSION = '4.4';
+const PREVIOUS_VERSION = '5.1';
 
-const PREVIOUS_BRANCH = '4.4-dev';
+const PREVIOUS_BRANCH = '5.1-dev';
 
 const GITHUB_REPO = 'https://github.com/joomla/joomla-cms.git';
 
@@ -221,7 +221,7 @@ if (PREVIOUS_CHECK) {
             echo 'Runing build script for previous major version.' . PHP_EOL;
             echo PHP_EOL;
 
-            system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-bzip2');
+            system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-zstd');
 
             chdir(__DIR__);
 
