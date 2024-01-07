@@ -27,7 +27,7 @@ ini_set('display_errors', 1);
 const PHP_TAB = "\t";
 
 // Change the following value to false when the previous major release has reached end of development.
-const PREVIOUS_CHECK = true;
+const PREVIOUS_CHECK = false;
 
 const PREVIOUS_VERSION = '3.10';
 
