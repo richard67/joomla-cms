@@ -91,7 +91,7 @@ if (empty($currentMajorDownload)) {
         echo 'Runing build script for current version.' . PHP_EOL;
         echo PHP_EOL;
 
-        system('php ./build.php --remote=' . ($options['currRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-bzip2');
+        system('php ./build.php --remote=' . ($options['currRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-zstd');
 
         $files = glob(__DIR__ . '/tmp/packages/*Full_Package.zip');
 
@@ -221,7 +221,7 @@ if (PREVIOUS_CHECK) {
             echo 'Runing build script for previous major version.' . PHP_EOL;
             echo PHP_EOL;
 
-            system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-bzip2');
+            system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-zstd');
 
             chdir(__DIR__);
 
