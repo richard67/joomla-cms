@@ -221,7 +221,7 @@ if (PREVIOUS_CHECK) {
             echo 'Runing build script for previous major version.' . PHP_EOL;
             echo PHP_EOL;
 
-            system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-zstd');
+            system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-bzip2');
 
             chdir(__DIR__);
 
