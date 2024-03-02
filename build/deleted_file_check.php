@@ -107,6 +107,7 @@ $excludedFolders = [
     'installation',
     'media/com_cpanel/js',
     'media/com_modules/js',
+    'media/legacy/js',
     'media/mod_multilangstatus',
     'media/plg_quickicon_eos310',
     'media/system/images',
