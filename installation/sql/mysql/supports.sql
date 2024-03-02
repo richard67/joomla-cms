@@ -225,7 +225,8 @@ CREATE TABLE IF NOT EXISTS `#__fields_values` (
   `item_id` varchar(255) NOT NULL COMMENT 'Allow references to items which have strings as ids, eg. none db systems.',
   `value` mediumtext,
   KEY `idx_field_id` (`field_id`),
-  KEY `idx_item_id` (`item_id`(191))
+  KEY `idx_item_id_2` (`item_id`),
+  KEY `idx_field_id_item_id` (`field_id`, `item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

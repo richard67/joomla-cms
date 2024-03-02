@@ -229,6 +229,7 @@ CREATE TABLE IF NOT EXISTS "#__fields_values" (
 );
 CREATE INDEX "#__fields_values_idx_field_id" ON "#__fields_values" ("field_id");
 CREATE INDEX "#__fields_values_idx_item_id" ON "#__fields_values" ("item_id");
+CREATE INDEX "#__fields_values_idx_field_id_item_id" ON "#__fields_values" ("field_id", "item_id");
 
 --
 -- Table structure for table `#__overrider`
