@@ -749,7 +749,7 @@ final class Blog extends CMSPlugin
                     // Store a field value
 
                     $valueAuthor = (object) [
-                        'item_id'  => $articleModel->getItem()->id,
+                        'item_id'  => (string) $articleModel->getItem()->id,
                         'field_id' => $fieldIds[0],
                         'value'    => $article['authorValue'],
                     ];
