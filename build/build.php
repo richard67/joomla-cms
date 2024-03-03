@@ -180,6 +180,27 @@ function clean_checkout(string $dir)
     // wamania/php-stemmer
     system('rm -rf libraries/vendor/wamania/php-stemmer/test');
 
+    // web-token/*
+    system('rm -rf libraries/vendor/web-token/jwt-experimental/.github/CONTRIBUTING.md');
+    system('rm -rf libraries/vendor/web-token/jwt-experimental/.github/FUNDING.yml');
+    system('rm -rf libraries/vendor/web-token/jwt-experimental/.github/PULL_REQUEST_TEMPLATE.md');
+    system('rm -rf libraries/vendor/web-token/jwt-experimental/.github/stale.yml');
+    system('rm -rf libraries/vendor/web-token/jwt-experimental/composer.json');
+    system('rm -rf libraries/vendor/web-token/jwt-experimental/LICENSE');
+    system('rm -rf libraries/vendor/web-token/jwt-experimental/README.md');
+    system('rm -rf libraries/vendor/web-token/jwt-library/.github/CONTRIBUTING.md');
+    system('rm -rf libraries/vendor/web-token/jwt-library/.github/FUNDING.yml');
+    system('rm -rf libraries/vendor/web-token/jwt-library/.github/PULL_REQUEST_TEMPLATE.md');
+    system('rm -rf libraries/vendor/web-token/jwt-library/.github/stale.yml');
+    system('rm -rf libraries/vendor/web-token/jwt-library/composer.json');
+    system('rm -rf libraries/vendor/web-token/jwt-signature-algorithm-ecdsa');
+    system('rm -rf libraries/vendor/web-token/jwt-signature-algorithm-eddsa');
+    system('rm -rf libraries/vendor/web-token/jwt-signature-algorithm-experimental');
+    system('rm -rf libraries/vendor/web-token/jwt-signature-algorithm-hmac');
+    system('rm -rf libraries/vendor/web-token/jwt-signature-algorithm-none');
+    system('rm -rf libraries/vendor/web-token/jwt-signature-algorithm-rsa');
+    system('rm -rf libraries/vendor/web-token/signature-pack');
+
     // willdurand/negotiation
     system('rm -rf libraries/vendor/willdurand/negotiation/tests');
 
