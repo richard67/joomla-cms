@@ -221,9 +221,6 @@ class ConstraintChecker
         $stabilityInt = $this->stabilityToInteger($stability);
 
         if (($stabilityInt < $minimumStability)) {
-            $this->failedEnvironmentConstraints->stability            = new \stdClass();
-            $this->failedEnvironmentConstraints->stability->required  = $stability;
-            $this->failedEnvironmentConstraints->stability->used      = $minimumStability;
 
             return false;
         }
