@@ -602,6 +602,10 @@ class Update
 
         // If the latest item is set then we transfer it to where we want to
         if (isset($this->latest)) {
+            $this->version = (object) [
+                '_data'  => $this->latest->version,
+            ];
+
             foreach ($this->downloadSources as $source) {
                 $this->downloadurl = (object) [
                     '_data'  => $source->url,
