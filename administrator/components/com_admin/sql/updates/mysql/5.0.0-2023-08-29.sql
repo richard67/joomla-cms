@@ -1,5 +1,7 @@
 ALTER TABLE `#__guidedtours` ADD COLUMN `uid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL AFTER `title`/** CAN FAIL **/;
-ALTER TABLE `#__guidedtours` ADD INDEX `idx_uid` (`uid`(191)) /** CAN FAIL **/;
+
+-- The following statement has been removed for Joomla 5.1.0
+-- ALTER TABLE `#__guidedtours` ADD INDEX `idx_uid` (`uid`(191)) /** CAN FAIL **/;
 
 UPDATE `#__guidedtours` SET `uid` = 'joomla-guidedtours' WHERE `title` = 'COM_GUIDEDTOURS_TOUR_GUIDEDTOURS_TITLE';
 UPDATE `#__guidedtours` SET `uid` = 'joomla-guidedtoursteps' WHERE `title` = 'COM_GUIDEDTOURS_TOUR_GUIDEDTOURSTEPS_TITLE';

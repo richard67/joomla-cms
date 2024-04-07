@@ -495,12 +495,12 @@ CREATE TABLE IF NOT EXISTS `#__menu` (
   `publish_up` datetime,
   `publish_down` datetime,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_client_id_parent_id_alias_language` (`client_id`,`parent_id`,`alias`(100),`language`),
+  UNIQUE KEY `idx_client_id_parent_id_alias_language_v2` (`client_id`,`parent_id`,`alias`,`language`),
   KEY `idx_componentid` (`component_id`,`menutype`,`published`,`access`),
   KEY `idx_menutype` (`menutype`),
   KEY `idx_left_right` (`lft`,`rgt`),
-  KEY `idx_alias` (`alias`(100)),
-  KEY `idx_path` (`path`(100)),
+  KEY `idx_alias_v2` (`alias`),
+  KEY `idx_path_v2` (`path`(768)),
   KEY `idx_language` (`language`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=102;
 
@@ -781,9 +781,9 @@ CREATE TABLE IF NOT EXISTS `#__tags` (
   KEY `tag_idx` (`published`,`access`),
   KEY `idx_access` (`access`),
   KEY `idx_checkout` (`checked_out`),
-  KEY `idx_path` (`path`(100)),
+  KEY `idx_path_v2` (`path`),
   KEY `idx_left_right` (`lft`,`rgt`),
-  KEY `idx_alias` (`alias`(100)),
+  KEY `idx_alias_v2` (`alias`),
   KEY `idx_language` (`language`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
@@ -1002,7 +1002,7 @@ CREATE TABLE IF NOT EXISTS `#__users` (
   `requireReset` tinyint NOT NULL DEFAULT 0 COMMENT 'Require user to reset password on next login',
   `authProvider` varchar(100) NOT NULL DEFAULT '' COMMENT 'Name of used authentication plugin',
   PRIMARY KEY (`id`),
-  KEY `idx_name` (`name`(100)),
+  KEY `idx_name_v2` (`name`),
   KEY `idx_block` (`block`),
   UNIQUE KEY `idx_username` (`username`),
   KEY `email` (`email`)
@@ -1016,14 +1016,14 @@ CREATE TABLE IF NOT EXISTS `#__users` (
 
 CREATE TABLE IF NOT EXISTS `#__user_keys` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(150) NOT NULL,
+  `user_id` varchar(255) NOT NULL,
   `token` varchar(255) NOT NULL,
-  `series` varchar(191) NOT NULL,
+  `series` varchar(255) NOT NULL,
   `time` varchar(200) NOT NULL,
   `uastring` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `series` (`series`),
-  KEY `user_id` (`user_id`)
+  UNIQUE KEY `series_v2` (`series`),
+  KEY `user_id_v2` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1149,7 +1149,7 @@ CREATE TABLE IF NOT EXISTS `#__workflows` (
   `checked_out` int unsigned,
   PRIMARY KEY (`id`),
   KEY `idx_asset_id` (`asset_id`),
-  KEY `idx_title` (`title`(191)),
+  KEY `idx_title_v2` (`title`),
   KEY `idx_extension` (`extension`),
   KEY `idx_default` (`default`),
   KEY `idx_created` (`created`),
@@ -1203,7 +1203,7 @@ CREATE TABLE IF NOT EXISTS `#__workflow_stages` (
   PRIMARY KEY (`id`),
   KEY `idx_workflow_id` (`workflow_id`),
   KEY `idx_checked_out` (`checked_out`),
-  KEY `idx_title` (`title`(191)),
+  KEY `idx_title_v2` (`title`),
   KEY `idx_asset_id` (`asset_id`),
   KEY `idx_default` (`default`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
@@ -1235,7 +1235,7 @@ CREATE TABLE IF NOT EXISTS `#__workflow_transitions` (
   `checked_out_time` datetime,
   `checked_out` int unsigned,
   PRIMARY KEY (`id`),
-  KEY `idx_title` (`title`(191)),
+  KEY `idx_title_v2` (`title`),
   KEY `idx_asset_id` (`asset_id`),
   KEY `idx_checked_out` (`checked_out`),
   KEY `idx_from_stage_id` (`from_stage_id`),

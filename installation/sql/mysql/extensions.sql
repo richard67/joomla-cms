@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `#__banners` (
   PRIMARY KEY (`id`),
   KEY `idx_state` (`state`),
   KEY `idx_own_prefix` (`own_prefix`),
-  KEY `idx_metakey_prefix` (`metakey_prefix`(100)),
+  KEY `idx_metakey_prefix_v2` (`metakey_prefix`),
   KEY `idx_banner_catid` (`catid`),
   KEY `idx_language` (`language`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `#__banner_clients` (
   `track_impressions` tinyint NOT NULL DEFAULT -1,
   PRIMARY KEY (`id`),
   KEY `idx_own_prefix` (`own_prefix`),
-  KEY `idx_metakey_prefix` (`metakey_prefix`(100))
+  KEY `idx_metakey_prefix_v2` (`metakey_prefix`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `#__content` (
   KEY `idx_createdby` (`created_by`),
   KEY `idx_featured_catid` (`featured`,`catid`),
   KEY `idx_language` (`language`),
-  KEY `idx_alias` (`alias`(191))
+  KEY `idx_alias_v2` (`alias`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -278,9 +278,9 @@ CREATE TABLE IF NOT EXISTS `#__finder_links` (
   `object` mediumblob,
   PRIMARY KEY (`link_id`),
   KEY `idx_type` (`type_id`),
-  KEY `idx_title` (`title`(100)),
+  KEY `idx_title_v2` (`title`),
   KEY `idx_md5` (`md5sum`),
-  KEY `idx_url` (`url`(75)),
+  KEY `idx_url_v2` (`url`),
   KEY `idx_language` (`language`),
   KEY `idx_published_list` (`published`,`state`,`access`,`publish_start_date`,`publish_end_date`,`list_price`),
   KEY `idx_published_sale` (`published`,`state`,`access`,`publish_start_date`,`publish_end_date`,`sale_price`)
@@ -314,7 +314,7 @@ CREATE TABLE IF NOT EXISTS `#__finder_logging` (
   `hits` int NOT NULL DEFAULT 1,
   `results` int NOT NULL DEFAULT 0,
   PRIMARY KEY (`md5sum`),
-  INDEX `searchterm` (`searchterm`(191))
+  INDEX `searchterm_v2` (`searchterm`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -338,10 +338,10 @@ CREATE TABLE IF NOT EXISTS `#__finder_taxonomy` (
   PRIMARY KEY (`id`),
   INDEX `idx_state` (`state`),
   INDEX `idx_access` (`access`),
-  INDEX `idx_path` (`path`(100)),
+  INDEX `idx_path_v2` (`path`),
   INDEX `idx_level` (`level`),
   INDEX `idx_left_right` (`lft`, `rgt`),
-  INDEX `idx_alias` (`alias`(100)),
+  INDEX `idx_alias_v2` (`alias`),
   INDEX `idx_language` (`language`),
   INDEX `idx_parent_published` (`parent_id`, `state`, `access`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
@@ -773,7 +773,7 @@ CREATE TABLE IF NOT EXISTS `#__redirect_links` (
   `modified_date` datetime NOT NULL,
   `header` smallint NOT NULL DEFAULT 301,
   PRIMARY KEY (`id`),
-  KEY `idx_old_url` (`old_url`(100)),
+  KEY `idx_old_url_v2` (`old_url`(768)),
   KEY `idx_link_modified` (`modified_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
@@ -977,7 +977,7 @@ CREATE TABLE IF NOT EXISTS `#__guidedtours` (
   KEY `idx_access` (`access`),
   KEY `idx_state` (`published`),
   KEY `idx_language` (`language`),
-  KEY `idx_uid` (`uid`(191))
+  KEY `idx_uid_v2` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 --

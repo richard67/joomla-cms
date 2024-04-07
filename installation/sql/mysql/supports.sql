@@ -53,9 +53,9 @@ CREATE TABLE IF NOT EXISTS `#__categories` (
   KEY `cat_idx` (`extension`,`published`,`access`),
   KEY `idx_access` (`access`),
   KEY `idx_checkout` (`checked_out`),
-  KEY `idx_path` (`path`(100)),
+  KEY `idx_path_v2` (`path`),
   KEY `idx_left_right` (`lft`,`rgt`),
-  KEY `idx_alias` (`alias`(100)),
+  KEY `idx_alias_v2` (`alias`),
   KEY `idx_language` (`language`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `#__content_types` (
   `router` varchar(255) NOT NULL DEFAULT '',
   `content_history_options` varchar(5120) COMMENT 'JSON string for com_contenthistory options',
   PRIMARY KEY (`type_id`),
-  KEY `idx_alias` (`type_alias`(100))
+  KEY `idx_alias_v2` (`type_alias`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=10000;
 
 --
@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `#__fields` (
   KEY `idx_state` (`state`),
   KEY `idx_created_user_id` (`created_user_id`),
   KEY `idx_access` (`access`),
-  KEY `idx_context` (`context`(191)),
+  KEY `idx_context_v2` (`context`),
   KEY `idx_language` (`language`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS `#__fields_groups` (
   KEY `idx_state` (`state`),
   KEY `idx_created_by` (`created_by`),
   KEY `idx_access` (`access`),
-  KEY `idx_context` (`context`(191)),
+  KEY `idx_context_v2` (`context`),
   KEY `idx_language` (`language`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS `#__fields_values` (
   `item_id` varchar(255) NOT NULL COMMENT 'Allow references to items which have strings as ids, eg. none db systems.',
   `value` mediumtext,
   KEY `idx_field_id` (`field_id`),
-  KEY `idx_item_id` (`item_id`(191))
+  KEY `idx_item_id_v2` (`item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -337,12 +337,12 @@ CREATE TABLE IF NOT EXISTS `#__ucm_content` (
   PRIMARY KEY (`core_content_id`),
   KEY `tag_idx` (`core_state`,`core_access`),
   KEY `idx_access` (`core_access`),
-  KEY `idx_alias` (`core_alias`(100)),
+  KEY `idx_alias_v2` (`core_alias`),
   KEY `idx_language` (`core_language`),
-  KEY `idx_title` (`core_title`(100)),
+  KEY `idx_title_v2` (`core_title`),
   KEY `idx_modified_time` (`core_modified_time`),
   KEY `idx_created_time` (`core_created_time`),
-  KEY `idx_content_type` (`core_type_alias`(100)),
+  KEY `idx_content_type_v2` (`core_type_alias`),
   KEY `idx_core_modified_user_id` (`core_modified_user_id`),
   KEY `idx_core_checked_out_user_id` (`core_checked_out_user_id`),
   KEY `idx_core_created_user_id` (`core_created_user_id`),
@@ -382,7 +382,7 @@ CREATE TABLE IF NOT EXISTS `#__webauthn_credentials` (
     `label`      VARCHAR(190)    NOT NULL COMMENT 'Human readable label',
     `credential` MEDIUMTEXT      NOT NULL COMMENT 'Credential source data, JSON format',
     PRIMARY KEY (`id`(100)),
-    INDEX (`user_id`(100))
+    KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
