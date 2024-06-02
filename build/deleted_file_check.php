@@ -101,18 +101,8 @@ if (!is_dir($options['to']) && !(is_file($options['to']) && substr(strtolower($o
 
 // Directories to skip for the check
 $excludedFolders = [
-    'administrator/components/com_search',
-    'components/com_search',
     'images/sampledata',
     'installation',
-    'media/com_cpanel/js',
-    'media/com_modules/js',
-    'media/legacy/js',
-    'media/mod_multilangstatus',
-    'media/system/images',
-    'modules/mod_search',
-    'plugins/captcha/recaptcha_invisible',
-    'plugins/search',
 ];
 
 /**
@@ -238,34 +228,12 @@ $foldersDifferenceDelete = array_diff($previousReleaseFilesFolders->folders, $ne
 
 // Specific files (e.g. language files) that we want to keep on upgrade
 $filesToKeep = [
-    "'/administrator/language/en-GB/en-GB.com_search.ini',",
-    "'/administrator/language/en-GB/en-GB.com_search.sys.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_editors-xtd_weblink.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_editors-xtd_weblink.sys.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_categories.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_categories.sys.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_contacts.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_contacts.sys.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_content.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_content.sys.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_newsfeeds.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_newsfeeds.sys.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_tags.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_tags.sys.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_weblinks.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_search_weblinks.sys.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_system_weblinks.ini',",
-    "'/administrator/language/en-GB/en-GB.plg_system_weblinks.sys.ini',",
-    "'/administrator/language/en-GB/plg_captcha_recaptcha_invisible.ini',",
-    "'/administrator/language/en-GB/plg_captcha_recaptcha_invisible.sys.ini',",
-    "'/language/en-GB/en-GB.com_search.ini',",
-    "'/language/en-GB/en-GB.mod_search.ini',",
-    "'/language/en-GB/en-GB.mod_search.sys.ini',",
+    // Example: "'/administrator/language/en-GB/en-GB.com_search.ini',",
 ];
 
 // Specific folders that we want to keep on upgrade
 $foldersToKeep = [
-    "'/bin',",
+    // Example: "'/bin',",
 ];
 
 // Remove folders from the results which we want to keep on upgrade
