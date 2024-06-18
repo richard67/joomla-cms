@@ -29,9 +29,9 @@ const PHP_TAB = "\t";
 // Change the following value to false when the previous major release has reached end of development.
 const PREVIOUS_CHECK = true;
 
-const PREVIOUS_VERSION = '5.1';
+const PREVIOUS_VERSION = '5.2';
 
-const PREVIOUS_BRANCH = '5.1-dev';
+const PREVIOUS_BRANCH = '5.2-dev';
 
 const GITHUB_REPO = 'https://github.com/joomla/joomla-cms.git';
 
