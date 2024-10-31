@@ -3528,7 +3528,7 @@ class JoomlaInstallerScript
         }
 
         foreach ($foldersRecursive as $parentFolder) {
-            if (is_dir(JPATH_ROOT . $parentFolder) {
+            if (is_dir(JPATH_ROOT . $parentFolder)) {
                 if (decoct(fileperms(JPATH_ROOT . $parentFolder) & 0777) === '777') {
                     @chmod(JPATH_ROOT . $parentFolder, 0755);
                 }
