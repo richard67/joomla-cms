@@ -3170,12 +3170,16 @@ class JoomlaInstallerScript
         if (
             empty($this->fromVersion)
             || version_compare($this->fromVersion, '5.2.0', 'ne')
-            || is_file(JPATH_ROOT . '/administrator/logs/joomla_update.php')
+            || (
+                is_file(JPATH_ROOT . '/administrator/logs/joomla_update.php')
+                && (time() - filectime(JPATH_ROOT . '/administrator/logs/joomla_update.php') > 3600)
+            )
         ) {
             return;
         }
 
         $files = [
+            '/administrator/logs/index.html',
             '/images/banners/banner.jpg',
             '/images/banners/osmbanner1.png',
             '/images/banners/osmbanner2.png',
@@ -3201,6 +3205,7 @@ class JoomlaInstallerScript
             '/images/sampledata/cassiopeia/nasa4-1200.jpg',
             '/images/sampledata/cassiopeia/nasa4-400.jpg',
             '/images/sampledata/cassiopeia/nasa5-400.jpg',
+            '/robots.txt',
         ];
 
         $folders = [
@@ -3239,6 +3244,7 @@ class JoomlaInstallerScript
             '/language/overrides',
             '/layouts',
             '/layouts/chromes',
+            '/layouts/libraries',
             '/layouts/libraries/html',
             '/layouts/libraries/html/bootstrap',
             '/layouts/libraries/html/bootstrap/modal',
@@ -3533,7 +3539,7 @@ class JoomlaInstallerScript
                     @chmod(JPATH_ROOT . $parentFolder, 0755);
                 }
 
-                foreach (Folder::folders($parentFolder, '.', true, true) as $folder) {
+                foreach (Folder::folders(JPATH_ROOT . $parentFolder, '.', true, true) as $folder) {
                     if (decoct(fileperms($folder) & 0777) === '777') {
                         @chmod($folder, 0755);
                     }
