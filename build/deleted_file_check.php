@@ -103,10 +103,10 @@ if (!is_dir($options['to']) && !(is_file($options['to']) && substr(strtolower($o
 $excludedFolders = [
     'images/sampledata',
     'installation',
-    '/media/plg_captcha_recaptcha',
-    '/media/plg_captcha_recaptcha_invisible',
-    '/media/plg_behaviour_compat',
-    '/plugins/behaviour/compat',
+    'media/plg_captcha_recaptcha',
+    'media/plg_captcha_recaptcha_invisible',
+    'media/plg_behaviour_compat',
+    'plugins/behaviour/compat',
 ];
 
 /**
