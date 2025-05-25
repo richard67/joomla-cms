@@ -105,6 +105,8 @@ $excludedFolders = [
     'installation',
     'media/plg_captcha_recaptcha',
     'media/plg_captcha_recaptcha_invisible',
+    'media/plg_behaviour_compat',
+    'plugins/behaviour/compat',
 ];
 
 /**
@@ -231,6 +233,8 @@ $foldersDifferenceDelete = array_diff($previousReleaseFilesFolders->folders, $ne
 // Specific files (e.g. language files) that we want to keep on upgrade
 $filesToKeep = [
     // Example: "'/administrator/language/en-GB/en-GB.com_search.ini',",
+    "'/administrator/language/en-GB/guidedtours.joomla_whatsnew_5_4.ini',",
+    "'/administrator/language/en-GB/guidedtours.joomla_whatsnew_5_4_steps.ini',",
 ];
 
 // Specific folders that we want to keep on upgrade
