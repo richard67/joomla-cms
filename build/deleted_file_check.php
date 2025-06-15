@@ -103,8 +103,8 @@ if (!is_dir($options['to']) && !(is_file($options['to']) && substr(strtolower($o
 $excludedFolders = [
     'images/sampledata',
     'installation',
-    '/media/plg_behaviour_compat6',
-    '/plugins/behaviour/compat6',
+    'media/plg_behaviour_compat6',
+    'plugins/behaviour/compat6',
 ];
 
 /**
