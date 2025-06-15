@@ -64,9 +64,9 @@ $previousReleaseExclude = [
     $options['from'] . '/images/sampledata',
     $options['from'] . '/installation',
     $options['from'] . '/media/com_guidedtours/images',
+    $options['from'] . '/media/plg_behaviour_compat',
     $options['from'] . '/media/plg_captcha_recaptcha',
     $options['from'] . '/media/plg_captcha_recaptcha_invisible',
-    $options['from'] . '/media/plg_behaviour_compat',
     $options['from'] . '/plugins/behaviour/compat',
 ];
 
