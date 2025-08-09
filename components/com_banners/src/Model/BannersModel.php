@@ -192,8 +192,11 @@ class BannersModel extends ListModel
                     $query->join('LEFT', $db->quoteName('#__categories', 'cat'), $db->quoteName('a.catid') . ' = ' . $db->quoteName('cat.id'));
                 }
 
+                // On MySQL and MariaDB use PCRE, on PostgreSQL use Henry Spencer regexp syntax
+                $wordStartEnd = $db->getServerType() === 'mysql' ? ['\\b', '\\b'] : ['[[:<:]]', '[[:>:]]'];
+
                 foreach ($keywords as $key => $keyword) {
-                    $regexp       = '[[:<:]]' . $keyword . '[[:>:]]';
+                    $regexp       = $wordStartEnd[0] . $keyword . $wordStartEnd[1];
                     $valuesToBind = [$keyword, $keyword, $regexp];
 
                     if ($cid) {
