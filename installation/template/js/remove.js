@@ -117,8 +117,8 @@ Joomla.deleteJoomlaInstallationDirectory = function (redirectUrl) {
             if (document.getElementById('installAddFeatures')) {
                 document.getElementById('installAddFeatures').disabled = true;
             }
-            if (document.getElementById('automatedUpdatesDisableButton')) {
-                document.getElementById('automatedUpdatesDisableButton').disabled = true;
+            if (document.getElementById('automatedUpdates')) {
+                document.getElementById('automatedUpdates').disabled = true;
             }
             if (document.getElementById('removeInstallationFolder')) {
                 document.getElementById('removeInstallationFolder').disabled = true;
@@ -137,7 +137,11 @@ Joomla.deleteJoomlaInstallationDirectory = function (redirectUrl) {
                 customInstallation.parentNode.removeChild(customInstallation);
 
                 const automatedUpdates = document.getElementById('automatedUpdates');
-                automatedUpdates.parentNode.removeChild(automatedUpdates);
+
+                // This will only exist if it has not been removed with a previous step
+                if (automatedUpdates) {
+                    automatedUpdates.parentNode.removeChild(automatedUpdates);
+                }
 
                 const removeInstallationTab = document.getElementById('removeInstallationTab');
 
