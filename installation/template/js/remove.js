@@ -89,7 +89,8 @@ Joomla.disableAutomatedUpdates = function () {
           Joomla.renderMessages({error:['Unknown error disabling the automated updates.']});
         }
       } else {
-        document.getElementById('automatedUpdates').remove()
+        const automatedUpdates = document.getElementById('automatedUpdates');
+        automatedUpdates.parentNode.removeChild(automatedUpdates);
       }
     },
     onError: function (xhr) {
