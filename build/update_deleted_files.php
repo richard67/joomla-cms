@@ -88,7 +88,7 @@ if (empty($currentMajorDownload)) {
         $currentVersionPackage = $files[0];
     } else {
         echo PHP_EOL;
-        echo 'Runing build script for current version.' . PHP_EOL;
+        echo 'Running build script for current version.' . PHP_EOL;
         echo PHP_EOL;
 
         system('php ./build.php --remote=' . ($options['currRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-zstd');
@@ -107,7 +107,7 @@ if (empty($currentMajorDownload)) {
     $currentVersionPackage = $packagesPath . '/' . basename($currentMajorDownload);
 
     if (!isset($options['reuse']) || !is_file($currentVersionPackage)) {
-        // Donwload package.
+        // Download package.
         echo PHP_EOL;
         echo 'Downloading package "' . $currentMajorDownload . '".' . PHP_EOL;
 
@@ -218,7 +218,7 @@ if (PREVIOUS_CHECK) {
             system($systemGit . ' clone -b ' . $prevMajorBranch . ' ' . GITHUB_REPO . ' .');
 
             echo PHP_EOL;
-            echo 'Runing build script for previous major version.' . PHP_EOL;
+            echo 'Running build script for previous major version.' . PHP_EOL;
             echo PHP_EOL;
 
             system('php ./build/build.php --remote=' . ($options['prevRemote'] ?? 'HEAD') . ' --exclude-gzip --exclude-zstd');
@@ -240,7 +240,7 @@ if (PREVIOUS_CHECK) {
         $previousMajorPackage = $previousBuildPackagePath . '/' . basename($previousMajorDownload);
 
         if (!isset($options['reuse']) || !is_file($previousMajorPackage)) {
-            // Donwload package.
+            // Download package.
             echo PHP_EOL;
             echo 'Downloading package "' . $previousMajorDownload . '".' . PHP_EOL;
 
