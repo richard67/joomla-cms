@@ -237,14 +237,16 @@ if (PREVIOUS_CHECK) {
         }
     } else {
         // Use download URL: Check if there is a saved package from a previous download.
-        $previousMajorPackage = $previousBuildPackagePath . '/' . basename($previousMajorDownload);
+        $previousMajorPackage = $previousBuildPackagePath . '/' . preg_replace('/\?.*$/', '', basename($previousMajorDownload));
 
         if (!isset($options['reuse']) || !is_file($previousMajorPackage)) {
+            @mkdir($previousBuildPackagePath, 0755, true);
+
             // Download package.
             echo PHP_EOL;
             echo 'Downloading package "' . $previousMajorDownload . '".' . PHP_EOL;
 
-            system('curl -L -o ' . $previousMajorPackage . ' ' . $previousMajorDownload);
+            system('curl -L -o "' . $previousMajorPackage . '" ' . $previousMajorDownload);
         }
 
         if (!is_file($previousMajorPackage)) {
