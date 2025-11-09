@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a0bbac1380e2021808fa2a026d589486",
+    "content-hash": "d7d70326993fadeb627683475c9f109e",
     "packages": [
         {
             "name": "algo26-matthias/idna-convert",
@@ -1447,16 +1447,16 @@
         },
         {
             "name": "joomla/database",
-            "version": "3.4.3",
+            "version": "dev-3.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/joomla-framework/database.git",
-                "reference": "6a8aedaea444cd78912153c4d8361eb06ba2a9cd"
+                "reference": "e56b182f50473025df11df37b3dd167f97f4dff8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/joomla-framework/database/zipball/6a8aedaea444cd78912153c4d8361eb06ba2a9cd",
-                "reference": "6a8aedaea444cd78912153c4d8361eb06ba2a9cd",
+                "url": "https://api.github.com/repos/joomla-framework/database/zipball/e56b182f50473025df11df37b3dd167f97f4dff8",
+                "reference": "e56b182f50473025df11df37b3dd167f97f4dff8",
                 "shasum": ""
             },
             "require": {
@@ -1514,9 +1514,9 @@
             ],
             "support": {
                 "issues": "https://github.com/joomla-framework/database/issues",
-                "source": "https://github.com/joomla-framework/database/tree/3.4.3"
+                "source": "https://github.com/joomla-framework/database/tree/3.x-dev"
             },
-            "time": "2025-07-19T15:40:51+00:00"
+            "time": "2025-10-26T11:52:48+00:00"
         },
         {
             "name": "joomla/di",
@@ -10146,6 +10146,12 @@
     ],
     "aliases": [
         {
+            "package": "joomla/database",
+            "version": "dev-3.x-dev",
+            "alias": "3.4.4",
+            "alias_normalized": "3.4.4.0"
+        },
+        {
             "package": "voku/portable-utf8",
             "version": "dev-joomla-5.3",
             "alias": "6.0.13",
@@ -10154,6 +10160,7 @@
     ],
     "minimum-stability": "stable",
     "stability-flags": {
+        "joomla/database": 20,
         "tobscure/json-api": 20,
         "voku/portable-utf8": 20
     },

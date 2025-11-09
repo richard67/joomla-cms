@@ -58,7 +58,7 @@
     "joomla/console": "^3.0.3",
     "joomla/crypt": "^3.0.3",
     "joomla/data": "^3.0.3",
-    "joomla/database": "^3.4",
+    "joomla/database": "dev-3.x-dev as 3.4.4",
     "joomla/di": "^3.1.1",
     "joomla/event": "^3.0.2",
     "joomla/filter": "^3.0.5",
