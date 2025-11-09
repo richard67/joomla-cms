@@ -53,7 +53,7 @@
     "joomla/console": "^4.0",
     "joomla/crypt": "^4.0",
     "joomla/data": "^4.0",
-    "joomla/database": "^4.0",
+    "joomla/database": "dev-4.x-dev as 4.0.1",
     "joomla/di": "^4.0",
     "joomla/event": "^4.0",
     "joomla/filter": "^4.0",

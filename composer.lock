@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f577684c10af21b55e694ebddac803ca",
+    "content-hash": "68fded208129c4b9af3af5beace0bc15",
     "packages": [
         {
             "name": "algo26-matthias/idna-convert",
@@ -1404,7 +1404,7 @@
         },
         {
             "name": "joomla/database",
-            "version": "4.0.0",
+            "version": "dev-4.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/joomla-framework/database.git",
@@ -1447,6 +1447,7 @@
                 "joomla/registry": "To use the Database ServiceProviderInterface objects, install joomla/registry.",
                 "psr/log": "To use the LoggingMonitor, install psr/log."
             },
+            "default-branch": true,
             "type": "joomla-package",
             "autoload": {
                 "psr-4": {
@@ -1466,7 +1467,7 @@
             ],
             "support": {
                 "issues": "https://github.com/joomla-framework/database/issues",
-                "source": "https://github.com/joomla-framework/database/tree/4.0.0"
+                "source": "https://github.com/joomla-framework/database/tree/4.x-dev"
             },
             "time": "2025-07-24T09:46:18+00:00"
         },
@@ -9585,9 +9586,17 @@
             "time": "2024-03-03T12:36:25+00:00"
         }
     ],
-    "aliases": [],
+    "aliases": [
+        {
+            "package": "joomla/database",
+            "version": "dev-4.x-dev",
+            "alias": "4.0.1",
+            "alias_normalized": "4.0.1.0"
+        }
+    ],
     "minimum-stability": "stable",
     "stability-flags": {
+        "joomla/database": 20,
         "tobscure/json-api": 20
     },
     "prefer-stable": false,
