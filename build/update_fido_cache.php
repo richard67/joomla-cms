@@ -75,5 +75,5 @@ if (!copy($downloadPath, $filePath)) {
     return;
 }
 
-echo "File $downloadPath to $filePath.\n";
+echo "File $downloadPath copied to $filePath.\n";
 
