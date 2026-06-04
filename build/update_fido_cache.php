@@ -21,12 +21,26 @@ if (!isset($fullPath)) {
     $fullPath = \dirname(__DIR__);
 }
 
+if (preg_match('#(.*)/build/tmp/\d{1,10}#', $fullPath, $matches)) {
+    $downloadPath = $matches[1] . '/fido.jwt';
+} else {
+    $downloadPath = $fullPath . '/fido.jwt';
+}
+
 $filePath = rtrim($fullPath, '\\/') . '/plugins/system/webauthn/fido.jwt';
 
 if (is_file($filePath) && filemtime($filePath) > (time() - 864000)) {
     echo "The file $filePath already exists and is current; nothing to do.\n";
 
     exit(0);
+}
+
+if (is_file($downloadPath) && filemtime($downloadPath) > (time() - 864000)) {
+    if (copy($downloadPath, $filePath)) {
+        echo "File $filePath copied from previous download $downloadPath.\n";
+
+        exit(0);
+    }
 }
 
 echo "Fetching FIDO metadata statements...\n";
@@ -47,8 +61,19 @@ if ($rawJwt === false) {
     return;
 }
 
-echo "Saving JWT file in the plugin directory...\n";
+echo "Saving JWT file...\n";
 
-file_put_contents($filePath, $rawJwt);
+file_put_contents($downloadPath, $rawJwt);
 
-echo "File saved: $filePath\n";
+echo "File saved: $downloadPath\n";
+
+echo "Copy saved JWT file to plugin directory...\n";
+
+if (!copy($downloadPath, $filePath)) {
+    echo "Failed to copy file $downloadPath to $filePath.\n";
+
+    return;
+}
+
+echo "File $downloadPath to $filePath.\n";
+

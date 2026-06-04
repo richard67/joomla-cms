@@ -106,4 +106,5 @@ RoboFile.ini
 cypress.config.mjs
 
 # WebAuthn FIDO metadata cache
+fido.jwt
 /plugins/system/webauthn/fido.jwt
