@@ -217,6 +217,14 @@ if (PREVIOUS_CHECK) {
 
             system($systemGit . ' clone -b ' . $prevMajorBranch . ' ' . GITHUB_REPO . ' .');
 
+            // Reuse fido.jwt from previous build of current version if possible
+            if (is_file(__DIR__ . '/fido/fido.jwt') && is_dir($previousBuildPath . '/build/fido')) {
+                echo PHP_EOL;
+                echo 'Copying file "' . __DIR__ . '/fido/fido.jwt' . '" to "' . $previousBuildPath . '/build/fido/fido.jwt".' . PHP_EOL;
+
+                copy(__DIR__ . '/fido/fido.jwt', $previousBuildPath . '/build/fido/fido.jwt');
+            }
+
             echo PHP_EOL;
             echo 'Running build script for previous major version.' . PHP_EOL;
             echo PHP_EOL;
