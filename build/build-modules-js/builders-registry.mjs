@@ -53,6 +53,8 @@ export const builders = [
   'mod_login',
   'mod_menu',
   'mod_quickicon',
+  'mod_rfaudio',
+  'mod_rfvideo',
   'mod_sampledata',
 
   // Plugins
