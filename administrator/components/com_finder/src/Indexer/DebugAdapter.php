@@ -11,6 +11,7 @@
 namespace Joomla\Component\Finder\Administrator\Indexer;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Table\Table;
 use Joomla\Database\DatabaseAwareTrait;
@@ -133,15 +134,21 @@ abstract class DebugAdapter extends CMSPlugin
     /**
      * Method to instantiate the indexer adapter.
      *
-     * @param   DispatcherInterface  $dispatcher  The object to observe.
-     * @param   array                $config      An array that holds the plugin configuration.
+     * @param   array  $config  An array that holds the plugin configuration.
      *
      * @since   5.0.0
      */
-    public function __construct(DispatcherInterface $dispatcher, array $config, ?DatabaseInterface $db = null)
+    public function __construct($config, ?DatabaseInterface $db = null)
     {
-        // Call the parent constructor.
-        parent::__construct($dispatcher, $config);
+        // Support the same config-first and dispatcher-first constructor signatures as Adapter.
+        if ($config instanceof DispatcherInterface) {
+            $dispatcher = $config;
+            $config     = \func_num_args() > 1 ? func_get_arg(1) : [];
+
+            parent::__construct($dispatcher, $config);
+        } else {
+            parent::__construct($config);
+        }
 
         if ($db === null) {
             @trigger_error(__CLASS__ . ': Database must be set, this will not be caught anymore in 9.0.', E_USER_DEPRECATED);
@@ -598,6 +605,10 @@ abstract class DebugAdapter extends CMSPlugin
 
         // Get the item to index.
         $item = $this->getDatabase()->setQuery($query)->loadAssoc();
+
+        if (!$item) {
+            throw new \UnexpectedValueException(Text::_('COM_FINDER_INDEXER_ERROR_NO_ITEM'));
+        }
 
         // Convert the item to a result object.
         $item = ArrayHelper::toObject((array) $item, Result::class);
